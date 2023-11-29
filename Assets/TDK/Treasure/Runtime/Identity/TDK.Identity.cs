@@ -9,7 +9,9 @@ namespace Treasure
         /// </summary>
         private void InitIdentity()
         {
-
+            // #if TDK_THIRDWEB // TODO re-enable and add scripting define
+            TDKServiceLocator.GetService<TDKThirdwebService>();
+            // #endif
         }
     }
 }
