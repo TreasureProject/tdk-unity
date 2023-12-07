@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Serialization;
-
 using System;
 
 namespace Treasure
@@ -9,7 +8,7 @@ namespace Treasure
     {
         public static string DEFAULT_CONFIG_LOCATION = "Assets/Treasure/TDK/Resources";
 
-        [SerializeField] private string _treasureApiKey = string.Empty;
+        [SerializeField] private string _gameId = string.Empty;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> {}
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
@@ -35,13 +34,13 @@ namespace Treasure
 
          public void SetConfig(SerializedTDKConfig config)
         {
-            _treasureApiKey = config.apiKey;
+            _gameId = config.gameId;
         }
     }
 
     [Serializable]
 	public class SerializedTDKConfig
 	{
-		[SerializeField] public string apiKey;
+		[SerializeField] public string gameId;
 	}
 }
