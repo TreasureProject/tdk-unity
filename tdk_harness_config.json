@@ -1,0 +1,10 @@
+{
+    "tdk": {
+        "gameId": "tdk-harness"
+    },
+    "helika": {
+        "apiKey": "my-api-key",
+        "gameId": "my-game-id",
+        "env": "my-env"
+    }
+}
