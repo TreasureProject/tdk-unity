@@ -39,6 +39,10 @@ namespace Treasure
                     }
                 }
 
+                TDKMainThreadDispatcher.Instance.Enqueue(() => {  
+					// no-op; don't add TDKLogger calls here
+				});
+
                 return _instance;
             }
         }
@@ -51,7 +55,7 @@ namespace Treasure
 
             // initialize subsystems
             Instance.InitAnalytics();
-            Instance.InitIdentity();
+            // Instance.InitIdentity();
         }
 
         public static void Init()

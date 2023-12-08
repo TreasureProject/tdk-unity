@@ -9,9 +9,9 @@ namespace Treasure
         /// </summary>
         private void InitAnalytics()
         {
-             // #if TDK_HELIKA // TODO re-enable and add scripting define
+            #if TDK_HELIKA
             TDKServiceLocator.GetService<TDKHelikaService>();
-            // #endif
+            #endif
         }
 
         private void OnApplicationPause_Analytics(bool isPaused)
