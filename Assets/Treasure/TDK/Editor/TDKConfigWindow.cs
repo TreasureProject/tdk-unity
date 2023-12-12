@@ -42,6 +42,10 @@ namespace Treasure
             TDKConfigEditor.CreateHelikaConfig(gameConfig.helika);
             #endif
 
+            #if TDK_THIRDWEB
+            TDKConfigEditor.CreateThirdwebConfig(gameConfig.thirdweb);
+            #endif
+
             _window.Close();
         }
     }
@@ -53,6 +57,10 @@ namespace Treasure
         
         #if TDK_HELIKA
         [SerializeField] public SerializedHelikaConfig helika;
+        #endif
+
+        #if TDK_THIRDWEB
+        [SerializeField] public SerializedThirdwebConfig thirdweb;
         #endif
     }
 }
