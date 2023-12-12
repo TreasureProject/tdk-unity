@@ -13,6 +13,11 @@ namespace Treasure
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> {}
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
 
+        public string GameId
+        {
+            get { return _gameId; }
+        }
+
         public T GetModuleConfig<T>()
         {
             if(moduleConfigurations.ContainsKey(typeof(T).Name))
