@@ -15,33 +15,34 @@ namespace Treasure
         public TDKConfig AppConfig { get; private set; }
 
         void OnApplicationPause(bool isPaused)
-		{
+        {
             OnApplicationPause_Analytics(isPaused);
-		}
+        }
 
         public static TDK Instance
-		{
-			get
-			{
+        {
+            get
+            {
                 // setup singleton
-				if (_instance == null)
-				{
-					_instance = GameObject.FindObjectOfType(typeof(TDK)) as TDK;
+                if (_instance == null)
+                {
+                    _instance = GameObject.FindObjectOfType(typeof(TDK)) as TDK;
 
                     if (_instance == null )
-					{
-						// create a new instance
-						_instance = new GameObject("TDK", new Type[] {
-							typeof(TDK)
-						}).GetComponent<TDK>();
+                    {
+                        // create a new instance
+                        _instance = new GameObject("TDK", new Type[] {
+                            typeof(TDK)
+                        }).GetComponent<TDK>();
 
-						DontDestroyOnLoad(_instance.gameObject);
+                        DontDestroyOnLoad(_instance.gameObject);
                     }
+
                 }
 
-                TDKMainThreadDispatcher.Instance.Enqueue(() => {  
-					// no-op; don't add TDKLogger calls here
-				});
+                TDKMainThreadDispatcher.Instance.Enqueue(() => {
+                    // no-op; don't add TDKLogger calls here
+                });
 
                 return _instance;
             }
@@ -55,7 +56,7 @@ namespace Treasure
 
             // initialize subsystems
             Instance.InitAnalytics();
-            // Instance.InitIdentity();
+            Instance.InitIdentity();
         }
 
         public static void Init()

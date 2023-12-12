@@ -10,7 +10,7 @@ namespace Treasure
         {
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);
             var config = ScriptableObject.CreateInstance<TDKHelikaConfig>();
-			AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKHelikaConfig.asset");
+            AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKHelikaConfig.asset");
 
             var tdkConfig = TDKConfig.LoadFromResources();
             tdkConfig.SetModuleConfig<TDKHelikaConfig>(config);
@@ -24,11 +24,11 @@ namespace Treasure
             var config = ScriptableObject.CreateInstance<TDKHelikaConfig>();
 
             if(serializedConfig != null)
-			{
-				config.SetConfig(serializedConfig);
-			}
+            {
+                config.SetConfig(serializedConfig);
+            }
 
-			AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKHelikaConfig.asset");
+            AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKHelikaConfig.asset");
 
             var tdkConfig = TDKConfig.LoadFromResources();
             tdkConfig.SetModuleConfig<TDKHelikaConfig>(config);

@@ -14,131 +14,131 @@ namespace Treasure
         public static void Log(string message, bool logOnMainThread=true)
         {
             #if UNITY_EDITOR
-			UnityEngine.Debug.Log(message);
+            UnityEngine.Debug.Log(message);
             ExternalLogCallback?.Invoke(message);
             #else
             if(logOnMainThread)
-			{
-				TDKMainThreadDispatcher.Instance.Enqueue(LogCoroutine(message));
-			}
-			else
-			{
-				LogInternal(message);
-			}
-			#endif
+            {
+                TDKMainThreadDispatcher.Instance.Enqueue(LogCoroutine(message));
+            }
+            else
+            {
+                LogInternal(message);
+            }
+            #endif
         }
 
         private static IEnumerator LogCoroutine(string message)
-		{
-			LogInternal(message);
-			yield return null;
-		}
+        {
+            LogInternal(message);
+            yield return null;
+        }
 
         private static void LogInternal(string message)
-		{
-			if(verboseLogging && !string.IsNullOrEmpty(message))
-			{
-				try {
-					#if UNITY_EDITOR
-					StackFrame sf = new StackFrame(1);
-					var method = sf.GetMethod();
-					UnityEngine.Debug.Log(string.Format("[{0}] {1}:{2}", Time.realtimeSinceStartup, method.DeclaringType, message));
-					#else
-					UnityEngine.Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
-					#endif
-					ExternalLogCallback?.Invoke(message);
-				}
-				catch
-				{
-					// no-op
-				}
-			}
-		}
+        {
+            if(verboseLogging && !string.IsNullOrEmpty(message))
+            {
+                try {
+                    #if UNITY_EDITOR
+                    StackFrame sf = new StackFrame(1);
+                    var method = sf.GetMethod();
+                    UnityEngine.Debug.Log(string.Format("[{0}] {1}:{2}", Time.realtimeSinceStartup, method.DeclaringType, message));
+                    #else
+                    UnityEngine.Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
+                    #endif
+                    ExternalLogCallback?.Invoke(message);
+                }
+                catch
+                {
+                    // no-op
+                }
+            }
+        }
 
         public static void LogWarning(string message, bool logOnMainThread=true)
-		{
-			#if UNITY_EDITOR || TP_UA
-			UnityEngine.Debug.LogWarning(message);
-			ExternalLogCallback?.Invoke(message);
-			#else
-			if(logOnMainThread)
-			{
-				TDKMainThreadDispatcher.Instance.Enqueue(LogWarningCoroutine(message));
-			}
-			else
-			{
-				LogWarningInternal(message);
-			}
-			#endif
-		}
+        {
+            #if UNITY_EDITOR || TP_UA
+            UnityEngine.Debug.LogWarning(message);
+            ExternalLogCallback?.Invoke(message);
+            #else
+            if(logOnMainThread)
+            {
+                TDKMainThreadDispatcher.Instance.Enqueue(LogWarningCoroutine(message));
+            }
+            else
+            {
+                LogWarningInternal(message);
+            }
+            #endif
+        }
 
         private static IEnumerator LogWarningCoroutine(string message)
-		{
-			LogWarningInternal(message);
-			yield return null;
-		}
+        {
+            LogWarningInternal(message);
+            yield return null;
+        }
 
         private static void LogWarningInternal(string message)
-		{
-			if(verboseLogging && !string.IsNullOrEmpty(message))
-			{
-				try {
-					#if UNITY_EDITOR
-					StackFrame sf = new StackFrame(1);
-					var method = sf.GetMethod();
-					UnityEngine.Debug.LogWarning(string.Format("[{0}] {1}:{2}", Time.realtimeSinceStartup, method.DeclaringType, message));
-					#else
-					UnityEngine.Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
-					#endif
-				}
-				catch
-				{
-					// no-op
-				}
-			}
-		}
+        {
+            if(verboseLogging && !string.IsNullOrEmpty(message))
+            {
+                try {
+                    #if UNITY_EDITOR
+                    StackFrame sf = new StackFrame(1);
+                    var method = sf.GetMethod();
+                    UnityEngine.Debug.LogWarning(string.Format("[{0}] {1}:{2}", Time.realtimeSinceStartup, method.DeclaringType, message));
+                    #else
+                    UnityEngine.Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
+                    #endif
+                }
+                catch
+                {
+                    // no-op
+                }
+            }
+        }
 
         public static void LogError(string message, bool logOnMainThread=true)
-		{
-			#if UNITY_EDITOR || TP_UA
-			UnityEngine.Debug.LogError(message);
-			ExternalLogCallback?.Invoke(message);
-			#else
-			if(logOnMainThread)
-			{
-				TDKMainThreadDispatcher.Instance.Enqueue(LogErrorCoroutine(message));
-			}
-			else
-			{
-				LogErrorInternal(message);
-			}
-			#endif
-		}
+        {
+            #if UNITY_EDITOR || TP_UA
+            UnityEngine.Debug.LogError(message);
+            ExternalLogCallback?.Invoke(message);
+            #else
+            if(logOnMainThread)
+            {
+                TDKMainThreadDispatcher.Instance.Enqueue(LogErrorCoroutine(message));
+            }
+            else
+            {
+                LogErrorInternal(message);
+            }
+            #endif
+        }
 
-		private static IEnumerator LogErrorCoroutine(string message)
-		{
-			LogErrorInternal(message);
-			yield return null;
-		}
+        private static IEnumerator LogErrorCoroutine(string message)
+        {
+            LogErrorInternal(message);
+            yield return null;
+        }
 
         private static void LogErrorInternal(string message)
-		{
-			if(!string.IsNullOrEmpty(message))
-			{
-				try {
-					#if UNITY_EDITOR
-					StackFrame sf = new StackFrame(1);
-					var method = sf.GetMethod();
-					UnityEngine.Debug.LogError(string.Format("[{0}] {1}:{2}", Time.realtimeSinceStartup, method.DeclaringType, message));
-					#else
-					UnityEngine.Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
-					#endif
-				}
-				catch
-				{
-					// no-op
-				}
-			}
-		}
+        {
+            if(!string.IsNullOrEmpty(message))
+            {
+                try {
+                    #if UNITY_EDITOR
+                    StackFrame sf = new StackFrame(1);
+                    var method = sf.GetMethod();
+                    UnityEngine.Debug.LogError(string.Format("[{0}] {1}:{2}", Time.realtimeSinceStartup, method.DeclaringType, message));
+                    #else
+                    UnityEngine.Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
+                    #endif
+                }
+                catch
+                {
+                    // no-op
+                }
+            }
+        }
     }
 }

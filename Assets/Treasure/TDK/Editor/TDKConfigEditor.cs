@@ -9,9 +9,9 @@ namespace Treasure
         private static void CheckForAndCreateResourcesDir(string dir)
         {
             if(!Directory.Exists(dir))
-			{
-				Directory.CreateDirectory(dir);
-			}
+            {
+                Directory.CreateDirectory(dir);
+            }
         }
 
         [MenuItem ("Treasure/TDK/Create Config/Root Config", false, 101)]
@@ -19,21 +19,21 @@ namespace Treasure
         {
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);
             var config = ScriptableObject.CreateInstance<TDKConfig>();
-			AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset");
+            AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset");
         }
 
-		public static void CreateTDKConfig(SerializedTDKConfig serializedConfig=null)
+        public static void CreateTDKConfig(SerializedTDKConfig serializedConfig=null)
         {
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);
-			
-            var config = ScriptableObject.CreateInstance<TDKConfig>();
-			
-			if(serializedConfig != null)
-			{
-				config.SetConfig(serializedConfig);
-			}
 
-			AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset");
+            var config = ScriptableObject.CreateInstance<TDKConfig>();
+
+            if(serializedConfig != null)
+            {
+                config.SetConfig(serializedConfig);
+            }
+
+            AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset");
         }
     }
 }

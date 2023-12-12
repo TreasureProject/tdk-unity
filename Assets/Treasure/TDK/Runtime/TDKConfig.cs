@@ -39,8 +39,8 @@ namespace Treasure
     }
 
     [Serializable]
-	public class SerializedTDKConfig
-	{
-		[SerializeField] public string gameId;
-	}
+    public class SerializedTDKConfig
+    {
+        [SerializeField] public string gameId;
+    }
 }
