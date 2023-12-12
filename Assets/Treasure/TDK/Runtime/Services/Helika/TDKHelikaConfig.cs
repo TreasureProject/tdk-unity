@@ -14,12 +14,12 @@ namespace Treasure
             get { return _apiKey; }
         }
 
-        public string gameId
+        public string GameId
         {
             get { return _gameId; }
         }
 
-        public string env
+        public string Env
         {
             get { return _env; }
         }
