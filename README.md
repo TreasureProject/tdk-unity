@@ -1,6 +1,6 @@
 # TDK Unity
 
-### What is the Treasure Development Kit (TDK)
+## What is the Treasure Development Kit (TDK)
 TDK Unity is exeprimental and in early development phase. It facilitates easy installation and integration with our internal client-side tools and vendor SDKs. It removes biolerplate integration code and abstracts interaction between game code and vendor SDKs.
 
 #### What's in the box
@@ -12,7 +12,7 @@ TDK Unity is exeprimental and in early development phase. It facilitates easy in
   });
   ```
 
-### Installation
+## Installation
 1. Import `tdk-unity_vX.Y.Z_Core.unitypackage` into your scene.
 2. Import additional vendor modules into your scene:
 	- `tdk-unity_vX.Y.Z_Helika.unitypackage`
@@ -22,7 +22,7 @@ TDK Unity is exeprimental and in early development phase. It facilitates easy in
 	- `TDK_THIRDWEB`
 4. Select `Treasure` -> `TDK` -> `Config` from the menu and supply your provided SDK config json. Hit `Configure TDK` when done.
 
-### Thirdweb Setup
+## Thirdweb Setup
 
 1. Configure `ThirdwebManager`:
 	1. Add `ThirdwebManager` to your scene.
