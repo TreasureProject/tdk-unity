@@ -1,3 +1,4 @@
+#if TDK_THIRDWEB
 using Thirdweb;
 
 namespace Treasure
@@ -16,3 +17,4 @@ namespace Treasure
         }
     }
 }
+#endif
