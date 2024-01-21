@@ -29,6 +29,8 @@ public class TDKRunner : MonoBehaviour
     {
         // enable core nav at start
         OnNavBtn("Core");
+
+        Application.logMessageReceived += HandleLog;
     }
     #endregion
 
@@ -40,21 +42,35 @@ public class TDKRunner : MonoBehaviour
 
     private void ResetNav()
     {
-        GameObject.Find("Canvas/UI/UI_Container/Core_Container").SetActive(false);
-        GameObject.Find("Canvas/UI/UI_Container/Identity_Container").SetActive(false);
-        GameObject.Find("Canvas/UI/UI_Container/Analytics_Container").SetActive(false);
+        GameObject.Find("Canvas/UI/UI_Containers/Core_Container").SetActive(false);
+        GameObject.Find("Canvas/UI/UI_Containers/Identity_Container").SetActive(false);
+        GameObject.Find("Canvas/UI/UI_Containers/Analytics_Container").SetActive(false);
 
         GameObject.Find ("Canvas/UI/Nav/Core_Btn").GetComponent<Button>().interactable = true;
         GameObject.Find ("Canvas/UI/Nav/Identity_Btn").GetComponent<Button>().interactable = true;
         GameObject.Find ("Canvas/UI/Nav/Analytics_Btn").GetComponent<Button>().interactable = true;
+
+        // temp
+        GameObject.Find("Canvas/UI/UI_Containers/ThirdwebTest_Container").SetActive(false);
+        GameObject.Find ("Canvas/UI/Nav/ThirdwebTest_Btn").GetComponent<Button>().interactable = true;
     }
 
     private void OnNavBtn(string navName)
     {
         ResetNav();
 
-        GameObject.Find("Canvas/UI/UI_Container/" + navName + "_Container").SetActive(true);
+        GameObject.Find("Canvas/UI/UI_Containers/" + navName + "_Container").SetActive(true);
         GameObject.Find ("Canvas/UI/Nav/" + navName + "_Btn").GetComponent<Button>().interactable = false;
+    }
+
+    public void OnClearDebugPanelBtn()
+	{
+		_debugTxt.text = "";
+	}
+
+    void HandleLog(string logString, string stackTrace, LogType type)
+    {
+        DebugPanelLog(logString);
     }
     #endregion
 }
