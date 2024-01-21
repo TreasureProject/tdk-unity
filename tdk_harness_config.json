@@ -12,7 +12,7 @@
     },
     "thirdweb": {
         "clientId": "ff8c8a3d59faca4d0eeb00600e3c64df",
-        "factoryAddress": "123",
+        "factoryAddress": "0xdd61B8AC8883a398659EC9C22DcA1B6b91DF5694",
         "gasless": true,
         "bundlerUrl": "456",
         "paymasterUrl": "789",
