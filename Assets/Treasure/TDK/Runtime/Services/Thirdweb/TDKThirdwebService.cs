@@ -1,3 +1,5 @@
+using Thirdweb;
+
 namespace Treasure
 {
     public class TDKThirdwebService : TDKBaseService
@@ -8,11 +10,9 @@ namespace Treasure
         {
             base.Awake();
 
-            _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>(); 
+            _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>();
 
-            // ThirdwebSDK sdk = new ThirdwebSDK("arbitrum-seploia", {
-            //     clientId = myClientId // you can get client id from dashboard settings
-            // });
+            // var sdk = ThirdwebManager.Instance.SDK;
         }
     }
 }

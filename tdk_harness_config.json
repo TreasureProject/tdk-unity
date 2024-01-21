@@ -1,10 +1,17 @@
 {
     "tdk": {
-        "gameId": "tdk-harness"
+        "gameId": "tdk-unity-harness"
     },
     "helika": {
         "apiKey": "my-api-key",
-        "gameId": "my-game-id",
         "env": "my-env"
+    },
+    "thirdweb": {
+        "clientId": "ff8c8a3d59faca4d0eeb00600e3c64df",
+        "factoryAddress": "123",
+        "gasless": true,
+        "bundlerUrl": "456",
+        "paymasterUrl": "789",
+        "entryPointAddress": "012"
     }
 }
