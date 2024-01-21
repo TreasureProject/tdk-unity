@@ -13,22 +13,22 @@ namespace Treasure
         {
             Debug.Log(string.Format("Exporting TDK {0} Core Package...", _packageName.ToString()));
 
-            var contents = new List<string>();
+            var contents = new List<string>
+            {
+                // Editor
+                "Assets/Treasure/TDK/Editor/TDKConfigEditor.cs",
+                "Assets/Treasure/TDK/Editor/TDKConfigWindow.cs",
 
-            // Editor
-            contents.Add("Assets/Treasure/TDK/Editor/TDKConfigEditor.cs");
-            contents.Add("Assets/Treasure/TDK/Editor/TDKConfigWindow.cs");
-
-            // Runtime
-            contents.Add("Assets/Treasure/TDK/Runtime/Analytics");
-            contents.Add("Assets/Treasure/TDK/Runtime/Identity");
-            contents.Add("Assets/Treasure/TDK/Runtime/Infrastructure");
-            contents.Add("Assets/Treasure/TDK/Runtime/TDK.cs");
-            contents.Add("Assets/Treasure/TDK/Runtime/TDKConfig.cs");
-            contents.Add("Assets/Treasure/TDK/Runtime/TDKVersion.cs");
-            contents.Add("Assets/Treasure/TDK/Runtime/Utils");
-
-            contents.Add("Assets/package.json");
+                // Runtime
+                "Assets/Treasure/TDK/Runtime/Analytics",
+                "Assets/Treasure/TDK/Runtime/Identity",
+                "Assets/Treasure/TDK/Runtime/Infrastructure",
+                "Assets/Treasure/TDK/Runtime/TDK.cs",
+                "Assets/Treasure/TDK/Runtime/TDKConfig.cs",
+                "Assets/Treasure/TDK/Runtime/TDKVersion.cs",
+                "Assets/Treasure/TDK/Runtime/Utils",
+                "Assets/package.json"
+            };
 
             AssetDatabase.Refresh();
 

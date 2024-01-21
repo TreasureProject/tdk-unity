@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace Treasure
 {
-    public class TDKPackagerHelika
+    public class TDKPackagerThirdweb
     {
-        private static string _packageName = "Helika";
+        private static string _packageName = "Thirdweb";
 
-        [MenuItem("Treasure/TDK/Export Packages/Service-Helika", false, 800)]
+        [MenuItem("Treasure/TDK/Export Packages/Service-Thirdweb", false, 800)]
         public static void ExportPackage()
         {
             Debug.Log($"Exporting TDK {_packageName} Module Package...");
@@ -16,6 +16,7 @@ namespace Treasure
             var contents = new List<string>
             {
                 $"Assets/{_packageName}",
+                $"Assets/WebGLTemplates/{_packageName}",
                 $"Assets/Treasure/TDK/Editor/Services/{_packageName}",
                 $"Assets/Treasure/TDK/Runtime/Services/{_packageName}"
             };
