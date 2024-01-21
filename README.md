@@ -1,7 +1,7 @@
 # TDK Unity
 
 ### What is the Treasure Development Kit (TDK)
-TDK Unity is exeprimental and in early development phase. It facilitates easy installation and integration with our internal client-side tools and vendor SDKs. It removes biolerplate integration code and abscracts interaction between game code and vendor SDKs.
+TDK Unity is exeprimental and in early development phase. It facilitates easy installation and integration with our internal client-side tools and vendor SDKs. It removes biolerplate integration code and abstracts interaction between game code and vendor SDKs.
 
 #### What's in the box
 - Analytics tracking 
