@@ -160,6 +160,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: lol.treasure.tdkunity
     Standalone: lol.treasure.tdkunity
+    iPhone: lol.treasure.tdkunity
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -833,8 +834,10 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: 
+    Android: TDK_HELIKA
     Standalone: TDK_HELIKA
+    WebGL: TDK_HELIKA
+    iPhone: TDK_HELIKA
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}
