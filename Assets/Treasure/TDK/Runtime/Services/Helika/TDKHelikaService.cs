@@ -17,8 +17,9 @@ namespace Treasure
             await EventManager.Instance.Init(
                 _config.ApiKey,
                 TDK.Instance.AppConfig.GameId,
-                HelikaEnvironment.Develop, //TODO abscract this
-                true);
+                TDK.Instance.AppConfig.Environment.Equals("prod") ? HelikaEnvironment.Production : HelikaEnvironment.Develop,
+                true
+            );
         }
 
         public void SetPlayerId(string playerId)
