@@ -8,10 +8,17 @@ namespace Treasure
     {
         public static string DEFAULT_CONFIG_LOCATION = "Assets/Treasure/TDK/Resources";
 
+        [SerializeField] private string _environment = string.Empty; // prod/dev - TODO change to enum?
+
         [SerializeField] private string _gameId = string.Empty;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> {}
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
+
+        public string Environment
+        {
+            get { return _environment; }
+        }
 
         public string GameId
         {
