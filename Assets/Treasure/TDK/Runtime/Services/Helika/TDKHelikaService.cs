@@ -1,7 +1,6 @@
 #if TDK_HELIKA
 using System.Collections.Generic;
 using Helika;
-using Newtonsoft.Json.Linq;
 
 namespace Treasure
 {
