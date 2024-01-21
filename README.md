@@ -5,10 +5,11 @@ TDK Unity is exeprimental and in early development phase. It facilitates easy in
 
 #### What's in the box
 - Analytics tracking 
-  ```TDK.Instance.TrackCustomEvent("custom_event", new Dictionary<string, object>
-        {
-            {"custom_event_key", "hello world"}
-        });
+  ```
+  TDK.Instance.TrackCustomEvent("custom_event", new Dictionary<string, object>
+    {
+        {"custom_event_key", "hello world"}
+    });
   ```
 
 ### Installation
