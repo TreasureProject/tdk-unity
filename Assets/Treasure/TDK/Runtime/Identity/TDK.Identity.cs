@@ -13,5 +13,12 @@ namespace Treasure
             TDKServiceLocator.GetService<TDKThirdwebService>();
             #endif
         }
+
+        public string AuthToken
+        {
+            get {
+                return TDKServiceLocator.GetService<TDKThirdwebService>().AuthToken;
+            }
+        }
     }
 }
