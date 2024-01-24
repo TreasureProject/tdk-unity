@@ -1,4 +1,5 @@
 #if TDK_THIRDWEB
+using System.Numerics;
 using System.Threading.Tasks;
 using Thirdweb;
 
@@ -8,25 +9,27 @@ namespace Treasure
     {
         private TDKThirdwebConfig _config;
 
-        private string _authToken;
-
         public override void Awake()
         {
             base.Awake();
 
             _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>();
-
-            // var sdk = ThirdwebManager.Instance.SDK;
         }
 
-        public string AuthToken
+        public async Task<BigInteger> GetChainId()
         {
-            get { return _authToken; }
+            return await ThirdwebManager.Instance.SDK.wallet.GetChainId();
         }
 
         public async Task<string> GetAddress()
         {
             return await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+        }
+
+        public async Task<string> Sign(string message)
+        {
+            var address = await GetAddress();
+            return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, address);
         }
     }
 }

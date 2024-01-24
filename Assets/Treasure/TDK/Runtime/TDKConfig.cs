@@ -9,8 +9,9 @@ namespace Treasure
         public static string DEFAULT_CONFIG_LOCATION = "Assets/Treasure/TDK/Resources";
 
         [SerializeField] private string _environment = string.Empty; // prod/dev - TODO change to enum?
-
         [SerializeField] private string _gameId = string.Empty;
+        [SerializeField] private string _tdkApiUrl = "http://localhost:8080";
+        
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> {}
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
@@ -23,6 +24,11 @@ namespace Treasure
         public string GameId
         {
             get { return _gameId; }
+        }
+
+        public string TDKApiUrl
+        {
+            get { return _tdkApiUrl; }
         }
 
         public T GetModuleConfig<T>()
@@ -47,6 +53,7 @@ namespace Treasure
          public void SetConfig(SerializedTDKConfig config)
         {
             _gameId = config.gameId;
+            _tdkApiUrl = config.tdkApiUrl;
         }
     }
 
@@ -54,5 +61,6 @@ namespace Treasure
     public class SerializedTDKConfig
     {
         [SerializeField] public string gameId;
+        [SerializeField] public string tdkApiUrl;
     }
 }

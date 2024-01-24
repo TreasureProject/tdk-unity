@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using Org.BouncyCastle.Asn1.Cms;
+using System;
+using Treasure;
 using UnityEngine;
 
 /**
@@ -20,16 +19,20 @@ public class ThirdwebTestUI : MonoBehaviour
 {
     void Start()
     {
-        
-    }
-
-    public void OnConnectWalletBtn()
-    {
 
     }
 
-    public void OnAuthBtn()
+    public async void OnAuthBtn()
     {
-        
+        TDKLogger.Log($"[ThirdwebTestUI] Authenticating...");
+        try
+        {
+            await TDK.identity.Authenticate();
+            TDKLogger.Log($"[ThirdwebTestUI] Authentication successful");
+        }
+        catch (Exception e)
+        {
+            TDKLogger.LogError($"[ThirdwebTestUI] Authentication error: {e}");
+        }
     }
 }
