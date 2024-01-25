@@ -32,7 +32,6 @@ public class ThirdwebTestUI : MonoBehaviour
 
     void Start()
     {
-        DepositBtn.interactable = false;
         _project = Task.Run(async () => await TDK.identity.GetProject()).Result;
     }
 
