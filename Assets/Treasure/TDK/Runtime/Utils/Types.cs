@@ -1,7 +1,21 @@
 using System;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace Treasure
 {
+    [Serializable]
+    public struct TDKProject
+    {
+        public string slug;
+        public string name;
+        public List<string> backendWallets;
+        public List<string> callTargets;
+        public string icon;
+        public string cover;
+        public string color;
+    }
+
     [Serializable]
     public class TDKAuthPayload
     {
@@ -56,22 +70,36 @@ namespace Treasure
     }
 
     [Serializable]
+    public struct TDKContractWriteRequest
+    {
+        public string functionName;
+        public string[] args;
+    }
+
+    [Serializable]
+    public struct TDKContractWriteResponse
+    {
+        public string queueId;
+    }
+
+    [Serializable]
     public struct TDKHarvesterResponse
     {
         [Serializable]
         public struct Harvester
         {
+            public string nftHandlerAddress;
             public string permitsAddress;
-            public string permitsTokenId;
+            public BigInteger permitsTokenId;
         }
 
         [Serializable]
         public struct User
         {
-            public string magicBalance;
-            public string permitsBalance;
-            public string harvesterDepositCap;
-            public string harvesterDepositAmount;
+            public BigInteger magicBalance;
+            public BigInteger permitsBalance;
+            public BigInteger harvesterDepositCap;
+            public BigInteger harvesterDepositAmount;
         }
 
         public Harvester harvester;
