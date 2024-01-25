@@ -134,5 +134,27 @@ namespace Treasure
             _authToken = token;
             return token;
         }
+
+        public async Task<TDKHarvesterResponse> GetHarvester(string id)
+        {
+            var req = new UnityWebRequest
+            {
+                url = $"{_tdkApiUrl}/harvesters/{id}",
+                method = "GET",
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("X-Chain-Id", (await GetChainId()).ToString());
+            req.SetRequestHeader("Authorization", $"Bearer {_authToken}");
+            await req.SendWebRequest();
+
+            var rawResponse = req.downloadHandler.text;
+            if (req.result != UnityWebRequest.Result.Success)
+            {
+                throw new UnityException($"[LogIn] {req.error}: {rawResponse}");
+            }
+
+            return JsonConvert.DeserializeObject<TDKHarvesterResponse>(rawResponse);
+        }
     }
 }

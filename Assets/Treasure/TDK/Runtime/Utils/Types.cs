@@ -1,6 +1,8 @@
+using System;
+
 namespace Treasure
 {
-    [System.Serializable]
+    [Serializable]
     public class TDKAuthPayload
     {
         public string type;
@@ -21,35 +23,58 @@ namespace Treasure
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct TDKAuthPayloadRequest
     {
         public string address;
         public string chainId;
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct TDKAuthPayloadResponse
     {
         public TDKAuthPayload payload;
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct TDKAuthLoginPayload
     {
         public TDKAuthPayload payload;
         public string signature;
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct TDKAuthLoginRequest
     {
         public TDKAuthLoginPayload payload;
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct TDKAuthLoginResponse
     {
         public string token;
+    }
+
+    [Serializable]
+    public struct TDKHarvesterResponse
+    {
+        [Serializable]
+        public struct Harvester
+        {
+            public string permitsAddress;
+            public string permitsTokenId;
+        }
+
+        [Serializable]
+        public struct User
+        {
+            public string magicBalance;
+            public string permitsBalance;
+            public string harvesterDepositCap;
+            public string harvesterDepositAmount;
+        }
+
+        public Harvester harvester;
+        public User user;
     }
 }

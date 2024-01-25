@@ -1,6 +1,7 @@
 using System;
 using Treasure;
 using UnityEngine;
+using UnityEngine.UI;
 
 /**
     1. auth with Smart Account
@@ -17,6 +18,9 @@ using UnityEngine;
 
 public class ThirdwebTestUI : MonoBehaviour
 {
+
+    public Button AuthBtn;
+
     void Start()
     {
 
@@ -27,8 +31,11 @@ public class ThirdwebTestUI : MonoBehaviour
         TDKLogger.Log($"[ThirdwebTestUI] Authenticating...");
         try
         {
-            await TDK.identity.Authenticate();
-            TDKLogger.Log($"[ThirdwebTestUI] Authentication successful");
+            var token = await TDK.identity.Authenticate();
+            TDKLogger.Log($"[ThirdwebTestUI] Authentication successful: {token}");
+
+            TDKLogger.Log("[ThirdwebTestUI] Fetching Harvester details...");
+            var harvesterInfo = await TDK.identity.GetHarvester("0x466d20a94e280bb419031161a6a7508438ad436f");
         }
         catch (Exception e)
         {
