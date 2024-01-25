@@ -98,6 +98,8 @@ namespace Treasure
         {
             public BigInteger magicBalance;
             public BigInteger permitsBalance;
+            public BigInteger harvesterMagicAllowance;
+            public bool harvesterPermitsApproved;
             public BigInteger harvesterDepositCap;
             public BigInteger harvesterDepositAmount;
         }

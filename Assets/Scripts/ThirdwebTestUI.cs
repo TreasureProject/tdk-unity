@@ -32,11 +32,13 @@ public class ThirdwebTestUI : MonoBehaviour
 
     void Start()
     {
-        _project = Task.Run(async () => await TDK.identity.GetProject()).Result;
+
     }
 
     public async void OnAuthBtn()
     {
+        _project = await TDK.identity.GetProject();
+
         if (!TDK.identity.IsAuthenticated)
         {
             try
@@ -86,15 +88,28 @@ public class ThirdwebTestUI : MonoBehaviour
 
         if (!hasDepositCapLeft)
         {
+            if (!_harvesterInfo.user.harvesterPermitsApproved)
+            {
+                TDKLogger.Log("Approving Consumables transfer...");
+                await TDK.identity.ApproveConsumables(_harvesterInfo.harvester.nftHandlerAddress);
+                await Task.Delay(20_000);
+            }
+
             TDKLogger.Log("Staking Ancient Permit...");
             await TDK.identity.HarvesterStakeNft(
                 nftHandlerAddress: _harvesterInfo.harvester.nftHandlerAddress,
                 permitsAddress: _harvesterInfo.harvester.permitsAddress,
                 permitsTokenId: _harvesterInfo.harvester.permitsTokenId
             );
+            await Task.Delay(20_000);
         }
 
-        await Task.Delay(20_000);
+        if (_harvesterInfo.user.harvesterMagicAllowance < _depositAmount)
+        {
+            TDKLogger.Log("Approving MAGIC transfer...");
+            await TDK.identity.ApproveMagic(_harvesterAddress, _depositAmount);
+            await Task.Delay(20_000);
+        }
 
         TDKLogger.Log("Depositing MAGIC...");
         await TDK.identity.HarvesterDepositMagic(_harvesterAddress, _depositAmount);

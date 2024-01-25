@@ -234,6 +234,24 @@ namespace Treasure
             return response.queueId;
         }
 
+        public async Task<string> ApproveMagic(string operatorAddress, BigInteger amount)
+        {
+            return await WriteContract(
+                address: "0x55d0cf68a1afe0932aff6f36c87efa703508191c",
+                functionName: "approve",
+                args: new string[] { operatorAddress, amount.ToString() }
+            );
+        }
+
+        public async Task<string> ApproveConsumables(string operatorAddress)
+        {
+            return await WriteContract(
+                address: "0x9d012712d24C90DDEd4574430B9e6065183896BE",
+                functionName: "setApprovalForAll",
+                args: new string[] { operatorAddress, "true" }
+            );
+        }
+
         public async Task<string> HarvesterStakeNft(string nftHandlerAddress, string permitsAddress, BigInteger permitsTokenId)
         {
             return await WriteContract(

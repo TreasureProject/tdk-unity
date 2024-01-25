@@ -4080,7 +4080,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 35088009}
         m_TargetAssemblyTypeName: ThirdwebTestUI, Assembly-CSharp
-        m_MethodName: OnAuthBtn
+        m_MethodName: OnDepositBtn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
