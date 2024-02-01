@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 using System;
 
 namespace Treasure
@@ -10,10 +9,10 @@ namespace Treasure
 
         [SerializeField] private string _environment = string.Empty; // prod/dev - TODO change to enum?
         [SerializeField] private string _gameId = string.Empty;
-        [SerializeField] private string _tdkApiUrl = "http://localhost:8080";
-        
+        [SerializeField] private string _tdkApiUrl = "https://tdk-api-dev.treasure.lol";
 
-        [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> {}
+
+        [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
 
         public string Environment
@@ -33,7 +32,7 @@ namespace Treasure
 
         public T GetModuleConfig<T>()
         {
-            if(moduleConfigurations.ContainsKey(typeof(T).Name))
+            if (moduleConfigurations.ContainsKey(typeof(T).Name))
             {
                 return (T)Convert.ChangeType(moduleConfigurations[typeof(T).Name], typeof(T));
             }
@@ -50,7 +49,7 @@ namespace Treasure
             return Resources.Load<TDKConfig>("TDKConfig");
         }
 
-         public void SetConfig(SerializedTDKConfig config)
+        public void SetConfig(SerializedTDKConfig config)
         {
             _gameId = config.gameId;
             _tdkApiUrl = config.tdkApiUrl;
