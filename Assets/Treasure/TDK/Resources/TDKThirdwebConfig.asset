@@ -12,9 +12,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 824a604ac334e44fe81b843b4e20a728, type: 3}
   m_Name: TDKThirdwebConfig
   m_EditorClassIdentifier: 
-  _clientId: ff8c8a3d59faca4d0eeb00600e3c64df
-  _factoryAddress: 0xdd61B8AC8883a398659EC9C22DcA1B6b91DF5694
-  _gasless: 1
-  _bundlerUrl: 456
-  _paymasterUrl: 789
-  _entryPointAddress: 012

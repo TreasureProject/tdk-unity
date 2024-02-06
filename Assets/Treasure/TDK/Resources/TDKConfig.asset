@@ -12,12 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 461a76f85cc754692a1cb1c32ff18209, type: 3}
   m_Name: TDKConfig
   m_EditorClassIdentifier: 
-  _environment: 
+  _environment: 0
   _gameId: tdk-unity-harness
+  _tdkApiUrl: https://tdk-api-dev.treasure.lol
   moduleConfigurations:
-    m_keys:
-    - TDKHelikaConfig
-    - TDKThirdwebConfig
-    m_values:
-    - {fileID: 11400000, guid: b84b3bcebfaa94aafb4f9b55e0f849aa, type: 2}
-    - {fileID: 11400000, guid: 79436692579a94a93abc4923b9cb098a, type: 2}
+    m_keys: []
+    m_values: []

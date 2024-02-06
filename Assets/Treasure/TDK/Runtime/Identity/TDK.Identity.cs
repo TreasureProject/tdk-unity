@@ -11,14 +11,14 @@ namespace Treasure
 {
     public partial class TDK : MonoBehaviour
     {
-        public static Identity identity;
+        public static Identity Identity;
 
         /// <summary>
         /// Initialize the Identity module
         /// </summary>
         private void InitIdentity()
         {
-            identity = new Identity(AppConfig.GameId, AppConfig.TDKApiUrl);
+            Identity = new Identity();
 
 #if TDK_THIRDWEB
             TDKServiceLocator.GetService<TDKThirdwebService>();
@@ -28,20 +28,15 @@ namespace Treasure
 
     public class Identity
     {
-        private string _gameId;
-        private string _tdkApiUrl;
+        #region private vars
         private string _authToken;
         private bool _isAuthenticated;
+        #endregion
 
+        #region accessors / mutators
         private Wallet _wallet
         {
             get { return TDKServiceLocator.GetService<TDKThirdwebService>().wallet; }
-        }
-
-        public Identity(string gameId, string tdkApiUrl)
-        {
-            _gameId = gameId;
-            _tdkApiUrl = tdkApiUrl;
         }
 
         public string AuthToken
@@ -53,29 +48,13 @@ namespace Treasure
         {
             get { return _isAuthenticated; }
         }
+        #endregion
 
-        public async Task<TDKProject> GetProject()
-        {
-            var req = new UnityWebRequest
-            {
-                // url = $"{_tdkApiUrl}/projects/{_gameId}",
-                url = $"{_tdkApiUrl}/projects/platform",
-                method = "GET",
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", (await _wallet.GetChainId()).ToString());
-            await req.SendWebRequest();
+        #region constructors
+        public Identity() {}
+        #endregion
 
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[LogIn] {req.error}: {rawResponse}");
-            }
-
-            return JsonConvert.DeserializeObject<TDKProject>(rawResponse);
-        }
-
+        #region private methods
         private async Task<TDKAuthPayload> GetAuthPayload()
         {
             var body = JsonConvert.SerializeObject(new TDKAuthPayloadRequest
@@ -85,7 +64,7 @@ namespace Treasure
             });
             var req = new UnityWebRequest
             {
-                url = $"{_tdkApiUrl}/auth/payload",
+                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/auth/payload",
                 method = "POST",
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
                 downloadHandler = new DownloadHandlerBuffer()
@@ -134,7 +113,7 @@ namespace Treasure
             });
             var req = new UnityWebRequest
             {
-                url = $"{_tdkApiUrl}/auth/login",
+                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/auth/login",
                 method = "POST",
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
                 downloadHandler = new DownloadHandlerBuffer()
@@ -150,6 +129,31 @@ namespace Treasure
 
             var response = JsonConvert.DeserializeObject<TDKAuthLoginResponse>(rawResponse);
             return response.token;
+        }
+        #endregion
+
+        #region public api
+        public async Task<TDKProject> GetProject()
+        {
+            var req = new UnityWebRequest
+            {
+                // url = $"{TDK.Instance.AppConfig.TDKApiUrl}/projects/{TDK.Instance.AppConfig.GameId}",
+
+                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/projects/platform",
+                method = "GET",
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("X-Chain-Id", (await _wallet.GetChainId()).ToString());
+            await req.SendWebRequest();
+
+            var rawResponse = req.downloadHandler.text;
+            if (req.result != UnityWebRequest.Result.Success)
+            {
+                throw new UnityException($"[LogIn] {req.error}: {rawResponse}");
+            }
+
+            return JsonConvert.DeserializeObject<TDKProject>(rawResponse);
         }
 
         public async Task<string> Authenticate(TDKProject project)
@@ -187,7 +191,7 @@ namespace Treasure
         {
             var req = new UnityWebRequest
             {
-                url = $"{_tdkApiUrl}/harvesters/{id}",
+                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/harvesters/{id}",
                 method = "GET",
                 downloadHandler = new DownloadHandlerBuffer()
             };
@@ -214,7 +218,7 @@ namespace Treasure
             });
             var req = new UnityWebRequest
             {
-                url = $"{_tdkApiUrl}/contracts/{address}",
+                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/contracts/{address}",
                 method = "POST",
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
                 downloadHandler = new DownloadHandlerBuffer()
@@ -269,5 +273,6 @@ namespace Treasure
                 args: new string[] { amount.ToString(), "0" }
             );
         }
+        #endregion
     }
 }

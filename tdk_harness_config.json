@@ -1,6 +1,7 @@
 {
     "tdk": {
-        "gameId": "tdk-unity-harness"
+        "gameId": "tdk-unity-harness",
+        "tdkApiUrl": "https://tdk-api-dev.treasure.lol"
     },
     "helika": {
         "prodApiKeyWeb": "21bce555ea28fe3d2dffeacc81fe2b.kotreasure-web-obvdlv09f",
@@ -10,12 +11,5 @@
         "devApiKeyIos": "2e516d82e129fb2f82624b5058839a.kotreasure-ios-3yhn2dq",
         "devApiKeyAndroid": "ac340039a7b9c21059a200d173cd5f.kotreasure-android-q7kqo4"
     },
-    "thirdweb": {
-        "clientId": "ff8c8a3d59faca4d0eeb00600e3c64df",
-        "factoryAddress": "0xdd61B8AC8883a398659EC9C22DcA1B6b91DF5694",
-        "gasless": true,
-        "bundlerUrl": "456",
-        "paymasterUrl": "789",
-        "entryPointAddress": "012"
-    }
+    "thirdweb": {}
 }

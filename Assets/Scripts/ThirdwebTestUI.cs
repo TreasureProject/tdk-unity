@@ -37,13 +37,13 @@ public class ThirdwebTestUI : MonoBehaviour
 
     public async void OnAuthBtn()
     {
-        _project = await TDK.identity.GetProject();
+        _project = await TDK.Identity.GetProject();
 
-        if (!TDK.identity.IsAuthenticated)
+        if (!TDK.Identity.IsAuthenticated)
         {
             try
             {
-                var token = await TDK.identity.Authenticate(_project);
+                var token = await TDK.Identity.Authenticate(_project);
                 TDKLogger.Log($"Received auth token: {token}");
                 AuthBtn.GetComponentInChildren<Text>().text = "Log Out";
                 DepositBtn.interactable = true;
@@ -56,7 +56,7 @@ public class ThirdwebTestUI : MonoBehaviour
             // Immediately fetch Harvester info so we can display status to user
             try
             {
-                _harvesterInfo = await TDK.identity.GetHarvester(_harvesterAddress);
+                _harvesterInfo = await TDK.Identity.GetHarvester(_harvesterAddress);
             }
             catch (Exception e)
             {
@@ -65,7 +65,7 @@ public class ThirdwebTestUI : MonoBehaviour
         }
         else
         {
-            TDK.identity.LogOut();
+            TDK.Identity.LogOut();
             AuthBtn.GetComponentInChildren<Text>().text = "Authenticate";
             DepositBtn.interactable = false;
         }
@@ -91,12 +91,12 @@ public class ThirdwebTestUI : MonoBehaviour
             if (!_harvesterInfo.user.harvesterPermitsApproved)
             {
                 TDKLogger.Log("Approving Consumables transfer...");
-                await TDK.identity.ApproveConsumables(_harvesterInfo.harvester.nftHandlerAddress);
+                await TDK.Identity.ApproveConsumables(_harvesterInfo.harvester.nftHandlerAddress);
                 await Task.Delay(20_000);
             }
 
             TDKLogger.Log("Staking Ancient Permit...");
-            await TDK.identity.HarvesterStakeNft(
+            await TDK.Identity.HarvesterStakeNft(
                 nftHandlerAddress: _harvesterInfo.harvester.nftHandlerAddress,
                 permitsAddress: _harvesterInfo.harvester.permitsAddress,
                 permitsTokenId: _harvesterInfo.harvester.permitsTokenId
@@ -107,11 +107,11 @@ public class ThirdwebTestUI : MonoBehaviour
         if (_harvesterInfo.user.harvesterMagicAllowance < _depositAmount)
         {
             TDKLogger.Log("Approving MAGIC transfer...");
-            await TDK.identity.ApproveMagic(_harvesterAddress, _depositAmount);
+            await TDK.Identity.ApproveMagic(_harvesterAddress, _depositAmount);
             await Task.Delay(20_000);
         }
 
         TDKLogger.Log("Depositing MAGIC...");
-        await TDK.identity.HarvesterDepositMagic(_harvesterAddress, _depositAmount);
+        await TDK.Identity.HarvesterDepositMagic(_harvesterAddress, _depositAmount);
     }
 }
