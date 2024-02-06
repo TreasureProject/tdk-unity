@@ -1,0 +1,26 @@
+{
+    "name": "TDK.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:bd306b637a3ab4934bf2a6fc742a3310",
+        "GUID:0f2166a81877b6f4b81956d2a579e6f7"
+    ],
+    "includePlatforms": [
+        "Android",
+        "Editor",
+        "iOS",
+        "LinuxStandalone64",
+        "macOSStandalone",
+        "WebGL",
+        "WindowsStandalone32",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

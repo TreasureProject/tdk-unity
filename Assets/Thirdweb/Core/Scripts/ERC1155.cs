@@ -86,7 +86,7 @@ namespace Thirdweb
             {
                 int totalCount = await TotalCount();
                 int start = queryParams?.start ?? 0;
-                int count = queryParams?.count + 1 ?? totalCount;
+                int count = queryParams?.count ?? totalCount;
                 int end = Math.Min(start + count, totalCount);
                 List<NFT> allNfts = new();
                 try
@@ -125,7 +125,7 @@ namespace Thirdweb
                 {
                     ThirdwebDebug.LogWarning("Unable to fetch using Multicall3, likely not deployed on this chain, falling back to single queries.");
                     allNfts = new List<NFT>();
-                    for (int i = start; i <= end; i++)
+                    for (int i = start; i < end; i++)
                         allNfts.Add(await Get(i.ToString()));
                 }
                 return allNfts;
@@ -348,9 +348,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                throw new UnityException("This functionality is not yet available on your current platform.");
-                // WEN WEBGL
-                // return await Bridge.InvokeRoute<TransactionResult>(getRoute("transferBatch"), Utils.ToJsonStringArray(to, tokenIds, amounts));
+                return await Bridge.InvokeRoute<TransactionResult>(getRoute("transferBatch"), Utils.ToJsonStringArray(to, tokenIds, amounts));
             }
             else
             {
