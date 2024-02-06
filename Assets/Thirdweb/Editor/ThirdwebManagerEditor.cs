@@ -27,7 +27,7 @@ namespace Thirdweb
         private SerializedProperty walletConnectExplorerRecommendedWalletIdsProperty;
         private SerializedProperty factoryAddressProperty;
         private SerializedProperty gaslessProperty;
-        private SerializedProperty doNotDeployOnSignMessageProperty;
+        private SerializedProperty deployOnSignProperty;
         private SerializedProperty bundlerUrlProperty;
         private SerializedProperty paymasterUrlProperty;
         private SerializedProperty entryPointAddressProperty;
@@ -44,7 +44,7 @@ namespace Thirdweb
         private GUIContent warningIcon;
         private Texture2D bannerImage;
 
-        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.4.2";
+        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.6.1";
 
         private void OnEnable()
         {
@@ -68,7 +68,7 @@ namespace Thirdweb
             walletConnectExplorerRecommendedWalletIdsProperty = serializedObject.FindProperty("walletConnectExplorerRecommendedWalletIds");
             factoryAddressProperty = serializedObject.FindProperty("factoryAddress");
             gaslessProperty = serializedObject.FindProperty("gasless");
-            doNotDeployOnSignMessageProperty = serializedObject.FindProperty("doNotDeployOnSignMessage");
+            deployOnSignProperty = serializedObject.FindProperty("deployOnSign");
             bundlerUrlProperty = serializedObject.FindProperty("bundlerUrl");
             paymasterUrlProperty = serializedObject.FindProperty("paymasterUrl");
             entryPointAddressProperty = serializedObject.FindProperty("entryPointAddress");
@@ -306,7 +306,7 @@ namespace Thirdweb
 
                     if (showSmartWalletOptionalFields)
                     {
-                        EditorGUILayout.PropertyField(doNotDeployOnSignMessageProperty);
+                        EditorGUILayout.PropertyField(deployOnSignProperty);
                         EditorGUILayout.PropertyField(bundlerUrlProperty);
                         EditorGUILayout.PropertyField(paymasterUrlProperty);
                         EditorGUILayout.PropertyField(entryPointAddressProperty);
