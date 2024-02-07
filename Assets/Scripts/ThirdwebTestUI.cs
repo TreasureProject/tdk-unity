@@ -51,6 +51,7 @@ public class ThirdwebTestUI : MonoBehaviour
             catch (Exception e)
             {
                 TDKLogger.LogError($"Error authenticating: {e}");
+                return;
             }
 
             // Immediately fetch Harvester info so we can display status to user
@@ -92,7 +93,6 @@ public class ThirdwebTestUI : MonoBehaviour
             {
                 TDKLogger.Log("Approving Consumables transfer...");
                 await TDK.Identity.ApproveConsumables(_harvesterInfo.harvester.nftHandlerAddress);
-                await Task.Delay(20_000);
             }
 
             TDKLogger.Log("Staking Ancient Permit...");
@@ -101,14 +101,12 @@ public class ThirdwebTestUI : MonoBehaviour
                 permitsAddress: _harvesterInfo.harvester.permitsAddress,
                 permitsTokenId: _harvesterInfo.harvester.permitsTokenId
             );
-            await Task.Delay(20_000);
         }
 
         if (_harvesterInfo.user.harvesterMagicAllowance < _depositAmount)
         {
             TDKLogger.Log("Approving MAGIC transfer...");
             await TDK.Identity.ApproveMagic(_harvesterAddress, _depositAmount);
-            await Task.Delay(20_000);
         }
 
         TDKLogger.Log("Depositing MAGIC...");

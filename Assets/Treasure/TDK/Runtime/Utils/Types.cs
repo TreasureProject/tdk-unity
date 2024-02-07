@@ -83,6 +83,14 @@ namespace Treasure
     }
 
     [Serializable]
+    public struct TDKTransactionResponse
+    {
+        public string status;
+        public string transactionHash;
+        public string errorMessage;
+    }
+
+    [Serializable]
     public struct TDKHarvesterResponse
     {
         [Serializable]

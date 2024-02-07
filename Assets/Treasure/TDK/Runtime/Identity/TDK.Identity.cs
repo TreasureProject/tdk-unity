@@ -51,7 +51,7 @@ namespace Treasure
         #endregion
 
         #region constructors
-        public Identity() {}
+        public Identity() { }
         #endregion
 
         #region private methods
@@ -150,7 +150,7 @@ namespace Treasure
             var rawResponse = req.downloadHandler.text;
             if (req.result != UnityWebRequest.Result.Success)
             {
-                throw new UnityException($"[LogIn] {req.error}: {rawResponse}");
+                throw new UnityException($"[GetProject] {req.error}: {rawResponse}");
             }
 
             return JsonConvert.DeserializeObject<TDKProject>(rawResponse);
@@ -203,7 +203,7 @@ namespace Treasure
             var rawResponse = req.downloadHandler.text;
             if (req.result != UnityWebRequest.Result.Success)
             {
-                throw new UnityException($"[LogIn] {req.error}: {rawResponse}");
+                throw new UnityException($"[GetHarvester] {req.error}: {rawResponse}");
             }
 
             return JsonConvert.DeserializeObject<TDKHarvesterResponse>(rawResponse);
@@ -238,40 +238,101 @@ namespace Treasure
             return response.queueId;
         }
 
-        public async Task<string> ApproveMagic(string operatorAddress, BigInteger amount)
+        private async Task<TDKTransactionResponse> GetTransaction(string queueId)
         {
-            return await WriteContract(
+            var req = new UnityWebRequest
+            {
+                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/transactions/{queueId}",
+                method = "GET",
+                downloadHandler = new DownloadHandlerBuffer()
+            };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Authorization", $"Bearer {_authToken}");
+            await req.SendWebRequest();
+
+            var rawResponse = req.downloadHandler.text;
+            if (req.result != UnityWebRequest.Result.Success)
+            {
+                throw new UnityException($"[GetTransaction] {req.error}: {rawResponse}");
+            }
+
+            return JsonConvert.DeserializeObject<TDKTransactionResponse>(rawResponse);
+        }
+
+        private async Task WaitForTransaction(string queueId)
+        {
+            var retries = 0;
+            TDKTransactionResponse transaction;
+            do
+            {
+                if (retries > 0)
+                {
+                    await Task.Delay(2_500);
+                }
+
+                transaction = await GetTransaction(queueId);
+                retries++;
+            } while (
+                retries < 10 &&
+                transaction.status != "errored" &&
+                transaction.status != "cancelled" &&
+                transaction.status != "mined"
+            );
+
+            if (transaction.status == "errored")
+            {
+                throw new UnityException($"[WaitForTransaction] Transaction {queueId} errored: {transaction.errorMessage}");
+            }
+
+            if (transaction.status == "cancelled")
+            {
+                throw new UnityException($"[WaitForTransaction] Transaction {queueId} cancelled");
+            }
+
+            if (transaction.status != "mined")
+            {
+                throw new UnityException($"[WaitForTransaction] Transaction {queueId} timed out with status: {transaction.status}");
+            }
+        }
+
+        public async Task ApproveMagic(string operatorAddress, BigInteger amount)
+        {
+            var queueId = await WriteContract(
                 address: "0x55d0cf68a1afe0932aff6f36c87efa703508191c",
                 functionName: "approve",
                 args: new string[] { operatorAddress, amount.ToString() }
             );
+            await WaitForTransaction(queueId);
         }
 
-        public async Task<string> ApproveConsumables(string operatorAddress)
+        public async Task ApproveConsumables(string operatorAddress)
         {
-            return await WriteContract(
+            var queueId = await WriteContract(
                 address: "0x9d012712d24C90DDEd4574430B9e6065183896BE",
                 functionName: "setApprovalForAll",
                 args: new string[] { operatorAddress, "true" }
             );
+            await WaitForTransaction(queueId);
         }
 
-        public async Task<string> HarvesterStakeNft(string nftHandlerAddress, string permitsAddress, BigInteger permitsTokenId)
+        public async Task HarvesterStakeNft(string nftHandlerAddress, string permitsAddress, BigInteger permitsTokenId)
         {
-            return await WriteContract(
+            var queueId = await WriteContract(
                 address: nftHandlerAddress,
                 functionName: "stakeNft",
                 args: new string[] { permitsAddress, permitsTokenId.ToString(), "1" }
             );
+            await WaitForTransaction(queueId);
         }
 
-        public async Task<string> HarvesterDepositMagic(string harvesterAddress, BigInteger amount)
+        public async Task HarvesterDepositMagic(string harvesterAddress, BigInteger amount)
         {
-            return await WriteContract(
+            var queueId = await WriteContract(
                 address: harvesterAddress,
                 functionName: "deposit",
                 args: new string[] { amount.ToString(), "0" }
             );
+            await WaitForTransaction(queueId);
         }
         #endregion
     }
