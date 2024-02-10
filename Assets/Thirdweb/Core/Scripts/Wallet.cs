@@ -439,6 +439,37 @@ namespace Thirdweb
         }
 
         /// <summary>
+        /// Prompts the connected wallet to sign the given message.
+        /// </summary>
+        /// <param name="message">The message to sign.</param>
+        /// <param name="signerAddress">The address to use as signer for the message.</param>
+        /// <returns>The signature of the message as a string.</returns>
+        public async Task<string> Sign(string message, string signerAddress)
+        {
+            if (!await IsConnected())
+                throw new Exception("No account connected!");
+
+            if (Utils.IsWebGLBuild())
+            {
+                return await Bridge.InvokeRoute<string>(getRoute("sign"), Utils.ToJsonStringArray(message));
+            }
+            else
+            {
+                if (ThirdwebManager.Instance.SDK.session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet && ThirdwebManager.Instance.SDK.session.Options.smartWalletConfig.Value.deployOnSign)
+                {
+                    var sw = ThirdwebManager.Instance.SDK.session.ActiveWallet as Wallets.ThirdwebSmartWallet;
+                    if (!sw.SmartWallet.IsDeployed && !sw.SmartWallet.IsDeploying)
+                    {
+                        ThirdwebDebug.Log("SmartWallet not deployed, deploying before signing...");
+                        await sw.SmartWallet.ForceDeploy();
+                    }
+                }
+
+                return await ThirdwebManager.Instance.SDK.session.Request<string>("personal_sign", message, signerAddress);
+            }
+        }
+
+        /// <summary>
         /// Signs a typed data object using EIP-712 signature.
         /// </summary>
         /// <typeparam name="T">The type of the data to sign.</typeparam>
