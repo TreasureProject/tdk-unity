@@ -48,6 +48,11 @@ namespace Treasure
         {
             get { return _isAuthenticated; }
         }
+
+        public async Task<string> GetWalletAddress()
+        {
+            return await _wallet.GetAddress();
+        }
         #endregion
 
         #region constructors

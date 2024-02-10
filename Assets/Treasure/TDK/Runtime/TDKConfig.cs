@@ -12,7 +12,7 @@ namespace Treasure
         [SerializeField] private Env _environment = Env.DEV;
         [SerializeField] private string _gameId = string.Empty;
         [SerializeField] private string _tdkApiUrl = string.Empty;
-
+        [SerializeField] private float _sessionLengthDays = 0;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
@@ -30,6 +30,11 @@ namespace Treasure
         public string TDKApiUrl
         {
             get { return _tdkApiUrl; }
+        }
+
+        public float SessionLengthDays
+        {
+            get { return _sessionLengthDays; }
         }
 
         public T GetModuleConfig<T>()
@@ -55,6 +60,7 @@ namespace Treasure
         {
             _gameId = config.gameId;
             _tdkApiUrl = config.tdkApiUrl;
+            _sessionLengthDays = config.sessionLengthDays;
         }
     }
 
@@ -63,5 +69,6 @@ namespace Treasure
     {
         [SerializeField] public string gameId;
         [SerializeField] public string tdkApiUrl;
+        [SerializeField] public float sessionLengthDays;
     }
 }
