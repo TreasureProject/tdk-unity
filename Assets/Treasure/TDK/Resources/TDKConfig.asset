@@ -16,6 +16,7 @@ MonoBehaviour:
   _gameId: tdk-unity-harness
   _tdkApiUrl: https://tdk-api-dev.treasure.lol
   _sessionLengthDays: 3
+  _harvesterAddress: 0x466d20a94e280bb419031161a6a7508438ad436f
   moduleConfigurations:
     m_keys:
     - TDKHelikaConfig
