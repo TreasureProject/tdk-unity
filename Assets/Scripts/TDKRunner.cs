@@ -51,8 +51,8 @@ public class TDKRunner : MonoBehaviour
         GameObject.Find ("Canvas/UI/Nav/Analytics_Btn").GetComponent<Button>().interactable = true;
 
         // temp
-        GameObject.Find("Canvas/UI/UI_Containers/ThirdwebTest_Container").SetActive(false);
-        GameObject.Find ("Canvas/UI/Nav/ThirdwebTest_Btn").GetComponent<Button>().interactable = true;
+        GameObject.Find("Canvas/UI/UI_Containers/Harvester_Container").SetActive(false);
+        GameObject.Find ("Canvas/UI/Nav/Harvester_Btn").GetComponent<Button>().interactable = true;
     }
 
     private void OnNavBtn(string navName)
