@@ -10,6 +10,11 @@ namespace Treasure
     public partial class TDK : MonoBehaviour
     {
         public static Harvester Harvester;
+
+        private void InitHarvester()
+        {
+            Harvester = new Harvester();
+        }
     }
 
     public class Harvester
