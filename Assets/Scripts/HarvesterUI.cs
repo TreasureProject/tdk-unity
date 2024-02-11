@@ -5,6 +5,7 @@ using Thirdweb;
 using Treasure;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /**
     1. auth with Smart Account
@@ -24,6 +25,7 @@ public class ThirdwebTestUI : MonoBehaviour
 
     public Button AuthBtn;
     public Button DepositBtn;
+    public TMP_InputField myTxtInput;
 
     private TDKProject _project;
     private TDKHarvesterResponse _harvesterInfo;
@@ -31,7 +33,7 @@ public class ThirdwebTestUI : MonoBehaviour
 
     void Start()
     {
-
+        myTxtInput.text = "Hello Rappzula!!!";
     }
 
     public async void OnAuthBtn()
