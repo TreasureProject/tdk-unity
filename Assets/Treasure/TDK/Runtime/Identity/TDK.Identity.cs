@@ -174,7 +174,7 @@ namespace Treasure
             var token = await LogIn(payload, signature);
 
             // Create session key
-            var permissionEndTimestamp = Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays;
+            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
             await _wallet.CreateSessionKey(
                 signerAddress: project.backendWallets[0],
                 approvedTargets: project.callTargets,

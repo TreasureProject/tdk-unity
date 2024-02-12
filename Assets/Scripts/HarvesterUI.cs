@@ -1,31 +1,17 @@
 using System;
 using System.Numerics;
-using System.Threading.Tasks;
 using Thirdweb;
+using TMPro;
 using Treasure;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
-/**
-    1. auth with Smart Account
-        - create session
-    2. separate connection with EOA
-    3. approvals:
-        - Smart Account to transfer MAGIC
-        - Smart Account to transfer Ancient Permits
-    4. TDK API (via Thirweb Engine)
-        - transfer magic & Ancient Permits to Smart Account
-        - stake from Smart Account to Harvester
-        - withdraw magic & Ancient Permits to Smart Account
-**/
-
-public class ThirdwebTestUI : MonoBehaviour
+public class HarvesterUI : MonoBehaviour
 {
 
     public Button AuthBtn;
     public Button DepositBtn;
-    public TMP_InputField myTxtInput;
+    public TMP_Text InfoText;
 
     private TDKProject _project;
     private TDKHarvesterResponse _harvesterInfo;
@@ -33,7 +19,30 @@ public class ThirdwebTestUI : MonoBehaviour
 
     void Start()
     {
-        myTxtInput.text = "Hello Rappzula!!!";
+        updateInfoText();
+    }
+
+    private async void updateInfoText()
+    {
+        string smartAccountAddress = null;
+        try
+        {
+            smartAccountAddress = await TDK.Identity.GetWalletAddress();
+        }
+        catch
+        {
+
+        }
+
+        InfoText.text = $@"Smart Account: {(smartAccountAddress != null ? smartAccountAddress : '-')}
+
+    {Utils.ToEth(_harvesterInfo.user.magicBalance.ToString())} MAGIC balance
+    {_harvesterInfo.user.permitsBalance} Ancient Permits
+
+Harvester: {TDK.Instance.AppConfig.HarvesterAddress}
+
+    {Utils.ToEth(_harvesterInfo.user.harvesterDepositCap.ToString())} MAGIC deposit cap for smart account
+    {Utils.ToEth(_harvesterInfo.user.harvesterDepositAmount.ToString())} MAGIC deposited by smart account";
     }
 
     public async void OnAuthBtn()
@@ -59,6 +68,7 @@ public class ThirdwebTestUI : MonoBehaviour
             try
             {
                 _harvesterInfo = await TDK.Harvester.GetHarvester(TDK.Instance.AppConfig.HarvesterAddress);
+                updateInfoText();
             }
             catch (Exception e)
             {
@@ -112,5 +122,11 @@ public class ThirdwebTestUI : MonoBehaviour
 
         TDKLogger.Log("Depositing MAGIC...");
         await TDK.Harvester.HarvesterDepositMagic(TDK.Instance.AppConfig.HarvesterAddress, _depositAmount);
+    }
+
+    public async void OnRefreshBtn()
+    {
+        _harvesterInfo = await TDK.Harvester.GetHarvester(TDK.Instance.AppConfig.HarvesterAddress);
+        updateInfoText();
     }
 }
