@@ -283,7 +283,7 @@ namespace Treasure
                 transaction = await GetTransaction(queueId);
                 retries++;
             } while (
-                retries < 10 &&
+                retries < 15 &&
                 transaction.status != "errored" &&
                 transaction.status != "cancelled" &&
                 transaction.status != "mined"

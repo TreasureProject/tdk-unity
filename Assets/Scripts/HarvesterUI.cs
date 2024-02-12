@@ -64,22 +64,26 @@ Harvester: {TDK.Instance.AppConfig.HarvesterAddress}
                 return;
             }
 
-            // Immediately fetch Harvester info so we can display status to user
-            try
-            {
-                _harvesterInfo = await TDK.Harvester.GetHarvester(TDK.Instance.AppConfig.HarvesterAddress);
-                updateInfoText();
-            }
-            catch (Exception e)
-            {
-                TDKLogger.LogError($"Error fetching Harvester info: {e}");
-            }
+            fetchAndUpdateHarvesterInfo();
         }
         else
         {
             TDK.Identity.LogOut();
             AuthBtn.GetComponentInChildren<Text>().text = "Authenticate";
             DepositBtn.interactable = false;
+        }
+    }
+
+    private async void fetchAndUpdateHarvesterInfo()
+    {
+        try
+        {
+            _harvesterInfo = await TDK.Harvester.GetHarvester(TDK.Instance.AppConfig.HarvesterAddress);
+            updateInfoText();
+        }
+        catch (Exception e)
+        {
+            TDKLogger.LogError($"Error fetching Harvester info: {e}");
         }
     }
 
@@ -122,11 +126,13 @@ Harvester: {TDK.Instance.AppConfig.HarvesterAddress}
 
         TDKLogger.Log("Depositing MAGIC...");
         await TDK.Harvester.HarvesterDepositMagic(TDK.Instance.AppConfig.HarvesterAddress, _depositAmount);
+
+        TDKLogger.Log("Deposit complete");
+        fetchAndUpdateHarvesterInfo();
     }
 
-    public async void OnRefreshBtn()
+    public void OnRefreshBtn()
     {
-        _harvesterInfo = await TDK.Harvester.GetHarvester(TDK.Instance.AppConfig.HarvesterAddress);
-        updateInfoText();
+        fetchAndUpdateHarvesterInfo();
     }
 }
