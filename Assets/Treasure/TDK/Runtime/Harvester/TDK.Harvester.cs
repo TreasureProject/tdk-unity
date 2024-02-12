@@ -19,7 +19,7 @@ namespace Treasure
 
     public class Harvester
     {
-        public Harvester() {}
+        public Harvester() { }
 
         public async Task<TDKHarvesterResponse> GetHarvester(string id)
         {
@@ -30,7 +30,7 @@ namespace Treasure
                 downloadHandler = new DownloadHandlerBuffer()
             };
             req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", TDK.Identity.GetChainId().ToString());
+            req.SetRequestHeader("X-Chain-Id", (await TDK.Identity.GetChainId()).ToString());
             req.SetRequestHeader("Authorization", $"Bearer {TDK.Identity.AuthToken}");
             await req.SendWebRequest();
 
