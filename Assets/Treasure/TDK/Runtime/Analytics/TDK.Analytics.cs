@@ -5,17 +5,25 @@ namespace Treasure
 {
     public partial class TDK : MonoBehaviour
     {
+        public static Analytics Analytics;
         /// <summary>
         /// Initialize the Analytics module
         /// </summary>
         private void InitAnalytics()
         {
+            Analytics = new Analytics();
+
 #if TDK_HELIKA
             TDKServiceLocator.GetService<TDKHelikaService>();
 #endif
         }
+    }
 
-        private void OnApplicationPause_Analytics(bool isPaused)
+    public class Analytics
+    {
+        public Analytics() { }
+
+        public void OnApplicationPause_Analytics(bool isPaused)
         {
             // no-op, but for tracking foreground/background
         }

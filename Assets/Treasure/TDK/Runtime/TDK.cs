@@ -16,7 +16,7 @@ namespace Treasure
 
         void OnApplicationPause(bool isPaused)
         {
-            OnApplicationPause_Analytics(isPaused);
+            TDK.Analytics.OnApplicationPause_Analytics(isPaused);
         }
 
         public static TDK Instance
