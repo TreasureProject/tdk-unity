@@ -57,6 +57,7 @@ namespace Treasure
             // initialize subsystems
             Instance.InitAnalytics();
             Instance.InitIdentity();
+            Instance.InitHarvester();
         }
 
         public static void Init()

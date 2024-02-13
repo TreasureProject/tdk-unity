@@ -4,15 +4,15 @@ using System.Collections.Generic;
 namespace Treasure
 {
     public partial class TDK : MonoBehaviour
-    {   
+    {
         /// <summary>
         /// Initialize the Analytics module
         /// </summary>
         private void InitAnalytics()
         {
-            #if TDK_HELIKA
+#if TDK_HELIKA
             TDKServiceLocator.GetService<TDKHelikaService>();
-            #endif
+#endif
         }
 
         private void OnApplicationPause_Analytics(bool isPaused)
@@ -20,11 +20,11 @@ namespace Treasure
             // no-op, but for tracking foreground/background
         }
 
-        public async void TrackCustomEvent(string eventName, Dictionary<string, object> eventProps = null)
+        public void TrackCustomEvent(string eventName, Dictionary<string, object> eventProps = null)
         {
-            #if TDK_HELIKA
+#if TDK_HELIKA
             TDKServiceLocator.GetService<TDKHelikaService>().TrackEvent(eventName, eventProps);
-            #endif
+#endif
         }
     }
 }

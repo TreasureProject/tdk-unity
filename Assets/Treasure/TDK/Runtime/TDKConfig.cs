@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 using System;
 
 namespace Treasure
@@ -8,14 +7,18 @@ namespace Treasure
     {
         public static string DEFAULT_CONFIG_LOCATION = "Assets/Treasure/TDK/Resources";
 
-        [SerializeField] private string _environment = string.Empty; // prod/dev - TODO change to enum?
+        public enum Env { DEV, PROD }
 
+        [SerializeField] private Env _environment = Env.DEV;
         [SerializeField] private string _gameId = string.Empty;
+        [SerializeField] private string _tdkApiUrl = string.Empty;
+        [SerializeField] private float _sessionLengthDays = 0;
+        [SerializeField] private string _harvesterAddress = string.Empty;
 
-        [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> {}
+        [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
 
-        public string Environment
+        public Env Environment
         {
             get { return _environment; }
         }
@@ -25,9 +28,24 @@ namespace Treasure
             get { return _gameId; }
         }
 
+        public string TDKApiUrl
+        {
+            get { return _tdkApiUrl; }
+        }
+
+        public float SessionLengthDays
+        {
+            get { return _sessionLengthDays; }
+        }
+
+        public string HarvesterAddress
+        {
+            get { return _harvesterAddress; }
+        }
+
         public T GetModuleConfig<T>()
         {
-            if(moduleConfigurations.ContainsKey(typeof(T).Name))
+            if (moduleConfigurations.ContainsKey(typeof(T).Name))
             {
                 return (T)Convert.ChangeType(moduleConfigurations[typeof(T).Name], typeof(T));
             }
@@ -44,9 +62,12 @@ namespace Treasure
             return Resources.Load<TDKConfig>("TDKConfig");
         }
 
-         public void SetConfig(SerializedTDKConfig config)
+        public void SetConfig(SerializedTDKConfig config)
         {
             _gameId = config.gameId;
+            _tdkApiUrl = config.tdkApiUrl;
+            _sessionLengthDays = config.sessionLengthDays;
+            _harvesterAddress = config.harvesterAddress;
         }
     }
 
@@ -54,5 +75,8 @@ namespace Treasure
     public class SerializedTDKConfig
     {
         [SerializeField] public string gameId;
+        [SerializeField] public string tdkApiUrl;
+        [SerializeField] public float sessionLengthDays;
+        [SerializeField] public string harvesterAddress;
     }
 }

@@ -8,25 +8,21 @@ namespace Treasure
     {
         private TDKThirdwebConfig _config;
 
-        private string _authToken;
+        public Wallet wallet
+        {
+            get { return ThirdwebManager.Instance.SDK.wallet; }
+        }
 
         public override void Awake()
         {
             base.Awake();
 
             _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>();
-
-            // var sdk = ThirdwebManager.Instance.SDK;
         }
 
-        public string AuthToken
+        public async Task<string> Sign(string message)
         {
-            get { return _authToken; }
-        }
-
-        public async Task<string> GetAddress()
-        {
-            return await ThirdwebManager.Instance.SDK.wallet.GetAddress();
+            return await ThirdwebManager.Instance.SDK.wallet.Sign(message, await wallet.GetAddress());
         }
     }
 }

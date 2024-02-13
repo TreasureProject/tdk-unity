@@ -17,7 +17,7 @@ namespace Helika
     {
         // Version data that is updated via a script. Do not change.
         private const string SdkName = "Unity";
-        private const string SdkVersion = "0.1.4";
+        private const string SdkVersion = "0.1.6";
         private const string SdkClass = "EventManager";
 
         private string _helikaApiKey;
@@ -44,7 +44,7 @@ namespace Helika
             }
 
             string[] apiKeys = apiKey.Split('.');
-            if (apiKeys.Length != 2)
+            if (apiKeys.Length < 1 || apiKeys.Length > 2)
             {
                 throw new ArgumentException("Invalid API Key");
             }
@@ -55,7 +55,10 @@ namespace Helika
             }
 
             _helikaApiKey = apiKeys[0];
-            _kochavaApiKey = apiKeys[1];
+            if (apiKeys.Length == 2)
+            {
+                _kochavaApiKey = apiKeys[1];
+            }
             _gameId = gameId;
             _baseUrl = ConvertUrl(env);
             _sessionID = Guid.NewGuid().ToString();
@@ -65,7 +68,7 @@ namespace Helika
             // If Localhost is set, force disable sending events
             _enabled = env != HelikaEnvironment.Localhost ? enabled : false;
 
-            if (KochavaTracker.Instance != null)
+            if (!string.IsNullOrEmpty(_kochavaApiKey) && KochavaTracker.Instance != null)
             {
                 KochavaTracker.Instance.RegisterEditorAppGuid(_kochavaApiKey);
 #if UNITY_ANDROID
@@ -93,7 +96,7 @@ namespace Helika
             }
             else
             {
-                // In case the KochavaTracker fails to initialized
+                // In case the Kochava key doesn't exist or KochavaTracker fails to initialized
                 await CreateSession();
             }
         }
@@ -255,7 +258,17 @@ namespace Helika
                     new JProperty("sdk_version", SdkVersion),
                     new JProperty("sdk_class", SdkClass),
                     new JProperty("sdk_platform", Application.platform.ToString()),
-                    new JProperty("kochava_device_id", _deviceId)
+                    new JProperty("kochava_app_guid", _kochavaApiKey),
+                    new JProperty("kochava_initialized", !string.IsNullOrEmpty(_kochavaApiKey)),
+                    new JProperty("kochava_device_id", _deviceId),
+                    new JProperty("event_sub_type", "session_created"),
+                    new JProperty("os", SystemInfo.operatingSystem),
+                    new JProperty("os_family", GetOperatingSystemFamily(SystemInfo.operatingSystemFamily)),
+                    new JProperty("device_model", SystemInfo.deviceModel),
+                    new JProperty("device_name", SystemInfo.deviceName),
+                    new JProperty("device_type", GetDeviceType(SystemInfo.deviceType)),
+                    new JProperty("device_unity_unique_identifier", SystemInfo.deviceUniqueIdentifier),
+                    new JProperty("device_processor_type", SystemInfo.processorType)
                 ))
             );
 
@@ -339,6 +352,38 @@ namespace Helika
                 case HelikaEnvironment.Localhost:
                 default:
                     return "http://localhost:8181/v1";
+            }
+        }
+
+        private static string GetDeviceType(DeviceType type)
+        {
+            switch (type)
+            {
+                case DeviceType.Console:
+                    return "Console";
+                case DeviceType.Desktop:
+                    return "Desktop";
+                case DeviceType.Handheld:
+                    return "Handheld";
+                case DeviceType.Unknown:
+                default:
+                    return "Unknown";
+            }
+        }
+
+        private static string GetOperatingSystemFamily(OperatingSystemFamily family)
+        {
+            switch (family)
+            {
+                case OperatingSystemFamily.Windows:
+                    return "Windows";
+                case OperatingSystemFamily.MacOSX:
+                    return "MacOSX";
+                case OperatingSystemFamily.Linux:
+                    return "Linux";
+                case OperatingSystemFamily.Other:
+                default:
+                    return "Other";
             }
         }
     }

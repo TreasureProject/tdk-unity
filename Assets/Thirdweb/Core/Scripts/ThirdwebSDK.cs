@@ -115,7 +115,7 @@ namespace Thirdweb
             /// <summary>
             /// Indicates whether to deploy the smart wallet upon signing any type of message.
             /// </summary>
-            public bool doNotDeployOnSignMessage;
+            public bool deployOnSign;
 
             /// <summary>
             /// The URL of the bundler service.
@@ -238,7 +238,7 @@ namespace Thirdweb
 
         public ThirdwebSession session;
 
-        internal const string version = "4.4.2";
+        internal const string version = "4.6.3";
 
         /// <summary>
         /// Create an instance of the Thirdweb SDK.
