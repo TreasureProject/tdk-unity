@@ -36,7 +36,13 @@ namespace Treasure
         #region accessors / mutators
         private Wallet _wallet
         {
-            get { return TDKServiceLocator.GetService<TDKThirdwebService>().wallet; }
+            get {
+#if TDK_THIRDWEB
+                return TDKServiceLocator.GetService<TDKThirdwebService>().Wallet;
+#else
+                return null;
+#endif
+            }
         }
 
         public string AuthToken
@@ -108,7 +114,12 @@ namespace Treasure
                 NotBefore = payload.invalid_before,
             };
             var finalMessage = SiweMessageStringBuilder.BuildMessage(message);
+
+#if TDK_THIRDWEB
             return await TDKServiceLocator.GetService<TDKThirdwebService>().Sign(finalMessage);
+#else
+            return await Task.FromResult<string>(string.Empty);
+#endif
         }
 
         private async Task<string> LogIn(TDKAuthPayload payload, string signature)
