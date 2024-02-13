@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 461a76f85cc754692a1cb1c32ff18209, type: 3}
+  m_Name: TDKConfig
+  m_EditorClassIdentifier: 
+  _environment: 0
+  _gameId: tdk-unity-harness
+  _tdkApiUrl: https://tdk-api-dev.treasure.lol
+  _sessionLengthDays: 3
+  _harvesterAddress: 0x466d20a94e280bb419031161a6a7508438ad436f
+  moduleConfigurations:
+    m_keys:
+    - TDKHelikaConfig
+    - TDKThirdwebConfig
+    m_values:
+    - {fileID: 11400000, guid: b84b3bcebfaa94aafb4f9b55e0f849aa, type: 2}
+    - {fileID: 11400000, guid: 79436692579a94a93abc4923b9cb098a, type: 2}
