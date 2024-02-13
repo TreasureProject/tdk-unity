@@ -8,7 +8,7 @@ namespace Treasure
     {
         private TDKThirdwebConfig _config;
 
-        public Wallet wallet
+        public Wallet Wallet
         {
             get { return ThirdwebManager.Instance.SDK.wallet; }
         }
@@ -22,7 +22,7 @@ namespace Treasure
 
         public async Task<string> Sign(string message)
         {
-            return await ThirdwebManager.Instance.SDK.wallet.Sign(message, await wallet.GetAddress());
+            return await ThirdwebManager.Instance.SDK.wallet.Sign(message, await Wallet.GetAddress());
         }
     }
 }
