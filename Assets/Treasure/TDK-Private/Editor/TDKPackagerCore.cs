@@ -21,8 +21,10 @@ namespace Treasure
 
                 // Runtime
                 "Assets/Treasure/TDK/Runtime/Analytics",
+                "Assets/Treasure/TDK/Runtime/Harvester",
                 "Assets/Treasure/TDK/Runtime/Identity",
                 "Assets/Treasure/TDK/Runtime/Infrastructure",
+                
                 "Assets/Treasure/TDK/Runtime/TDK.cs",
                 "Assets/Treasure/TDK/Runtime/TDKConfig.cs",
                 "Assets/Treasure/TDK/Runtime/TDKVersion.cs",
