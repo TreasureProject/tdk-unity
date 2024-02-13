@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Threading.Tasks;
 using Thirdweb;
 using TMPro;
 using Treasure;
@@ -16,10 +17,18 @@ public class HarvesterUI : MonoBehaviour
     private TDKProject _project;
     private TDKHarvesterResponse _harvesterInfo;
     private BigInteger _depositAmount = BigInteger.Parse(Utils.ToWei("1000"));
+    private string _arbHarvesterAddress = "0x587dc30014e10b56907237d4880a9bf8b9518150";
+    private string _arbSepoliaHarvesterAddress = "0x466d20a94e280bb419031161a6a7508438ad436f";
 
     void Start()
     {
         updateInfoText();
+    }
+
+    private async Task<string> GetHarvesterAddress()
+    {
+        var chainId = await TDK.Identity.GetChainId();
+        return chainId.Equals(Chain.ArbitrumSepolia.id) ? _arbSepoliaHarvesterAddress : _arbHarvesterAddress;
     }
 
     private async void updateInfoText()
@@ -39,7 +48,7 @@ public class HarvesterUI : MonoBehaviour
     {Utils.ToEth(_harvesterInfo.user.magicBalance.ToString())} MAGIC balance
     {_harvesterInfo.user.permitsBalance} Ancient Permits
 
-Harvester: {TDK.Instance.AppConfig.HarvesterAddress}
+Harvester: {_harvesterInfo.harvester.id}
 
     {Utils.ToEth(_harvesterInfo.user.harvesterDepositCap.ToString())} MAGIC deposit cap for smart account
     {Utils.ToEth(_harvesterInfo.user.harvesterDepositAmount.ToString())} MAGIC deposited by smart account";
@@ -78,7 +87,9 @@ Harvester: {TDK.Instance.AppConfig.HarvesterAddress}
     {
         try
         {
-            _harvesterInfo = await TDK.Harvester.GetHarvester(TDK.Instance.AppConfig.HarvesterAddress);
+            var address = await GetHarvesterAddress();
+            _harvesterInfo = await TDK.Harvester.GetHarvester(address);
+            _harvesterInfo.harvester.id = address;
             updateInfoText();
         }
         catch (Exception e)
@@ -121,11 +132,11 @@ Harvester: {TDK.Instance.AppConfig.HarvesterAddress}
         if (_harvesterInfo.user.harvesterMagicAllowance < _depositAmount)
         {
             TDKLogger.Log("Approving MAGIC transfer...");
-            await TDK.Harvester.ApproveMagic(TDK.Instance.AppConfig.HarvesterAddress, _depositAmount);
+            await TDK.Harvester.ApproveMagic(_harvesterInfo.harvester.id, _depositAmount);
         }
 
         TDKLogger.Log("Depositing MAGIC...");
-        await TDK.Harvester.HarvesterDepositMagic(TDK.Instance.AppConfig.HarvesterAddress, _depositAmount);
+        await TDK.Harvester.HarvesterDepositMagic(_harvesterInfo.harvester.id, _depositAmount);
 
         TDKLogger.Log("Deposit complete");
         fetchAndUpdateHarvesterInfo();

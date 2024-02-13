@@ -14,8 +14,6 @@ namespace Treasure
         [SerializeField] private string _prodTdkApiUrl = string.Empty;
         [SerializeField] private string _devTdkApiUrl = string.Empty;
         [SerializeField] private float _sessionLengthDays = 0;
-        [SerializeField] private string _prodHarvesterAddress = string.Empty;
-        [SerializeField] private string _devHarvesterAddress = string.Empty;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
@@ -32,11 +30,14 @@ namespace Treasure
 
         public string TDKApiUrl
         {
-            get {
-                if(TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD) {
+            get
+            {
+                if (TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD)
+                {
                     return _prodTdkApiUrl;
                 }
-                else {
+                else
+                {
                     return _devTdkApiUrl;
                 }
             }
@@ -45,18 +46,6 @@ namespace Treasure
         public float SessionLengthDays
         {
             get { return _sessionLengthDays; }
-        }
-
-        public string HarvesterAddress
-        {
-            get {
-                if(TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD) {
-                    return _prodHarvesterAddress;
-                }
-                else {
-                    return _devHarvesterAddress;
-                }
-            }
         }
 
         public T GetModuleConfig<T>()
@@ -84,8 +73,6 @@ namespace Treasure
             _prodTdkApiUrl = config.prodTdkApiUrl;
             _devTdkApiUrl = config.devTdkApiUrl;
             _sessionLengthDays = config.sessionLengthDays;
-            _prodHarvesterAddress = config.prodHarvesterAddress;
-            _devHarvesterAddress = config.devHarvesterAddress;
         }
     }
 
@@ -96,7 +83,5 @@ namespace Treasure
         [SerializeField] public string prodTdkApiUrl;
         [SerializeField] public string devTdkApiUrl;
         [SerializeField] public float sessionLengthDays;
-        [SerializeField] public string prodHarvesterAddress;
-        [SerializeField] public string devHarvesterAddress;
     }
 }
