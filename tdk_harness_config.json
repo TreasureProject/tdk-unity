@@ -1,9 +1,9 @@
 {
     "tdk": {
         "gameId": "tdk-unity-harness",
-        "tdkApiUrl": "https://tdk-api-dev.treasure.lol",
-        "sessionLengthDays": 3,
-        "harvesterAddress": "0x466d20a94e280bb419031161a6a7508438ad436f"
+        "prodTdkApiUrl": "https://tdk-api.treasure.lol",
+        "devTdkApiUrl": "https://tdk-api-dev.treasure.lol",
+        "sessionLengthDays": 3
     },
     "helika": {
         "prodApiKeyWeb": "21bce555ea28fe3d2dffeacc81fe2b.kotreasure-web-obvdlv09f",

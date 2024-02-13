@@ -14,13 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _environment: 0
   _gameId: tdk-unity-harness
-  _tdkApiUrl: https://tdk-api-dev.treasure.lol
+  _prodTdkApiUrl: https://tdk-api.treasure.lol
+  _devTdkApiUrl: https://tdk-api-dev.treasure.lol
   _sessionLengthDays: 3
-  _harvesterAddress: 0x466d20a94e280bb419031161a6a7508438ad436f
   moduleConfigurations:
-    m_keys:
-    - TDKHelikaConfig
-    - TDKThirdwebConfig
-    m_values:
-    - {fileID: 11400000, guid: b84b3bcebfaa94aafb4f9b55e0f849aa, type: 2}
-    - {fileID: 11400000, guid: 79436692579a94a93abc4923b9cb098a, type: 2}
+    m_keys: []
+    m_values: []

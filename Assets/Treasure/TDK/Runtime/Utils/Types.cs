@@ -96,6 +96,7 @@ namespace Treasure
         [Serializable]
         public struct Harvester
         {
+            public string id;
             public string nftHandlerAddress;
             public string permitsAddress;
             public BigInteger permitsTokenId;
