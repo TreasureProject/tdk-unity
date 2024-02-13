@@ -36,7 +36,8 @@ namespace Treasure
         #region accessors / mutators
         private Wallet _wallet
         {
-            get {
+            get
+            {
 #if TDK_THIRDWEB
                 return TDKServiceLocator.GetService<TDKThirdwebService>().Wallet;
 #else
@@ -60,9 +61,10 @@ namespace Treasure
             return await _wallet.GetAddress();
         }
 
-        public async Task<BigInteger> GetChainId()
+        public async Task<ChainId> GetChainId()
         {
-            return await _wallet.GetChainId();
+            var chainId = await _wallet.GetChainId();
+            return chainId.Equals(BigInteger.Parse(ChainId.ArbitrumSepolia.ToString())) ? ChainId.ArbitrumSepolia : ChainId.Arbitrum;
         }
         #endregion
 
@@ -154,31 +156,10 @@ namespace Treasure
         #endregion
 
         #region public api
-        public async Task<TDKProject> GetProject()
+        public async Task<string> Authenticate(string projectSlug)
         {
-            var req = new UnityWebRequest
-            {
-                // url = $"{TDK.Instance.AppConfig.TDKApiUrl}/projects/{TDK.Instance.AppConfig.GameId}",
+            var project = await TDK.API.GetProjectBySlug(projectSlug);
 
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/projects/platform",
-                method = "GET",
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", (await _wallet.GetChainId()).ToString());
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[GetProject] {req.error}: {rawResponse}");
-            }
-
-            return JsonConvert.DeserializeObject<TDKProject>(rawResponse);
-        }
-
-        public async Task<string> Authenticate(TDKProject project)
-        {
             // Create auth token
             var payload = await GetAuthPayload();
             var signature = await GenerateSignature(payload);
@@ -207,154 +188,6 @@ namespace Treasure
             _authToken = null;
             _isAuthenticated = false;
         }
-
-        // public async Task<TDKHarvesterResponse> GetHarvester(string id)
-        // {
-        //     var req = new UnityWebRequest
-        //     {
-        //         url = $"{TDK.Instance.AppConfig.TDKApiUrl}/harvesters/{id}",
-        //         method = "GET",
-        //         downloadHandler = new DownloadHandlerBuffer()
-        //     };
-        //     req.SetRequestHeader("Content-Type", "application/json");
-        //     req.SetRequestHeader("X-Chain-Id", (await _wallet.GetChainId()).ToString());
-        //     req.SetRequestHeader("Authorization", $"Bearer {_authToken}");
-        //     await req.SendWebRequest();
-
-        //     var rawResponse = req.downloadHandler.text;
-        //     if (req.result != UnityWebRequest.Result.Success)
-        //     {
-        //         throw new UnityException($"[GetHarvester] {req.error}: {rawResponse}");
-        //     }
-
-        //     return JsonConvert.DeserializeObject<TDKHarvesterResponse>(rawResponse);
-        // }
-
-        public async Task<string> WriteContract(string address, string functionName, string[] args)
-        {
-            var body = JsonConvert.SerializeObject(new TDKContractWriteRequest()
-            {
-                functionName = functionName,
-                args = args,
-            });
-            var req = new UnityWebRequest
-            {
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/contracts/{address}",
-                method = "POST",
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", (await _wallet.GetChainId()).ToString());
-            req.SetRequestHeader("Authorization", $"Bearer {_authToken}");
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[WriteContract] {req.error}: {rawResponse}");
-            }
-
-            var response = JsonConvert.DeserializeObject<TDKContractWriteResponse>(rawResponse);
-            return response.queueId;
-        }
-
-        public async Task<TDKTransactionResponse> GetTransaction(string queueId)
-        {
-            var req = new UnityWebRequest
-            {
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/transactions/{queueId}",
-                method = "GET",
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("Authorization", $"Bearer {_authToken}");
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[GetTransaction] {req.error}: {rawResponse}");
-            }
-
-            return JsonConvert.DeserializeObject<TDKTransactionResponse>(rawResponse);
-        }
-
-        public async Task WaitForTransaction(string queueId)
-        {
-            var retries = 0;
-            TDKTransactionResponse transaction;
-            do
-            {
-                if (retries > 0)
-                {
-                    await Task.Delay(2_500);
-                }
-
-                transaction = await GetTransaction(queueId);
-                retries++;
-            } while (
-                retries < 15 &&
-                transaction.status != "errored" &&
-                transaction.status != "cancelled" &&
-                transaction.status != "mined"
-            );
-
-            if (transaction.status == "errored")
-            {
-                throw new UnityException($"[WaitForTransaction] Transaction {queueId} errored: {transaction.errorMessage}");
-            }
-
-            if (transaction.status == "cancelled")
-            {
-                throw new UnityException($"[WaitForTransaction] Transaction {queueId} cancelled");
-            }
-
-            if (transaction.status != "mined")
-            {
-                throw new UnityException($"[WaitForTransaction] Transaction {queueId} timed out with status: {transaction.status}");
-            }
-        }
-
-        // public async Task ApproveMagic(string operatorAddress, BigInteger amount)
-        // {
-        //     var queueId = await WriteContract(
-        //         address: "0x55d0cf68a1afe0932aff6f36c87efa703508191c",
-        //         functionName: "approve",
-        //         args: new string[] { operatorAddress, amount.ToString() }
-        //     );
-        //     await WaitForTransaction(queueId);
-        // }
-
-        // public async Task ApproveConsumables(string operatorAddress)
-        // {
-        //     var queueId = await WriteContract(
-        //         address: "0x9d012712d24C90DDEd4574430B9e6065183896BE",
-        //         functionName: "setApprovalForAll",
-        //         args: new string[] { operatorAddress, "true" }
-        //     );
-        //     await WaitForTransaction(queueId);
-        // }
-
-        // public async Task HarvesterStakeNft(string nftHandlerAddress, string permitsAddress, BigInteger permitsTokenId)
-        // {
-        //     var queueId = await WriteContract(
-        //         address: nftHandlerAddress,
-        //         functionName: "stakeNft",
-        //         args: new string[] { permitsAddress, permitsTokenId.ToString(), "1" }
-        //     );
-        //     await WaitForTransaction(queueId);
-        // }
-
-        // public async Task HarvesterDepositMagic(string harvesterAddress, BigInteger amount)
-        // {
-        //     var queueId = await WriteContract(
-        //         address: harvesterAddress,
-        //         functionName: "deposit",
-        //         args: new string[] { amount.ToString(), "0" }
-        //     );
-        //     await WaitForTransaction(queueId);
-        // }
         #endregion
     }
 }

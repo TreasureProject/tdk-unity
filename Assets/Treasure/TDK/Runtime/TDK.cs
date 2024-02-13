@@ -4,7 +4,7 @@ using System;
 namespace Treasure
 {
     public partial class TDK : MonoBehaviour
-    {   
+    {
         /// <summary>
         /// Singleton to access all Treasure TDK functionality through
         /// </summary>
@@ -28,7 +28,7 @@ namespace Treasure
                 {
                     _instance = GameObject.FindObjectOfType(typeof(TDK)) as TDK;
 
-                    if (_instance == null )
+                    if (_instance == null)
                     {
                         // create a new instance
                         _instance = new GameObject("TDK", new Type[] {
@@ -40,7 +40,8 @@ namespace Treasure
 
                 }
 
-                TDKMainThreadDispatcher.Instance.Enqueue(() => {
+                TDKMainThreadDispatcher.Instance.Enqueue(() =>
+                {
                     // no-op; don't add TDKLogger calls here
                 });
 
@@ -55,9 +56,11 @@ namespace Treasure
             Init();
 
             // initialize subsystems
+            Instance.InitCommon();
             Instance.InitAnalytics();
+            Instance.InitAPI();
             Instance.InitIdentity();
-            Instance.InitHarvester();
+            Instance.InitBridgeworld();
         }
 
         public static void Init()
