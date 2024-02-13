@@ -2,6 +2,12 @@ using System.Collections.Generic;
 
 namespace Treasure
 {
+    public enum ChainId : int
+    {
+        Arbitrum = 42161,
+        ArbitrumSepolia = 421614
+    }
+
     public enum Contract
     {
         Magic,
