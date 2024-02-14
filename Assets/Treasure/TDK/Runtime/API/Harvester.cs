@@ -12,7 +12,7 @@ namespace Treasure
         public string nftHandlerAddress;
         public string permitsAddress;
         public int permitsTokenId;
-        public BigInteger permitDepositCap;
+        public BigInteger permitsDepositCap;
         public BigInteger userMagicBalance;
         public int userPermitsBalance;
         public BigInteger userMagicAllowance;

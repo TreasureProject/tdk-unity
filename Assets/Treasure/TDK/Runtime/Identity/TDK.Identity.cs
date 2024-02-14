@@ -63,8 +63,8 @@ namespace Treasure
 
         public async Task<ChainId> GetChainId()
         {
-            var chainId = await _wallet.GetChainId();
-            return chainId.Equals(BigInteger.Parse(ChainId.ArbitrumSepolia.ToString())) ? ChainId.ArbitrumSepolia : ChainId.Arbitrum;
+            var chainId = (int)await _wallet.GetChainId();
+            return chainId == (int)ChainId.ArbitrumSepolia ? ChainId.ArbitrumSepolia : ChainId.Arbitrum;
         }
         #endregion
 

@@ -21,6 +21,7 @@ namespace Treasure
 
         public async Task<string> Get(string path)
         {
+            var chainId = (int)await TDK.Identity.GetChainId();
             var req = new UnityWebRequest
             {
                 url = TDK.Instance.AppConfig.TDKApiUrl + path,
@@ -28,7 +29,7 @@ namespace Treasure
                 downloadHandler = new DownloadHandlerBuffer()
             };
             req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", (await TDK.Identity.GetChainId()).ToString());
+            req.SetRequestHeader("X-Chain-Id", chainId.ToString());
             if (TDK.Identity.IsAuthenticated)
             {
                 req.SetRequestHeader("Authorization", $"Bearer {TDK.Identity.AuthToken}");
@@ -46,6 +47,7 @@ namespace Treasure
 
         public async Task<string> Post(string path, string body)
         {
+            var chainId = (int)await TDK.Identity.GetChainId();
             var req = new UnityWebRequest
             {
                 url = TDK.Instance.AppConfig.TDKApiUrl + path,
@@ -54,7 +56,7 @@ namespace Treasure
                 downloadHandler = new DownloadHandlerBuffer()
             };
             req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", (await TDK.Identity.GetChainId()).ToString());
+            req.SetRequestHeader("X-Chain-Id", chainId.ToString());
             if (TDK.Identity.IsAuthenticated)
             {
                 req.SetRequestHeader("Authorization", $"Bearer {TDK.Identity.AuthToken}");

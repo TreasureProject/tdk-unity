@@ -14,7 +14,6 @@ public class HarvesterUI : MonoBehaviour
     public TMP_Text InfoText;
 
     private Harvester _harvester;
-    private BigInteger _depositAmount = BigInteger.Parse(Utils.ToWei("1000"));
 
     void Start()
     {
@@ -25,13 +24,9 @@ public class HarvesterUI : MonoBehaviour
     {
         _harvester = await TDK.Bridgeworld.GetHarvester(Treasure.Contract.HarvesterEmerion);
         string smartAccountAddress = null;
-        try
+        if (TDK.Identity.IsAuthenticated)
         {
             smartAccountAddress = await TDK.Identity.GetWalletAddress();
-        }
-        catch
-        {
-
         }
 
         InfoText.text = $@"Smart Account: {(smartAccountAddress != null ? smartAccountAddress : '-')}
@@ -73,7 +68,7 @@ Harvester: {_harvester.id}
 
     public async void OnDepositBtn()
     {
-        await _harvester.Deposit(_depositAmount);
+        await _harvester.Deposit(BigInteger.Parse(Utils.ToWei("1000")));
         refreshHarvester();
     }
 

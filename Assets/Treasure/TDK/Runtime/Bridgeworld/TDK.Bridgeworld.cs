@@ -30,11 +30,13 @@ namespace Treasure
     {
         private async Task<Transaction> ApprovePermits()
         {
+            TDKLogger.Log("Approving Consumables for transfer to Harvester");
             return await TDK.Common.ApproveERC1155(Contract.Consumables, nftHandlerAddress);
         }
 
         private async Task<Transaction> StakePermits(int amount)
         {
+            TDKLogger.Log($"Staking {amount} Permit(s) to Harvester");
             var transaction = await TDK.API.WriteTransaction(
                 address: nftHandlerAddress,
                 functionName: "stakeNft",
@@ -45,11 +47,13 @@ namespace Treasure
 
         private async Task<Transaction> ApproveMagic(BigInteger amount)
         {
+            TDKLogger.Log($"Approving {Thirdweb.Utils.ToEth(amount.ToString())} MAGIC for transfer to Harvester");
             return await TDK.Common.ApproveERC20(Contract.Magic, id, amount);
         }
 
         private async Task<Transaction> DepositMagic(BigInteger amount)
         {
+            TDKLogger.Log($"Depositing {Thirdweb.Utils.ToEth(amount.ToString())} MAGIC to Harvester");
             var chainId = await TDK.Identity.GetChainId();
             var transaction = await TDK.API.WriteTransaction(
                 address: id,
@@ -72,7 +76,9 @@ namespace Treasure
             var remainingDepositCap = userDepositCap - userDepositAmount;
             if (remainingDepositCap < amount)
             {
-                var requiredPermits = (int)Math.Ceiling(decimal.Parse(Thirdweb.Utils.ToEth((amount - remainingDepositCap / permitDepositCap).ToString())));
+                var capRequired = decimal.Parse(Thirdweb.Utils.ToEth((amount - remainingDepositCap).ToString()));
+                var capPerPart = decimal.Parse(Thirdweb.Utils.ToEth(permitsDepositCap.ToString()));
+                var requiredPermits = (int)Math.Ceiling(capRequired / capPerPart);
                 if (requiredPermits < userPermitsBalance)
                 {
                     throw new UnityException("Ancient Permits balance too low");
