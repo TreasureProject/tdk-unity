@@ -21,7 +21,9 @@ namespace Treasure
 
                 // Runtime
                 "Assets/Treasure/TDK/Runtime/Analytics",
-                "Assets/Treasure/TDK/Runtime/Harvester",
+                "Assets/Treasure/TDK/Runtime/API",
+                "Assets/Treasure/TDK/Runtime/Bridgeworld",
+                "Assets/Treasure/TDK/Runtime/Common",
                 "Assets/Treasure/TDK/Runtime/Identity",
                 "Assets/Treasure/TDK/Runtime/Infrastructure",
                 
