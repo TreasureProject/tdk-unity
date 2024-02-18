@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 #if UNITY_IOS
@@ -13,81 +14,77 @@ namespace Treasure
 {
     public partial class TDKAnalyticsService : TDKBaseService
     {
-        private string cacheFolderPath;
-        private readonly object fileLock = new object();
+        private string persistentFolderPath;
+        private CancellationTokenSource cancellationTokenSource;
 
-        private List<Dictionary<string, object>> eventBuffer = new List<Dictionary<string, object>>();
-        private const int MaxBufferSize = 20; // Maximum number of events in the buffer before writing to file
-
-        private void SetupPaths()
+        private void InitPersistentCache()
         {
-            this.cacheFolderPath = Path.Combine(Application.persistentDataPath, AnalyticsConstants.CACHE_DIRECTORY_NAME);
+            // build directory
+            this.persistentFolderPath = Path.Combine(Application.persistentDataPath, AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
             
-            if (!Directory.Exists(cacheFolderPath))
+            // ensure directory exists
+            if (!Directory.Exists(persistentFolderPath))
             {
-                Directory.CreateDirectory(cacheFolderPath);
+                Directory.CreateDirectory(persistentFolderPath);
             }
 
-#if UNITY_IOS   
-            Device.SetNoBackupFlag(cacheFolderPath);
+#if UNITY_IOS
+            // set no [icloud] backup 
+            Device.SetNoBackupFlag(persistentFolderPath);
 #endif
+            // init threadpool 
+            cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = cancellationTokenSource.Token;
+
+            // start a new thread for periodic file checking
+            ThreadPool.QueueUserWorkItem((state) =>
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    ProcessFiles();
+                    Thread.Sleep((int)(AnalyticsConstants.PERSISTENT_CHECK_INTERVAL_SECONDS * 1000)); // Convert seconds to milliseconds
+                }
+            });
         }
 
-        private async void CacheNewEvent(string eventName, IDictionary<string, object> parameters = null)
+        private async void ProcessFiles()
         {
-            // construct log entry as a JSON object
-            var logEntry = new Dictionary<string, object>
-            {
-                { "event_name", eventName },
-                { "parameters", parameters ?? new Dictionary<string, object>() }
-            };
+            string[] files = Directory.GetFiles(persistentFolderPath, "*.eventbatch"); // Get all txt files in directory
 
-            lock (eventBuffer)
+            foreach (string filePath in files)
             {
-                eventBuffer.Add(logEntry);
+                string content = File.ReadAllText(filePath); // Read file content
+                bool success = await ProcessContent(content);
 
-                // check if buffer size exceeds the maximum threshold
-                if (eventBuffer.Count >= MaxBufferSize)
+                if (success)
                 {
-                    // flush buffer and write events to file
-                    FlushBufferToFile();
+                    TDKLogger.Log("[TDKAnalyticsService.Cache:ProcessFiles] File processed successfully: " + filePath);
+                    File.Delete(filePath); // Delete file after successful processing
+                }
+                else
+                {
+                    TDKLogger.Log("[TDKAnalyticsService.Cache:ProcessFiles] File processing failed: " + filePath);
                 }
             }
         }
 
-        private async Task FlushBufferToFile()
+        private async Task<bool> ProcessContent(string content)
         {
-            // create a log file with the current date
-            string logFilePath = Path.Combine(cacheFolderPath, $"{DateTime.Now:yyyy-MM-dd}.log");
+            int retries = 0;
 
-            // serialize events in the buffer to json
-            string jsonEvents = JsonConvert.SerializeObject(eventBuffer);
+            while (retries < AnalyticsConstants.PERSISTENT_MAX_RETRIES)
+            {
+                // attemps re-send
+                bool processingSuccess = await RetrySendEvents(content);
 
-            try
-            {
-                // asynchronously write events to file
-                await Task.Run(() =>
-                {
-                    lock (fileLock)
-                    {
-                        // append events to the log file
-                        File.AppendAllText(logFilePath, jsonEvents + Environment.NewLine);
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                // handle exceptions (e.g., logging or displaying an error)
-                TDKLogger.LogError($"[TDKAnalyticsService.PersistPayloadToDiskAsync] Error logging events: {ex.Message}");
-            }
-            finally
-            {
-                // clear the buffer after writing to file
-                lock (eventBuffer)
-                {
-                    eventBuffer.Clear();
+                if (processingSuccess) {
+                    return true;
                 }
+
+                retries++;
             }
+
+            return false;
         }
 
         private async void PersistPayloadToDiskAsync(string payload)
@@ -95,9 +92,10 @@ namespace Treasure
             await Task.Run(() =>
             {
                 // simulate writing the payload to disk
-                string filePath = Path.Combine(cacheFolderPath, "analytics_payload.txt");
+                var fileGuid = Guid.NewGuid().ToString("N");
+                string filePath = Path.Combine(persistentFolderPath, $"{fileGuid}.eventbatch");
                 File.WriteAllText(filePath, payload);
-                TDKLogger.Log("[TDKAnalyticsService.PersistPayloadToDiskAsync] Payload persisted to disk: " + filePath);
+                TDKLogger.Log("[TDKAnalyticsService.Cache:PersistPayloadToDiskAsync] Payload persisted to disk: " + filePath);
             });
         }
     }

@@ -20,10 +20,10 @@ namespace Treasure
 
         public void Start()
         {
-            SetupPaths();
+            InitPersistentCache();
             
             // initialize flush timer
-            flushTimer = new Timer(AnalyticsConstants.VOLATILE_EVENT_FLUSH_TIME_SECONDS);
+            flushTimer = new Timer(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS);
             flushTimer.Elapsed += FlushTimerElapsed;
             flushTimer.AutoReset = true;
             flushTimer.Start();
@@ -34,6 +34,9 @@ namespace Treasure
             // stop and dispose of the timer when the service is destroyed
             flushTimer.Stop();
             flushTimer.Dispose();
+
+            cancellationTokenSource.Cancel(); // Cancel the thread when the object is destroyed
+            cancellationTokenSource.Dispose();
         }
 
         private void OnApplicationQuit()
@@ -48,7 +51,7 @@ namespace Treasure
             FlushCache();
         }
 
-        private void FlushCache()
+        private async void FlushCache()
         {
             // copy the cache to avoid modifying it while iterating
             List<string> eventsToFlush = new List<string>(eventCache);
@@ -56,8 +59,8 @@ namespace Treasure
             // clear the cache
             eventCache.Clear();
 
-            // send the batch of events to the analytics backend
-            SendEvents(eventsToFlush);
+            // send the batch of events for io
+            await SendEvents(eventsToFlush);
         }
 
         private int CalculateCacheSizeInBytes()
@@ -69,10 +72,10 @@ namespace Treasure
 
 #region public api
         /// <summary>
-        /// All tracking events should go through this function
+        /// All other tracking methods should route through this function
         /// </summary>
-        /// <param name="eventName"></param>
-        /// <param name="eventProps"></param>
+        /// <param name="eventName">The name of the event</param>
+        /// <param name="eventProps">Event properties</param>
         public void TrackCustom(string eventName, Dictionary<string, object> eventProps = null)
         {
             // handle null properties
@@ -80,7 +83,7 @@ namespace Treasure
                 eventProps = new Dictionary<string, object>();
             }
 
-            // geenrate event id
+            // generate event id
             eventProps[AnalyticsConstants.PROP_EVENT_ID] = Guid.NewGuid().ToString("N");
 
             // create a dictionary to represent the event
@@ -94,7 +97,7 @@ namespace Treasure
             string json = JsonConvert.SerializeObject(eventData);
 
             // check if adding the event exceeds the cache limits
-            if (eventCache.Count + 1 > AnalyticsConstants.MAX_VOLATILE_EVENTS_CACHE_COUNT || CalculateCacheSizeInBytes() + json.Length > AnalyticsConstants.MAX_VOLATILE_EVENTS_CACHE_SIZE_KB)
+            if (eventCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT || CalculateCacheSizeInBytes() + json.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB)
             {
                 FlushCache(); // flush the cache if limits are exceeded
             }
