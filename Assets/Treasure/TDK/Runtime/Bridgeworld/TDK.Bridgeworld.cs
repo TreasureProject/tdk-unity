@@ -8,7 +8,7 @@ namespace Treasure
 {
     public partial class TDK : MonoBehaviour
     {
-        public static Bridgeworld Bridgeworld;
+        public static Bridgeworld Bridgeworld { get; private set; }
 
         private void InitBridgeworld()
         {

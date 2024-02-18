@@ -11,7 +11,7 @@ namespace Treasure
 {
     public partial class TDK : MonoBehaviour
     {
-        public static Identity Identity;
+        public static Identity Identity { get; private set; }
 
         /// <summary>
         /// Initialize the Identity module
