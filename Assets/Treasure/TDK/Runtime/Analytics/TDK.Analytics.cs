@@ -5,7 +5,8 @@ namespace Treasure
 {
     public partial class TDK : MonoBehaviour
     {
-        public static Analytics Analytics;
+        public static Analytics Analytics { get; private set; }
+
         /// <summary>
         /// Initialize the Analytics module
         /// </summary>

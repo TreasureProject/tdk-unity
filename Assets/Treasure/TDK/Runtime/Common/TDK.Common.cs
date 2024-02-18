@@ -6,7 +6,7 @@ namespace Treasure
 {
     public partial class TDK : MonoBehaviour
     {
-        public static Common Common;
+        public static Common Common { get; private set; }
 
         private void InitCommon()
         {
