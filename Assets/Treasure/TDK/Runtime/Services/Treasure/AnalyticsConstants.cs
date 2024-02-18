@@ -2,17 +2,17 @@ namespace Treasure
 {
     public static class AnalyticsConstants
     {
-        public const string API_ENDPOINT =  "http://api-analytics.treasure.lol";
+        public const string API_ENDPOINT =  "https://eo8mh7fi7fodgbz.m.pipedream.net";
 
         // event cache values
-        public const int MAX_CACHE_EVENT_COUNT = 50;
-        public const int MAX_CACHE_SIZE_KB =  64 * 1024;
-        public const int CACHE_FLUSH_TIME_SECONDS =  10;
+        public const int MAX_CACHE_EVENT_COUNT = 5; //50;
+        public const int MAX_CACHE_SIZE_KB = 32; //64;
+        public const int CACHE_FLUSH_TIME_SECONDS = 5; //10;
         
         // persistent store values
-        public const string PERSISTENT_DIRECTORY_NAME = "Treasure";
-        public const float PERSISTENT_CHECK_INTERVAL_SECONDS = 30f;
-        public const int PERSISTENT_MAX_RETRIES = 5;
+        public const string PERSISTENT_DIRECTORY_NAME = "AnalyticsStore";
+        public const float PERSISTENT_CHECK_INTERVAL_SECONDS = 10f; //30f;
+        public const int PERSISTENT_MAX_RETRIES = 3; //5;
 
         // properties
         public const string PROP_EVENT_NAME = "event_name";

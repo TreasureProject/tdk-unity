@@ -9,7 +9,7 @@ namespace Treasure
         private async Task<bool> RetrySendEvents(string payload)
         {
             // Send the payload to the analytics backend via HTTP POST request
-            UnityWebRequest request = UnityWebRequest.PostWwwForm("YOUR_BACKEND_URL", payload);
+            UnityWebRequest request = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT, payload);
             request.SetRequestHeader("Content-Type", "application/json");
 
             // Send the request asynchronously
@@ -20,6 +20,8 @@ namespace Treasure
             // Check if the request was successful
             if (request.result != UnityWebRequest.Result.Success)
             {
+                TDKLogger.Log("[TDKAnalyticsService.IO:RetrySendEvents] Failed to send events: " + request.error);
+
                 // If the request failed, persist the payload to disk in a separate task
                 success = false;
                 PersistPayloadToDiskAsync(payload);
@@ -42,7 +44,7 @@ namespace Treasure
             string payload = string.Join(",", events);
 
             // Send the payload to the analytics backend via HTTP POST request
-            UnityWebRequest request = UnityWebRequest.PostWwwForm("YOUR_BACKEND_URL", payload);
+            UnityWebRequest request = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT, payload);
             request.SetRequestHeader("Content-Type", "application/json");
 
             // Send the request asynchronously
@@ -51,6 +53,8 @@ namespace Treasure
             // Check if the request was successful
             if (request.result != UnityWebRequest.Result.Success)
             {
+                TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Failed to send events: " + request.error);
+
                 // If the request failed, persist the payload to disk in a separate task
                 PersistPayloadToDiskAsync(payload);
             }

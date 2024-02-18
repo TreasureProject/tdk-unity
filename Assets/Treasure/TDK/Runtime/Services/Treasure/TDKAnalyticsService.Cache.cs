@@ -21,6 +21,7 @@ namespace Treasure
         {
             // build directory
             this.persistentFolderPath = Path.Combine(Application.persistentDataPath, AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
+            TDKLogger.Log("[TDKAnalyticsService.Cache:InitPersistentCache] persistentFolderPath: " + persistentFolderPath);
             
             // ensure directory exists
             if (!Directory.Exists(persistentFolderPath))
