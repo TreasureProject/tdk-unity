@@ -31,7 +31,9 @@ namespace Treasure
                 "Assets/Treasure/TDK/Runtime/TDKConfig.cs",
                 "Assets/Treasure/TDK/Runtime/TDKVersion.cs",
                 "Assets/Treasure/TDK/Runtime/Utils",
-                "Assets/package.json"
+                "Assets/package.json",
+
+                "Assets/Treasure/TDK/Runtime/Services/Treasure"
             };
 
             AssetDatabase.Refresh();
