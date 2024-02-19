@@ -99,6 +99,11 @@ namespace Treasure
             }
         }
 
+        public static long LocalEpochTimeInt64
+        {
+            get { return Convert.ToInt64(LocalEpochTime); }
+        }
+
         public static double ServerEpochTime
         {
             get
@@ -110,6 +115,11 @@ namespace Treasure
 
                 return LocalEpochTime + LocalToServerEpochTimeDiff;
             }
+        }
+
+        public static long ServerEpochTimeInt64
+        {
+            get { return Convert.ToInt64(ServerEpochTime); }
         }
 
         public class ServerTimeResponse
