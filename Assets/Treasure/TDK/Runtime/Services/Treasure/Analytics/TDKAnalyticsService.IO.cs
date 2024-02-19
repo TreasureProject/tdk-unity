@@ -28,7 +28,7 @@ namespace Treasure
 
                 // delete the file if max send attempts have been reached & stop processing
                 if(numSendAttempts > AnalyticsConstants.PERSISTENT_MAX_RETRIES) {
-                    RemovePersistentBatch(filePath, playerPrefsKey);
+                    RemovePersistedBatch(filePath, playerPrefsKey);
                     yield return null;
                 }
 
@@ -47,7 +47,7 @@ namespace Treasure
                     else
                     {
                         TDKLogger.Log($"[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Persisted event batch ({fileName}) sent successfully");
-                        RemovePersistentBatch(filePath, playerPrefsKey);
+                        RemovePersistedBatch(filePath, playerPrefsKey);
                     }
                     PlayerPrefs.Save();
                 }
@@ -58,7 +58,7 @@ namespace Treasure
         /// <summary>
         /// See SendPersistedEventsRoutine doc
         /// </summary>
-        private void RemovePersistentBatch(string filePath, string key)
+        private void RemovePersistedBatch(string filePath, string key)
         {
             File.Delete(filePath);
             PlayerPrefs.DeleteKey(key);
