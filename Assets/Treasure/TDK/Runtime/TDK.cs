@@ -62,6 +62,9 @@ namespace Treasure
             Instance.InitAPI();
             Instance.InitIdentity();
             Instance.InitBridgeworld();
+
+            // track app start event
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_APP_START);
         }
 
         public static void Init()
