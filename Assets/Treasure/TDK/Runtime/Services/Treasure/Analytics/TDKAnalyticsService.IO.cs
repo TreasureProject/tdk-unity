@@ -22,7 +22,7 @@ namespace Treasure
             {
                 // retrieve file name and send attempts value
                 var fileName = Path.GetFileName(filePath);
-                int numSendAttempts = PlayerPrefs.GetInt(fileName + "_sendattemps");
+                int numSendAttempts = PlayerPrefs.GetInt(fileName + "_sendattemps", 0);
 
                 // delete the file if max send attempts have been reached & stop processing
                 if(numSendAttempts > AnalyticsConstants.PERSISTENT_MAX_RETRIES) {
