@@ -19,12 +19,12 @@ namespace Treasure
         public override void Awake()
         {
             base.Awake();
+            BuildDeviceInfo();
         }
 
         public void Start()
         {
             InitPersistentCache();
-            BuildDeviceInfo();
 
             // start coroutine for event flushing
             StartCoroutine(FlushTimer());
