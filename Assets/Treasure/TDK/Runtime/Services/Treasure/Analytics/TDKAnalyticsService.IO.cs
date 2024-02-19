@@ -41,13 +41,14 @@ namespace Treasure
                         
                         // increment playerprefs send attempt
                         PlayerPrefs.SetInt(fileName + "_sendattemps", numSendAttempts + 1);
-                        PlayerPrefs.Save();
                     }
                     else
                     {
                         TDKLogger.Log("[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Persisted event batch sent successfully");
                         File.Delete(filePath); // Delete file after successful processing
+                        PlayerPrefs.DeleteKey(fileName + "_sendattemps");
                     }
+                    PlayerPrefs.Save();
                 }
             }
             yield return null;
