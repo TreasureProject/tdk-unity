@@ -44,7 +44,7 @@ namespace Treasure
                         DateTime utcDateTime = DateTime.Parse(responseData.utc);
                         long server = (long)(utcDateTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
 
-                        var local = LocalEpochTimeMilliseconds;
+                        var local = LocalEpochTime;
                         
                         _epochTimeDiff = server - local;
                         
@@ -90,7 +90,7 @@ namespace Treasure
             get { return !double.IsNaN(LocalToServerEpochTimeDiff); }
         }
 
-        public static double LocalEpochTimeMilliseconds
+        public static double LocalEpochTime
         {
             get
             {
@@ -99,7 +99,7 @@ namespace Treasure
             }
         }
 
-        public static double ServerEpochTimeMilliseconds
+        public static double ServerEpochTime
         {
             get
             {
@@ -108,7 +108,7 @@ namespace Treasure
                     return double.NaN;
                 }
 
-                return LocalEpochTimeMilliseconds + LocalToServerEpochTimeDiff;
+                return LocalEpochTime + LocalToServerEpochTimeDiff;
             }
         }
 
