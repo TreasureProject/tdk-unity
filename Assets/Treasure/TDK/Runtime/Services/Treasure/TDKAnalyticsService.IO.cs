@@ -1,3 +1,4 @@
+using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,19 +11,22 @@ namespace Treasure
     {
         private IEnumerator SendPersistedEventsRoutine(string payload, string filePath)
         {
-            using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT, payload))
+            if(Application.internetReachability != NetworkReachability.NotReachable)
             {
-                // Send the request and wait for a response
-                yield return webRequest.SendWebRequest();
+                using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT, payload))
+                {
+                    // Send the request and wait for a response
+                    yield return webRequest.SendWebRequest();
 
-                if (webRequest.result != UnityWebRequest.Result.Success)
-                {
-                    TDKLogger.Log("[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Failed to send persisted event batch: " + webRequest.error);
-                }
-                else
-                {
-                    TDKLogger.Log("[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Persisted event batch sent successfully");
-                    File.Delete(filePath); // Delete file after successful processing
+                    if (webRequest.result != UnityWebRequest.Result.Success)
+                    {
+                        TDKLogger.Log("[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Failed to send persisted event batch: " + webRequest.error);
+                    }
+                    else
+                    {
+                        TDKLogger.Log("[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Persisted event batch sent successfully");
+                        File.Delete(filePath); // Delete file after successful processing
+                    }
                 }
             }
             yield return null;
