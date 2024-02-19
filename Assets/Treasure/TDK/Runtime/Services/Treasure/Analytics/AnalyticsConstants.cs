@@ -15,8 +15,22 @@ namespace Treasure
         public const int PERSISTENT_MAX_RETRIES = 5;
 
         // properties
-        public const string PROP_EVENT_NAME = "event_name";
-        public const string PROP_EVENT_ID = "event_id";
-        public const string PROP_EVENT_PROPERTIES = "event_properties";
+        public const string PROP_NAME = "name";
+        public const string PROP_ID = "id";
+        public const string PROP_VERSION = "version";
+        public const string PROP_TIME_LOCAL = "time_local";
+        public const string PROP_TIME_SERVER = "time_server";
+        public const string PROP_PROPERTIES = "properties";
+        public const string PROP_DEVICE = "device";
+        public const string PROP_DEVICE_NAME = "device_name";
+        public const string PROP_DEVICE_MODEL = "device_model";
+        public const string PROP_DEVICE_TYPE = "device_type";
+        public const string PROP_DEVICE_UNIQUE_ID = "device_unique_id";
+        public const string PROP_DEVICE_OS = "device_os";
+        public const string PROP_DEVICE_OS_FAMILY = "device_os_family";
+        public const string PROP_DEVICE_CPU = "device_cpu";
+
+        // events
+        public const string EVT_APP_START = "app_start";
     }
 }

@@ -10,6 +10,9 @@ namespace Treasure
 {
     public partial class TDKAnalyticsService : TDKBaseService
     {
+        public const uint EventsVersion = 1;
+
+        private Dictionary<string, object> deviceInfo;
         private List<string> eventCache = new List<string>();
 
 #region lifecycle
@@ -21,6 +24,7 @@ namespace Treasure
         public void Start()
         {
             InitPersistentCache();
+            BuildDeviceInfo();
 
             // start coroutine for event flushing
             StartCoroutine(FlushTimer());
@@ -63,6 +67,40 @@ namespace Treasure
             // calculate the total size of the cached events in bytes
             return eventCache.Sum(e => e.Length);
         }
+
+        private void BuildDeviceInfo()
+        {
+            deviceInfo = new Dictionary<string, object>
+            {
+                { AnalyticsConstants.PROP_DEVICE_NAME, SystemInfo.deviceName },
+                { AnalyticsConstants.PROP_DEVICE_MODEL, SystemInfo.deviceModel },
+                { AnalyticsConstants.PROP_DEVICE_TYPE, SystemInfo.deviceType },
+                { AnalyticsConstants.PROP_DEVICE_UNIQUE_ID, SystemInfo.deviceUniqueIdentifier },
+                { AnalyticsConstants.PROP_DEVICE_OS, SystemInfo.operatingSystem },
+                { AnalyticsConstants.PROP_DEVICE_OS_FAMILY, SystemInfo.operatingSystemFamily },
+                { AnalyticsConstants.PROP_DEVICE_CPU, SystemInfo.processorType }
+            };
+        }
+
+        private Dictionary<string, object> BuildBaseEvent(string eventName, Dictionary<string, object> eventProps = null)
+        {
+            // handle null eventProps
+            eventProps = eventProps ?? new Dictionary<string, object>();
+
+            // create a dictionary to represent the event
+            var evt = new Dictionary<string, object>
+            {
+                { AnalyticsConstants.PROP_NAME, eventName }, // event_name
+                { AnalyticsConstants.PROP_ID, Guid.NewGuid().ToString("N") }, // event_id
+                { AnalyticsConstants.PROP_VERSION, EventsVersion }, // event_version
+                { AnalyticsConstants.PROP_TIME_LOCAL, TDKTimeKeeper.LocalEpochTime }, // event_time_local
+                { AnalyticsConstants.PROP_TIME_SERVER, TDKTimeKeeper.ServerEpochTime }, // event_time_server
+                { AnalyticsConstants.PROP_PROPERTIES, eventProps }, // event_properties
+                { AnalyticsConstants.PROP_DEVICE, deviceInfo }
+            };
+
+            return evt;
+        }
 #endregion
 
 #region public api
@@ -73,21 +111,8 @@ namespace Treasure
         /// <param name="eventProps">Event properties</param>
         public void TrackCustom(string eventName, Dictionary<string, object> eventProps = null)
         {
-            // handle null properties
-            if(eventProps == null) {
-                eventProps = new Dictionary<string, object>();
-            }
-
-            // create a dictionary to represent the event
-            var eventData = new Dictionary<string, object>
-            {
-                { AnalyticsConstants.PROP_EVENT_NAME, eventName },
-                { AnalyticsConstants.PROP_EVENT_ID, Guid.NewGuid().ToString("N") },
-                { AnalyticsConstants.PROP_EVENT_PROPERTIES, eventProps }
-            };
-
             // serialize the event to JSON
-            string json = JsonConvert.SerializeObject(eventData);
+            string json = JsonConvert.SerializeObject(BuildBaseEvent(eventName, eventProps));
 
             // check if adding the event exceeds the cache limits
             if (eventCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT || CalculateCacheSizeInBytes() + json.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB * 1024)
