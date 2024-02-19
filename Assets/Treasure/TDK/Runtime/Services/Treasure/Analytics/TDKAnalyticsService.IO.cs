@@ -16,7 +16,7 @@ namespace Treasure
         /// the main tread. 
         /// </summary>
         /// <returns></returns>
-        private IEnumerator SendPersistedEventsRoutine(string payload, string filePath)
+        private IEnumerator SendPersistedEventBatchRoutine(string payload, string filePath)
         {
             // if there is no intenet connection, we skip this and keep persisted batch
             if(Application.internetReachability != NetworkReachability.NotReachable)
@@ -66,7 +66,12 @@ namespace Treasure
             PlayerPrefs.DeleteKey(key);
         }
 
-        private async Task SendEvents(List<string> events)
+        private async Task<bool> SendEvent(string eventStr)
+        {
+            return await SendEventBatch(new List<string>() { eventStr });
+        }
+        
+        private async Task<bool> SendEventBatch(List<string> events)
         {
             // construct the payload by joining all events into a single string
             string payload = string.Join(",", events);
@@ -78,13 +83,13 @@ namespace Treasure
             // send the request asynchronously
             await request.SendWebRequest();
 
+            bool success = true;
+
             // Check if the request was successful
             if (request.result != UnityWebRequest.Result.Success)
             {
                 TDKLogger.LogWarning("[TDKAnalyticsService.IO:SendEvents] Failed to send events: " + request.error);
-
-                // if the request failed, persist the payload to disk in a separate task
-                PersistPayloadToDiskAsync(payload);
+                success = false;
             }
             else
             {
@@ -93,6 +98,8 @@ namespace Treasure
 
             // dispose the request
             request.Dispose();
+
+            return success;
         }
     }
 }

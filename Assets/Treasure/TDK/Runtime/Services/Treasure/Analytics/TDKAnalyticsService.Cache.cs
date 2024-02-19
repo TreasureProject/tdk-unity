@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -55,17 +56,19 @@ namespace Treasure
                 TDKLogger.Log("[TDKAnalyticsService.Cache:ProcessFiles] processing: " + filePath);
                 string content = File.ReadAllText(filePath); // Read file content
                 
-                TDKMainThreadDispatcher.Instance.Enqueue(SendPersistedEventsRoutine(content, filePath));
+                TDKMainThreadDispatcher.Instance.Enqueue(SendPersistedEventBatchRoutine(content, filePath));
             }
         }
 
-        private async void PersistPayloadToDiskAsync(string payload)
+        private async void PersistEventBatchAsync(List<string> events)
         {
             await Task.Run(() =>
             {
+                string payload = string.Join(",", events);
+
                 // simulate writing the payload to disk
                 var fileGuid = Guid.NewGuid().ToString("N");
-                string filePath = Path.Combine(persistentFolderPath, $"{fileGuid}.eventbatch");
+                string filePath = Path.Combine(persistentFolderPath, $"tdk_{fileGuid}.eventbatch");
                 File.WriteAllText(filePath, payload);
                 TDKLogger.Log("[TDKAnalyticsService.Cache:PersistPayloadToDiskAsync] Payload persisted to disk: " + filePath);
             });

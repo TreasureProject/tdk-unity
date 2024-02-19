@@ -58,7 +58,12 @@ namespace Treasure
                 eventCache.Clear();
 
                 // send the batch of events for io
-                await SendEvents(eventsToFlush);
+                var success = await SendEventBatch(eventsToFlush);
+                
+                // if the request failed, persist the payload to disk in a separate task
+                if(!success) {
+                    PersistEventBatchAsync(eventsToFlush);
+                }
             }
         }
 
@@ -100,33 +105,6 @@ namespace Treasure
             };
 
             return evt;
-        }
-#endregion
-
-#region public api
-        /// <summary>
-        /// All other tracking methods should route through this function
-        /// </summary>
-        /// <param name="eventName">The name of the event</param>
-        /// <param name="eventProps">Event properties</param>
-        public void TrackCustom(string eventName, Dictionary<string, object> eventProps = null)
-        {
-            // serialize the event to JSON
-            string json = JsonConvert.SerializeObject(BuildBaseEvent(eventName, eventProps));
-
-            // check if adding the event exceeds the cache limits
-            if (eventCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT || CalculateCacheSizeInBytes() + json.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB * 1024)
-            {
-                // flush the cache if limits are exceeded
-                FlushCache(); 
-                
-                // restart flush coroutine
-                StopCoroutine(FlushTimer());
-                StartCoroutine(FlushTimer());
-            }
-
-            // add the serialized event to the cache
-            eventCache.Add(json);
         }
 #endregion
     }
