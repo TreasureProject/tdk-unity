@@ -32,7 +32,8 @@ namespace Treasure
                     {
                         // create a new instance
                         _instance = new GameObject("TDK", new Type[] {
-                            typeof(TDK)
+                            typeof(TDK),
+                            typeof(TDKTimeKeeper)
                         }).GetComponent<TDK>();
 
                         DontDestroyOnLoad(_instance.gameObject);
