@@ -1,8 +1,6 @@
 using UnityEngine;
 using System;
 using System.IO;
-using System.Collections.Generic;
-using Newtonsoft.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,44 +46,17 @@ namespace Treasure
             });
         }
 
-        private async void ProcessFiles()
+        private void ProcessFiles()
         {
             string[] files = Directory.GetFiles(persistentFolderPath, "*.eventbatch"); // Get all txt files in directory
 
             foreach (string filePath in files)
             {
+                TDKLogger.Log("[TDKAnalyticsService.Cache:ProcessFiles] processing: " + filePath);
                 string content = File.ReadAllText(filePath); // Read file content
-                bool success = await ProcessContent(content);
-
-                if (success)
-                {
-                    TDKLogger.Log("[TDKAnalyticsService.Cache:ProcessFiles] File processed successfully: " + filePath);
-                    File.Delete(filePath); // Delete file after successful processing
-                }
-                else
-                {
-                    TDKLogger.Log("[TDKAnalyticsService.Cache:ProcessFiles] File processing failed: " + filePath);
-                }
+                
+                TDKMainThreadDispatcher.Instance.Enqueue(SendPersistedEventsRoutine(content, filePath));
             }
-        }
-
-        private async Task<bool> ProcessContent(string content)
-        {
-            int retries = 0;
-
-            while (retries < AnalyticsConstants.PERSISTENT_MAX_RETRIES)
-            {
-                // attemps re-send
-                bool processingSuccess = await RetrySendEvents(content);
-
-                if (processingSuccess) {
-                    return true;
-                }
-
-                retries++;
-            }
-
-            return false;
         }
 
         private async void PersistPayloadToDiskAsync(string payload)
