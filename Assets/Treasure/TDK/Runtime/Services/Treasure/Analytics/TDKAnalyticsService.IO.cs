@@ -38,7 +38,7 @@ namespace Treasure
             string payload = string.Join(",", events);
 
             // Send the payload to the analytics backend via HTTP POST request
-            UnityWebRequest request = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT + "abc", payload);
+            UnityWebRequest request = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT, payload);
             request.SetRequestHeader("Content-Type", "application/json");
 
             // Send the request asynchronously
