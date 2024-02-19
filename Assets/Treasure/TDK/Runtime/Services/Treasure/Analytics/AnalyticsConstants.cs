@@ -11,8 +11,8 @@ namespace Treasure
         
         // persistent store values
         public const string PERSISTENT_DIRECTORY_NAME = "AnalyticsStore";
-        public const float PERSISTENT_CHECK_INTERVAL_SECONDS = 30f;
-        public const int PERSISTENT_MAX_RETRIES = 3; //5;
+        public const int PERSISTENT_CHECK_INTERVAL_SECONDS = 60;
+        public const int PERSISTENT_MAX_RETRIES = 5;
 
         // properties
         public const string PROP_EVENT_NAME = "event_name";

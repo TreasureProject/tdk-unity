@@ -7,20 +7,41 @@ using System.IO;
 
 namespace Treasure
 {
+    /// <summary>
+    /// This method does not adhere to separation of concerns as it modifies the cache. This is 
+    /// a workaround to enable invocation from a ThreadGroup to [this] coroutine and the need
+    /// for accessing the unity api (Application.internetReachability & UnityWebRequest) via
+    /// the main tread.
+    /// </summary>
     public partial class TDKAnalyticsService : TDKBaseService
     {
         private IEnumerator SendPersistedEventsRoutine(string payload, string filePath)
         {
+            // if there is no intenet connection, we skip this and keep persisted batch
             if(Application.internetReachability != NetworkReachability.NotReachable)
             {
+                // retrieve file name and send attempts value
+                var fileName = Path.GetFileName(filePath);
+                int numSendAttempts = PlayerPrefs.GetInt(fileName + "_sendattemps");
+
+                // delete the file if max send attempts have been reached & stop processing
+                if(numSendAttempts > AnalyticsConstants.PERSISTENT_MAX_RETRIES) {
+                    File.Delete(filePath);
+                    yield return null;
+                }
+
                 using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT, payload))
                 {
-                    // Send the request and wait for a response
+                    // send the request and wait for a response
                     yield return webRequest.SendWebRequest();
 
                     if (webRequest.result != UnityWebRequest.Result.Success)
                     {
                         TDKLogger.Log("[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Failed to send persisted event batch: " + webRequest.error);
+                        
+                        // increment playerprefs send attempt
+                        PlayerPrefs.SetInt(fileName + "_sendattemps", numSendAttempts + 1);
+                        PlayerPrefs.Save();
                     }
                     else
                     {
