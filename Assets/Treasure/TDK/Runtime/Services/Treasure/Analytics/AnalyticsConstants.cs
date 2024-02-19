@@ -2,7 +2,7 @@ namespace Treasure
 {
     public static class AnalyticsConstants
     {
-        public const string API_ENDPOINT =  "https://eo8mh7fi7fodgbz.m.pipedream.net";
+        public const string INGEST_API_ENDPOINT =  "https://eo8mh7fi7fodgbz.m.pipedream.net";
 
         // event cache values
         public const int MAX_CACHE_EVENT_COUNT = 50;

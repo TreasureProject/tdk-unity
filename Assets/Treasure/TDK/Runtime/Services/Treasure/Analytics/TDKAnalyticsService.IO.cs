@@ -32,14 +32,16 @@ namespace Treasure
                     yield return null;
                 }
 
-                using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT, payload))
+                using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm(AnalyticsConstants.INGEST_API_ENDPOINT, payload))
                 {
+                    webRequest.SetRequestHeader("Content-Type", "application/json");
+
                     // send the request and wait for a response
                     yield return webRequest.SendWebRequest();
 
                     if (webRequest.result != UnityWebRequest.Result.Success)
                     {
-                        TDKLogger.Log($"[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Failed to send persisted event batch {fileName}: {webRequest.error}");
+                        TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendPersistedEventsRoutine] Failed to send persisted event batch {fileName}: {webRequest.error}");
                         
                         // increment playerprefs send attempt
                         PlayerPrefs.SetInt(playerPrefsKey, numSendAttempts + 1);
@@ -70,7 +72,7 @@ namespace Treasure
             string payload = string.Join(",", events);
 
             // send the payload to the analytics backend via HTTP POST request
-            UnityWebRequest request = UnityWebRequest.PostWwwForm(AnalyticsConstants.API_ENDPOINT, payload);
+            UnityWebRequest request = UnityWebRequest.PostWwwForm(AnalyticsConstants.INGEST_API_ENDPOINT, payload);
             request.SetRequestHeader("Content-Type", "application/json");
 
             // send the request asynchronously
@@ -79,7 +81,7 @@ namespace Treasure
             // Check if the request was successful
             if (request.result != UnityWebRequest.Result.Success)
             {
-                TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Failed to send events: " + request.error);
+                TDKLogger.LogWarning("[TDKAnalyticsService.IO:SendEvents] Failed to send events: " + request.error);
 
                 // if the request failed, persist the payload to disk in a separate task
                 PersistPayloadToDiskAsync(payload);
