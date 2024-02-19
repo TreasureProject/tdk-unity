@@ -63,7 +63,7 @@ namespace Treasure
             Instance.InitBridgeworld();
 
             // track app start event
-            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_APP_START);
+            TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(AnalyticsConstants.EVT_APP_START);
 
             // set as initialized
             Initialized = true;
