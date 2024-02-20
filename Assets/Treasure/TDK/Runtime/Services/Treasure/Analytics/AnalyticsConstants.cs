@@ -29,6 +29,11 @@ namespace Treasure
         public const string PROP_DEVICE_OS = "device_os";
         public const string PROP_DEVICE_OS_FAMILY = "device_os_family";
         public const string PROP_DEVICE_CPU = "device_cpu";
+        public const string PROP_APP = "app";
+        public const string PROP_APP_IDENTIFIER = "app_identifier";
+        public const string PROP_APP_IS_EDITOR = "app_is_editor";
+        public const string PROP_APP_VERSION = "app_version";
+        public const string PROP_APP_ENVIRONMENT = "app_environment";
 
         // events
         public const string EVT_APP_START = "app_start";

@@ -13,6 +13,7 @@ namespace Treasure
         public const uint EventsVersion = 1;
 
         private Dictionary<string, object> deviceInfo;
+        private Dictionary<string, object> appInfo;
         private List<string> eventCache = new List<string>();
 
 #region lifecycle
@@ -20,6 +21,7 @@ namespace Treasure
         {
             base.Awake();
             BuildDeviceInfo();
+            BuildAppInfo();
         }
 
         public void Start()
@@ -92,6 +94,17 @@ namespace Treasure
             };
         }
 
+        private void BuildAppInfo()
+        {
+            appInfo = new Dictionary<string, object>
+            {
+                { AnalyticsConstants.PROP_APP_IDENTIFIER, Application.identifier },
+                { AnalyticsConstants.PROP_APP_IS_EDITOR, Application.isEditor },
+                { AnalyticsConstants.PROP_APP_VERSION, Application.version },
+                { AnalyticsConstants.PROP_APP_ENVIRONMENT, TDK.Instance.AppConfig.Environment }
+            };
+        }
+
         private Dictionary<string, object> BuildBaseEvent(string eventName, Dictionary<string, object> eventProps = null)
         {
             // handle null eventProps
@@ -106,7 +119,8 @@ namespace Treasure
                 { AnalyticsConstants.PROP_TIME_LOCAL, TDKTimeKeeper.LocalEpochTimeInt64 }, // event_time_local
                 { AnalyticsConstants.PROP_TIME_SERVER, TDKTimeKeeper.ServerEpochTimeInt64 }, // event_time_server
                 { AnalyticsConstants.PROP_PROPERTIES, eventProps }, // event_properties
-                { AnalyticsConstants.PROP_DEVICE, deviceInfo }
+                { AnalyticsConstants.PROP_DEVICE, deviceInfo },
+                { AnalyticsConstants.PROP_APP, appInfo }
             };
 
             return evt;
