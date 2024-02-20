@@ -32,7 +32,8 @@ namespace Treasure
                     {
                         // create a new instance
                         _instance = new GameObject("TDK", new Type[] {
-                            typeof(TDK)
+                            typeof(TDK),
+                            typeof(TDKTimeKeeper)
                         }).GetComponent<TDK>();
 
                         DontDestroyOnLoad(_instance.gameObject);
@@ -49,11 +50,10 @@ namespace Treasure
             }
         }
 
-        // TODO wrap AutoInitialize in scripting define to enable manual / a la carte inits
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void AutoInitialize()
         {
-            Init();
+            Instance.AppConfig = TDKConfig.LoadFromResources();
 
             // initialize subsystems
             Instance.InitCommon();
@@ -61,11 +61,13 @@ namespace Treasure
             Instance.InitAPI();
             Instance.InitIdentity();
             Instance.InitBridgeworld();
-        }
 
-        public static void Init()
-        {
-            Instance.AppConfig = TDKConfig.LoadFromResources();
+            // track app start event
+#if TDK_ANALYTICS
+            TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(AnalyticsConstants.EVT_APP_START);
+#endif
+
+            // set as initialized
             Initialized = true;
         }
     }

@@ -31,6 +31,12 @@ namespace Treasure
 
         public void TrackCustomEvent(string eventName, Dictionary<string, object> eventProps = null)
         {
+            // send events to treasure analytics
+#if TDK_ANALYTICS
+            TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(eventName, eventProps);
+#endif
+
+            // send events to helika
 #if TDK_HELIKA
             TDKServiceLocator.GetService<TDKHelikaService>().TrackEvent(eventName, eventProps);
 #endif

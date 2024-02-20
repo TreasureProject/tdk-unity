@@ -13,6 +13,7 @@ namespace Treasure
         [SerializeField] private string _gameId = string.Empty;
         [SerializeField] private string _prodTdkApiUrl = string.Empty;
         [SerializeField] private string _devTdkApiUrl = string.Empty;
+        [SerializeField] private string _analyticsApiUrl = string.Empty;
         [SerializeField] private float _sessionLengthDays = 0;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
@@ -41,6 +42,11 @@ namespace Treasure
                     return _devTdkApiUrl;
                 }
             }
+        }
+
+        public string AnalyticsApiUrl
+        {
+            get { return _analyticsApiUrl; }
         }
 
         public float SessionLengthDays
@@ -72,6 +78,7 @@ namespace Treasure
             _gameId = config.gameId;
             _prodTdkApiUrl = config.prodTdkApiUrl;
             _devTdkApiUrl = config.devTdkApiUrl;
+            _analyticsApiUrl = config.analyticsApiUrl;
             _sessionLengthDays = config.sessionLengthDays;
         }
     }
@@ -82,6 +89,7 @@ namespace Treasure
         [SerializeField] public string gameId;
         [SerializeField] public string prodTdkApiUrl;
         [SerializeField] public string devTdkApiUrl;
+        [SerializeField] public string analyticsApiUrl;
         [SerializeField] public float sessionLengthDays;
     }
 }

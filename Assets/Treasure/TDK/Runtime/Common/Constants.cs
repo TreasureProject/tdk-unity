@@ -15,8 +15,15 @@ namespace Treasure
         HarvesterEmerion,
     }
 
-    public class Constants
+    public static class Constants
     {
+        // player prefs
+        public const string PPREFS_EPOCH_DIFF = "treasure.epoch_diff";
+
+        // misc values
+        public const string SERVER_TIME_ENDPOINT =  "https://trove-api.treasure.lol/v1/time";
+        
+        // contract accresses
         public static Dictionary<ChainId, Dictionary<Contract, string>> ContractAddresses = new Dictionary<ChainId, Dictionary<Contract, string>> {
             {
                 ChainId.Arbitrum, new Dictionary<Contract, string> {
