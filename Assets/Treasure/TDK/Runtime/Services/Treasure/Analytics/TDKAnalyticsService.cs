@@ -38,6 +38,11 @@ namespace Treasure
             cancellationTokenSource.Cancel(); // Cancel the thread when the object is destroyed
             cancellationTokenSource.Dispose();
         }
+
+        void OnApplicationQuit()
+        {
+            FlushCache();
+        }
 #endregion
 
 #region internal
