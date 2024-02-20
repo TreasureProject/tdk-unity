@@ -2,8 +2,6 @@ namespace Treasure
 {
     public static class AnalyticsConstants
     {
-        public const string INGEST_API_ENDPOINT =  "https://ingress.treasure.lol";
-
         // event cache values
         public const int MAX_CACHE_EVENT_COUNT = 50;
         public const int MAX_CACHE_SIZE_KB = 64;

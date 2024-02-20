@@ -32,7 +32,7 @@ namespace Treasure
                     yield return null;
                 }
 
-                using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm(AnalyticsConstants.INGEST_API_ENDPOINT, payload))
+                using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm(TDK.Instance.AppConfig.AnalyticsApiUrl, payload))
                 {
                     webRequest.SetRequestHeader("Content-Type", "application/json");
 
@@ -77,7 +77,7 @@ namespace Treasure
             string payload = string.Join(",", events);
 
             // send the payload to the analytics backend via HTTP POST request
-            UnityWebRequest request = UnityWebRequest.PostWwwForm(AnalyticsConstants.INGEST_API_ENDPOINT, payload);
+            UnityWebRequest request = UnityWebRequest.PostWwwForm(TDK.Instance.AppConfig.AnalyticsApiUrl, payload);
             request.SetRequestHeader("Content-Type", "application/json");
 
             // send the request asynchronously

@@ -3,6 +3,7 @@
         "gameId": "tdk-unity-harness",
         "prodTdkApiUrl": "https://tdk-api.treasure.lol",
         "devTdkApiUrl": "https://tdk-api-dev.treasure.lol",
+        "analyticsApiUrl": "https://ingress.treasure.lol",
         "sessionLengthDays": 3
     },
     "helika": {
