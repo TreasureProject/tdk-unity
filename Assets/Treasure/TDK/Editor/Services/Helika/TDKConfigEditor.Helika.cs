@@ -15,6 +15,7 @@ namespace Treasure
             var tdkConfig = TDKConfig.LoadFromResources();
             tdkConfig.SetModuleConfig<TDKHelikaConfig>(config);
             EditorUtility.SetDirty(tdkConfig);
+            AssetDatabase.SaveAssetIfDirty(tdkConfig);
         }
 
         public static void CreateHelikaConfig(SerializedHelikaConfig serializedConfig=null)
@@ -33,6 +34,7 @@ namespace Treasure
             var tdkConfig = TDKConfig.LoadFromResources();
             tdkConfig.SetModuleConfig<TDKHelikaConfig>(config);
             EditorUtility.SetDirty(tdkConfig);
+            AssetDatabase.SaveAssetIfDirty(tdkConfig);
         }
     }
 }

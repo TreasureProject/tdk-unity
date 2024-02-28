@@ -20,6 +20,8 @@ namespace Treasure
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);
             var config = ScriptableObject.CreateInstance<TDKConfig>();
             AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset");
+            EditorUtility.SetDirty(config);
+            AssetDatabase.SaveAssetIfDirty(config);
         }
 
         public static void CreateTDKConfig(SerializedTDKConfig serializedConfig=null)
@@ -34,6 +36,8 @@ namespace Treasure
             }
 
             AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset");
+            EditorUtility.SetDirty(config);
+            AssetDatabase.SaveAssetIfDirty(config);
         }
     }
 }
