@@ -1,9 +1,12 @@
 using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
+using System;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+#if TDK_THIRDWEB
 using Thirdweb;
+#endif
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -34,17 +37,17 @@ namespace Treasure
         #endregion
 
         #region accessors / mutators
+
+#if TDK_THIRDWEB
         private Wallet _wallet
         {
             get
             {
-#if TDK_THIRDWEB
+
                 return TDKServiceLocator.GetService<TDKThirdwebService>().Wallet;
-#else
-                return null;
-#endif
             }
         }
+#endif
 
         public string AuthToken
         {
@@ -58,13 +61,22 @@ namespace Treasure
 
         public async Task<string> GetWalletAddress()
         {
+#if TDK_THIRDWEB
             return await _wallet.GetAddress();
+#else
+            throw new Exception("Unable to retrieve wallet address. TDK Identity wallet service not implemented.");
+#endif
         }
 
         public async Task<ChainId> GetChainId()
         {
+#if TDK_THIRDWEB
             var chainId = (int)await _wallet.GetChainId();
             return chainId == (int)ChainId.ArbitrumSepolia ? ChainId.ArbitrumSepolia : ChainId.Arbitrum;
+#else
+            throw new Exception("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
+#endif
+            
         }
         #endregion
 
@@ -77,8 +89,10 @@ namespace Treasure
         {
             var body = JsonConvert.SerializeObject(new TDKAuthPayloadRequest
             {
+#if TDK_THIRDWEB
                 address = await _wallet.GetAddress(),
                 chainId = (await _wallet.GetChainId()).ToString(),
+#endif
             });
             var req = new UnityWebRequest
             {
@@ -167,6 +181,7 @@ namespace Treasure
 
             // Create session key
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
+#if TDK_THIRDWEB
             await _wallet.CreateSessionKey(
                 signerAddress: project.backendWallets[0],
                 approvedTargets: project.callTargets,
@@ -176,6 +191,9 @@ namespace Treasure
                 reqValidityStartTimestamp: "0",
                 reqValidityEndTimestamp: Utils.GetUnixTimeStampIn10Years().ToString()
             );
+#else
+            throw new Exception("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
+#endif
 
             _authToken = token;
             _isAuthenticated = true;
