@@ -15,6 +15,9 @@ namespace Treasure
 
             var contents = new List<string>
             {
+                // Example
+                "Assets/Treasure/Example",
+
                 // Editor
                 "Assets/Treasure/TDK/Editor/TDKConfigEditor.cs",
                 "Assets/Treasure/TDK/Editor/TDKConfigWindow.cs",
@@ -41,7 +44,7 @@ namespace Treasure
             AssetDatabase.ExportPackage(
                 contents.ToArray(),
                 string.Format("{0}_v{1}_{2}.unitypackage", TDKVersion.name, TDKVersion.version, _packageName.ToString()),
-                ExportPackageOptions.Recurse | ExportPackageOptions.IncludeDependencies);
+                ExportPackageOptions.Recurse);
 
             Debug.Log(string.Format("TDK {0} Core Package exported", _packageName.ToString()));
         }
