@@ -1,6 +1,8 @@
 using System;
 using System.Numerics;
+#if TDK_THIRDWEB
 using Thirdweb;
+#endif
 using TMPro;
 using Treasure;
 using UnityEngine;
