@@ -13,6 +13,7 @@ namespace Treasure
         public const int PERSISTENT_MAX_RETRIES = 5;
 
         // properties
+        public const string CARTRIDGE_TAG = "cartridgeTag";
         public const string PROP_NAME = "name";
         public const string PROP_ID = "id";
         public const string PROP_VERSION = "version";

@@ -16,7 +16,7 @@ namespace Treasure
 
             await EventManager.Instance.Init(
                 _config.ApiKey,
-                TDK.Instance.AppConfig.GameId,
+                TDK.Instance.AppConfig.CartridgeTag,
                 TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD ? HelikaEnvironment.Production : HelikaEnvironment.Develop,
                 true
             );
