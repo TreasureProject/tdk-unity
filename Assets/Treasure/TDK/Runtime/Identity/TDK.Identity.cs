@@ -1,12 +1,14 @@
-using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
 using System;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+
 #if TDK_THIRDWEB
 using Thirdweb;
+using Nethereum.Siwe.Core;
 #endif
+
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -64,7 +66,8 @@ namespace Treasure
 #if TDK_THIRDWEB
             return await _wallet.GetAddress();
 #else
-            throw new Exception("Unable to retrieve wallet address. TDK Identity wallet service not implemented.");
+            TDKLogger.LogError("Unable to retrieve wallet address. TDK Identity wallet service not implemented.");
+            return await Task.FromResult<string>(string.Empty);
 #endif
         }
 
@@ -74,7 +77,8 @@ namespace Treasure
             var chainId = (int)await _wallet.GetChainId();
             return chainId == (int)ChainId.ArbitrumSepolia ? ChainId.ArbitrumSepolia : ChainId.Arbitrum;
 #else
-            throw new Exception("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
+            TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
+            return await Task.FromResult<ChainId>(ChainId.Arbitrum);
 #endif
             
         }
@@ -116,6 +120,7 @@ namespace Treasure
 
         private async Task<string> GenerateSignature(TDKAuthPayload payload)
         {
+#if TDK_THIRDWEB
             var message = new SiweMessage()
             {
                 Uri = payload.uri,
@@ -131,9 +136,9 @@ namespace Treasure
             };
             var finalMessage = SiweMessageStringBuilder.BuildMessage(message);
 
-#if TDK_THIRDWEB
             return await TDKServiceLocator.GetService<TDKThirdwebService>().Sign(finalMessage);
 #else
+            TDKLogger.LogError("Unable to generate signature. TDK Identity wallet service not implemented.");
             return await Task.FromResult<string>(string.Empty);
 #endif
         }
@@ -179,9 +184,10 @@ namespace Treasure
             var signature = await GenerateSignature(payload);
             var token = await LogIn(payload, signature);
 
+#if TDK_THIRDWEB
             // Create session key
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
-#if TDK_THIRDWEB
+
             await _wallet.CreateSessionKey(
                 signerAddress: project.backendWallets[0],
                 approvedTargets: project.callTargets,
@@ -191,14 +197,15 @@ namespace Treasure
                 reqValidityStartTimestamp: "0",
                 reqValidityEndTimestamp: Utils.GetUnixTimeStampIn10Years().ToString()
             );
-#else
-            throw new Exception("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
-#endif
 
             _authToken = token;
             _isAuthenticated = true;
 
             return token;
+#else
+            TDKLogger.LogError("Unable to authenticate. TDK Identity wallet service not implemented.");
+            return await Task.FromResult<string>(string.Empty);
+#endif
         }
 
         public void LogOut()

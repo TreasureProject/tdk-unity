@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Threading.Tasks;
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -26,6 +27,7 @@ public class HarvesterUI : MonoBehaviour
 
     private async void refreshHarvester()
     {
+#if TDK_THIRDWEB
         _harvester = await TDK.Bridgeworld.GetHarvester(Treasure.Contract.HarvesterEmerion);
         string smartAccountAddress = null;
         if (TDK.Identity.IsAuthenticated)
@@ -42,6 +44,9 @@ Harvester: {_harvester.id}
 
     {Utils.ToEth(_harvester.userDepositCap.ToString())} MAGIC deposit cap for smart account
     {Utils.ToEth(_harvester.userDepositAmount.ToString())} MAGIC deposited by smart account";
+#else
+    await Task.FromResult<string>(string.Empty);
+#endif
     }
 
     public async void OnAuthBtn()
@@ -72,8 +77,12 @@ Harvester: {_harvester.id}
 
     public async void OnDepositBtn()
     {
+#if TDK_THIRDWEB
         await _harvester.Deposit(BigInteger.Parse(Utils.ToWei("1000")));
         refreshHarvester();
+#else
+    await Task.FromResult<string>(string.Empty);
+#endif
     }
 
     public void OnRefreshBtn()
