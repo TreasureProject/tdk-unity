@@ -22,7 +22,7 @@ namespace Treasure
 
         public async Task<string> Sign(string message)
         {
-            return await ThirdwebManager.Instance.SDK.wallet.Sign(message, await Wallet.GetAddress());
+            return await ThirdwebManager.Instance.SDK.wallet.Sign(message);
         }
     }
 }

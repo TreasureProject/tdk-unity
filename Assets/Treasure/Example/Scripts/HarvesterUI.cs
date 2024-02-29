@@ -45,7 +45,7 @@ Harvester: {_harvester.id}
     {Utils.ToEth(_harvester.userDepositCap.ToString())} MAGIC deposit cap for smart account
     {Utils.ToEth(_harvester.userDepositAmount.ToString())} MAGIC deposited by smart account";
 #else
-    await Task.FromResult<string>(string.Empty);
+        await Task.FromResult<string>(string.Empty);
 #endif
     }
 
@@ -55,7 +55,7 @@ Harvester: {_harvester.id}
         {
             try
             {
-                var token = await TDK.Identity.Authenticate("platform");
+                var token = await TDK.Identity.Authenticate(TDK.Instance.AppConfig.CartridgeTag);
                 TDKLogger.Log($"Received auth token: {token}");
                 AuthBtn.GetComponentInChildren<Text>().text = "Log Out";
                 DepositBtn.interactable = true;
@@ -81,7 +81,7 @@ Harvester: {_harvester.id}
         await _harvester.Deposit(BigInteger.Parse(Utils.ToWei("1000")));
         refreshHarvester();
 #else
-    await Task.FromResult<string>(string.Empty);
+        await Task.FromResult<string>(string.Empty);
 #endif
     }
 
