@@ -113,6 +113,7 @@ namespace Treasure
             // create a dictionary to represent the event
             var evt = new Dictionary<string, object>
             {
+                { AnalyticsConstants.CARTRIDGE_TAG, TDK.Instance.AppConfig.CartridgeTag }, // cartridgeTag
                 { AnalyticsConstants.PROP_NAME, eventName }, // event_name
                 { AnalyticsConstants.PROP_ID, Guid.NewGuid().ToString("N") }, // event_id
                 { AnalyticsConstants.PROP_VERSION, EventsVersion }, // event_version
