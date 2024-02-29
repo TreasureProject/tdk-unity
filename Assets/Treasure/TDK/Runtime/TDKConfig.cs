@@ -10,7 +10,7 @@ namespace Treasure
         public enum Env { DEV, PROD }
 
         [SerializeField] private Env _environment = Env.DEV;
-        [SerializeField] private string _gameId = string.Empty;
+        [SerializeField] private string _cartridgeTag = string.Empty;
         [SerializeField] private string _prodTdkApiUrl = string.Empty;
         [SerializeField] private string _devTdkApiUrl = string.Empty;
         [SerializeField] private string _analyticsApiUrl = string.Empty;
@@ -24,9 +24,9 @@ namespace Treasure
             get { return _environment; }
         }
 
-        public string GameId
+        public string CartridgeTag
         {
-            get { return _gameId; }
+            get { return _cartridgeTag; }
         }
 
         public string TDKApiUrl
@@ -75,7 +75,7 @@ namespace Treasure
 
         public void SetConfig(SerializedTDKConfig config)
         {
-            _gameId = config.gameId;
+            _cartridgeTag = config.cartridgeTag;
             _prodTdkApiUrl = config.prodTdkApiUrl;
             _devTdkApiUrl = config.devTdkApiUrl;
             _analyticsApiUrl = config.analyticsApiUrl;
@@ -86,7 +86,7 @@ namespace Treasure
     [Serializable]
     public class SerializedTDKConfig
     {
-        [SerializeField] public string gameId;
+        [SerializeField] public string cartridgeTag;
         [SerializeField] public string prodTdkApiUrl;
         [SerializeField] public string devTdkApiUrl;
         [SerializeField] public string analyticsApiUrl;

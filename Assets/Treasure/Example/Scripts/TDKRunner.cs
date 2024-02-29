@@ -1,11 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 using UnityEngine.UI;
 
 using Treasure;
-using Nethereum.Contracts.Standards.ENS.PublicResolver.ContractDefinition;
 
 public class TDKRunner : MonoBehaviour
 {

@@ -1,6 +1,6 @@
 {
     "tdk": {
-        "gameId": "tdk-unity-harness",
+        "cartridgeTag": "tdk-unity-harness",
         "prodTdkApiUrl": "https://tdk-api.treasure.lol",
         "devTdkApiUrl": "https://tdk-api-dev.treasure.lol",
         "analyticsApiUrl": "https://ingress.treasure.lol",
