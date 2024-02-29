@@ -1,2 +1,2 @@
 helika: 0.1.6
-thirdweb: 4.6.3
+thirdweb: 4.7.1
