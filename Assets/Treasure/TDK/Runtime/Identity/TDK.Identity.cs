@@ -1,6 +1,4 @@
 using Newtonsoft.Json;
-using System;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -80,7 +78,7 @@ namespace Treasure
             TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
             return await Task.FromResult<ChainId>(ChainId.Arbitrum);
 #endif
-            
+
         }
         #endregion
 
@@ -89,36 +87,7 @@ namespace Treasure
         #endregion
 
         #region private methods
-        private async Task<TDKAuthPayload> GetAuthPayload()
-        {
-            var body = JsonConvert.SerializeObject(new TDKAuthPayloadRequest
-            {
-#if TDK_THIRDWEB
-                address = await _wallet.GetAddress(),
-                chainId = (await _wallet.GetChainId()).ToString(),
-#endif
-            });
-            var req = new UnityWebRequest
-            {
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/auth/payload",
-                method = "POST",
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[GetAuthPayload] {req.error}: {rawResponse}");
-            }
-
-            var response = JsonConvert.DeserializeObject<TDKAuthPayloadResponse>(rawResponse);
-            return response.payload;
-        }
-
-        private async Task<string> GenerateSignature(TDKAuthPayload payload)
+        private async Task<string> GenerateSignature(AuthPayload payload)
         {
 #if TDK_THIRDWEB
             var message = new SiweMessage()
@@ -142,52 +111,29 @@ namespace Treasure
             return await Task.FromResult<string>(string.Empty);
 #endif
         }
-
-        private async Task<string> LogIn(TDKAuthPayload payload, string signature)
-        {
-            var body = JsonConvert.SerializeObject(new TDKAuthLoginRequest()
-            {
-                payload = new TDKAuthLoginPayload()
-                {
-                    payload = payload,
-                    signature = signature
-                },
-            });
-            var req = new UnityWebRequest
-            {
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/auth/login",
-                method = "POST",
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[LogIn] {req.error}: {rawResponse}");
-            }
-
-            var response = JsonConvert.DeserializeObject<TDKAuthLoginResponse>(rawResponse);
-            return response.token;
-        }
         #endregion
 
         #region public api
         public async Task<string> Authenticate(string projectSlug)
         {
             var project = await TDK.API.GetProjectBySlug(projectSlug);
+            var address = await GetWalletAddress();
+            var chainId = (int)await GetChainId();
 
             // Create auth token
-            var payload = await GetAuthPayload();
+            TDKLogger.Log("Generating auth payload");
+            var payload = await TDK.API.GetAuthPayload(address, chainId.ToString());
+
+            TDKLogger.Log("Generating auth signature");
             var signature = await GenerateSignature(payload);
-            var token = await LogIn(payload, signature);
+
+            TDKLogger.Log("Logging in smart wallet");
+            var token = await TDK.API.LogIn(payload, signature);
 
 #if TDK_THIRDWEB
             // Create session key
+            TDKLogger.Log("Creating smart wallet session key");
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
-
             await _wallet.CreateSessionKey(
                 signerAddress: project.backendWallets[0],
                 approvedTargets: project.callTargets,
@@ -195,7 +141,7 @@ namespace Treasure
                 permissionStartTimestamp: "0",
                 permissionEndTimestamp: permissionEndTimestamp.ToString(),
                 reqValidityStartTimestamp: "0",
-                reqValidityEndTimestamp: Utils.GetUnixTimeStampIn10Years().ToString()
+                reqValidityEndTimestamp: permissionEndTimestamp.ToString()
             );
 
             _authToken = token;
