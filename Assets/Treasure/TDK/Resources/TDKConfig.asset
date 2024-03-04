@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TDKConfig
   m_EditorClassIdentifier: 
   _environment: 0
-  _cartridgeTag: tdk-unity-harness
+  _cartridgeTag: app
   _prodTdkApiUrl: https://tdk-api.treasure.lol
   _devTdkApiUrl: https://tdk-api-dev.treasure.lol
   _analyticsApiUrl: https://ingress.treasure.lol

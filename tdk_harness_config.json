@@ -1,6 +1,6 @@
 {
     "tdk": {
-        "cartridgeTag": "tdk-unity-harness",
+        "cartridgeTag": "app",
         "prodTdkApiUrl": "https://tdk-api.treasure.lol",
         "devTdkApiUrl": "https://tdk-api-dev.treasure.lol",
         "analyticsApiUrl": "https://ingress.treasure.lol",
