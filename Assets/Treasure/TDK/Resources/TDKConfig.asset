@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: TDKConfig
   m_EditorClassIdentifier: 
   _environment: 0
-  _gameId: tdk-unity-harness
-  _tdkApiUrl: https://tdk-api-dev.treasure.lol
+  _cartridgeTag: app
+  _prodTdkApiUrl: https://tdk-api.treasure.lol
+  _devTdkApiUrl: https://tdk-api-dev.treasure.lol
+  _analyticsApiUrl: https://ingress.treasure.lol
   _sessionLengthDays: 3
-  _harvesterAddress: 0x466d20a94e280bb419031161a6a7508438ad436f
   moduleConfigurations:
     m_keys:
     - TDKHelikaConfig

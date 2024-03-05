@@ -10,10 +10,11 @@ namespace Treasure
         public enum Env { DEV, PROD }
 
         [SerializeField] private Env _environment = Env.DEV;
-        [SerializeField] private string _gameId = string.Empty;
-        [SerializeField] private string _tdkApiUrl = string.Empty;
+        [SerializeField] private string _cartridgeTag = string.Empty;
+        [SerializeField] private string _prodTdkApiUrl = string.Empty;
+        [SerializeField] private string _devTdkApiUrl = string.Empty;
+        [SerializeField] private string _analyticsApiUrl = string.Empty;
         [SerializeField] private float _sessionLengthDays = 0;
-        [SerializeField] private string _harvesterAddress = string.Empty;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
@@ -23,24 +24,34 @@ namespace Treasure
             get { return _environment; }
         }
 
-        public string GameId
+        public string CartridgeTag
         {
-            get { return _gameId; }
+            get { return _cartridgeTag; }
         }
 
         public string TDKApiUrl
         {
-            get { return _tdkApiUrl; }
+            get
+            {
+                if (TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD)
+                {
+                    return _prodTdkApiUrl;
+                }
+                else
+                {
+                    return _devTdkApiUrl;
+                }
+            }
+        }
+
+        public string AnalyticsApiUrl
+        {
+            get { return _analyticsApiUrl; }
         }
 
         public float SessionLengthDays
         {
             get { return _sessionLengthDays; }
-        }
-
-        public string HarvesterAddress
-        {
-            get { return _harvesterAddress; }
         }
 
         public T GetModuleConfig<T>()
@@ -64,19 +75,21 @@ namespace Treasure
 
         public void SetConfig(SerializedTDKConfig config)
         {
-            _gameId = config.gameId;
-            _tdkApiUrl = config.tdkApiUrl;
+            _cartridgeTag = config.cartridgeTag;
+            _prodTdkApiUrl = config.prodTdkApiUrl;
+            _devTdkApiUrl = config.devTdkApiUrl;
+            _analyticsApiUrl = config.analyticsApiUrl;
             _sessionLengthDays = config.sessionLengthDays;
-            _harvesterAddress = config.harvesterAddress;
         }
     }
 
     [Serializable]
     public class SerializedTDKConfig
     {
-        [SerializeField] public string gameId;
-        [SerializeField] public string tdkApiUrl;
+        [SerializeField] public string cartridgeTag;
+        [SerializeField] public string prodTdkApiUrl;
+        [SerializeField] public string devTdkApiUrl;
+        [SerializeField] public string analyticsApiUrl;
         [SerializeField] public float sessionLengthDays;
-        [SerializeField] public string harvesterAddress;
     }
 }

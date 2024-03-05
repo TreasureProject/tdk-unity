@@ -15,13 +15,18 @@ namespace Treasure
 
             var contents = new List<string>
             {
+                // Example
+                "Assets/Treasure/Example",
+
                 // Editor
                 "Assets/Treasure/TDK/Editor/TDKConfigEditor.cs",
                 "Assets/Treasure/TDK/Editor/TDKConfigWindow.cs",
 
                 // Runtime
                 "Assets/Treasure/TDK/Runtime/Analytics",
-                "Assets/Treasure/TDK/Runtime/Harvester",
+                "Assets/Treasure/TDK/Runtime/API",
+                "Assets/Treasure/TDK/Runtime/Bridgeworld",
+                "Assets/Treasure/TDK/Runtime/Common",
                 "Assets/Treasure/TDK/Runtime/Identity",
                 "Assets/Treasure/TDK/Runtime/Infrastructure",
                 
@@ -29,7 +34,9 @@ namespace Treasure
                 "Assets/Treasure/TDK/Runtime/TDKConfig.cs",
                 "Assets/Treasure/TDK/Runtime/TDKVersion.cs",
                 "Assets/Treasure/TDK/Runtime/Utils",
-                "Assets/package.json"
+                "Assets/package.json",
+
+                "Assets/Treasure/TDK/Runtime/Services/Treasure"
             };
 
             AssetDatabase.Refresh();
@@ -37,7 +44,7 @@ namespace Treasure
             AssetDatabase.ExportPackage(
                 contents.ToArray(),
                 string.Format("{0}_v{1}_{2}.unitypackage", TDKVersion.name, TDKVersion.version, _packageName.ToString()),
-                ExportPackageOptions.Recurse | ExportPackageOptions.IncludeDependencies);
+                ExportPackageOptions.Recurse);
 
             Debug.Log(string.Format("TDK {0} Core Package exported", _packageName.ToString()));
         }

@@ -1,9 +1,12 @@
-using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+
+#if TDK_THIRDWEB
 using Thirdweb;
+using Nethereum.Siwe.Core;
+#endif
+
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -11,7 +14,7 @@ namespace Treasure
 {
     public partial class TDK : MonoBehaviour
     {
-        public static Identity Identity;
+        public static Identity Identity { get; private set; }
 
         /// <summary>
         /// Initialize the Identity module
@@ -34,16 +37,17 @@ namespace Treasure
         #endregion
 
         #region accessors / mutators
+
+#if TDK_THIRDWEB
         private Wallet _wallet
         {
-            get {
-#if TDK_THIRDWEB
+            get
+            {
+
                 return TDKServiceLocator.GetService<TDKThirdwebService>().Wallet;
-#else
-                return null;
-#endif
             }
         }
+#endif
 
         public string AuthToken
         {
@@ -57,12 +61,24 @@ namespace Treasure
 
         public async Task<string> GetWalletAddress()
         {
+#if TDK_THIRDWEB
             return await _wallet.GetAddress();
+#else
+            TDKLogger.LogError("Unable to retrieve wallet address. TDK Identity wallet service not implemented.");
+            return await Task.FromResult<string>(string.Empty);
+#endif
         }
 
-        public async Task<BigInteger> GetChainId()
+        public async Task<ChainId> GetChainId()
         {
-            return await _wallet.GetChainId();
+#if TDK_THIRDWEB
+            var chainId = (int)await _wallet.GetChainId();
+            return chainId == (int)ChainId.ArbitrumSepolia ? ChainId.ArbitrumSepolia : ChainId.Arbitrum;
+#else
+            TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
+            return await Task.FromResult<ChainId>(ChainId.Arbitrum);
+#endif
+
         }
         #endregion
 
@@ -71,35 +87,9 @@ namespace Treasure
         #endregion
 
         #region private methods
-        private async Task<TDKAuthPayload> GetAuthPayload()
+        private async Task<string> GenerateSignature(AuthPayload payload)
         {
-            var body = JsonConvert.SerializeObject(new TDKAuthPayloadRequest
-            {
-                address = await _wallet.GetAddress(),
-                chainId = (await _wallet.GetChainId()).ToString(),
-            });
-            var req = new UnityWebRequest
-            {
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/auth/payload",
-                method = "POST",
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[GetAuthPayload] {req.error}: {rawResponse}");
-            }
-
-            var response = JsonConvert.DeserializeObject<TDKAuthPayloadResponse>(rawResponse);
-            return response.payload;
-        }
-
-        private async Task<string> GenerateSignature(TDKAuthPayload payload)
-        {
+#if TDK_THIRDWEB
             var message = new SiweMessage()
             {
                 Uri = payload.uri,
@@ -115,76 +105,34 @@ namespace Treasure
             };
             var finalMessage = SiweMessageStringBuilder.BuildMessage(message);
 
-#if TDK_THIRDWEB
             return await TDKServiceLocator.GetService<TDKThirdwebService>().Sign(finalMessage);
 #else
+            TDKLogger.LogError("Unable to generate signature. TDK Identity wallet service not implemented.");
             return await Task.FromResult<string>(string.Empty);
 #endif
-        }
-
-        private async Task<string> LogIn(TDKAuthPayload payload, string signature)
-        {
-            var body = JsonConvert.SerializeObject(new TDKAuthLoginRequest()
-            {
-                payload = new TDKAuthLoginPayload()
-                {
-                    payload = payload,
-                    signature = signature
-                },
-            });
-            var req = new UnityWebRequest
-            {
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/auth/login",
-                method = "POST",
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[LogIn] {req.error}: {rawResponse}");
-            }
-
-            var response = JsonConvert.DeserializeObject<TDKAuthLoginResponse>(rawResponse);
-            return response.token;
         }
         #endregion
 
         #region public api
-        public async Task<TDKProject> GetProject()
+        public async Task<string> Authenticate(string projectSlug)
         {
-            var req = new UnityWebRequest
-            {
-                // url = $"{TDK.Instance.AppConfig.TDKApiUrl}/projects/{TDK.Instance.AppConfig.GameId}",
+            var project = await TDK.API.GetProjectBySlug(projectSlug);
+            var address = await GetWalletAddress();
+            var chainId = (int)await GetChainId();
 
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/projects/platform",
-                method = "GET",
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", (await _wallet.GetChainId()).ToString());
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[GetProject] {req.error}: {rawResponse}");
-            }
-
-            return JsonConvert.DeserializeObject<TDKProject>(rawResponse);
-        }
-
-        public async Task<string> Authenticate(TDKProject project)
-        {
             // Create auth token
-            var payload = await GetAuthPayload();
-            var signature = await GenerateSignature(payload);
-            var token = await LogIn(payload, signature);
+            TDKLogger.Log("Generating auth payload");
+            var payload = await TDK.API.GetAuthPayload(address, chainId.ToString());
 
+            TDKLogger.Log("Generating auth signature");
+            var signature = await GenerateSignature(payload);
+
+            TDKLogger.Log("Logging in smart wallet");
+            var token = await TDK.API.LogIn(payload, signature);
+
+#if TDK_THIRDWEB
             // Create session key
+            TDKLogger.Log("Creating smart wallet session key");
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
             await _wallet.CreateSessionKey(
                 signerAddress: project.backendWallets[0],
@@ -193,13 +141,17 @@ namespace Treasure
                 permissionStartTimestamp: "0",
                 permissionEndTimestamp: permissionEndTimestamp.ToString(),
                 reqValidityStartTimestamp: "0",
-                reqValidityEndTimestamp: Utils.GetUnixTimeStampIn10Years().ToString()
+                reqValidityEndTimestamp: permissionEndTimestamp.ToString()
             );
 
             _authToken = token;
             _isAuthenticated = true;
 
             return token;
+#else
+            TDKLogger.LogError("Unable to authenticate. TDK Identity wallet service not implemented.");
+            return await Task.FromResult<string>(string.Empty);
+#endif
         }
 
         public void LogOut()
@@ -207,154 +159,6 @@ namespace Treasure
             _authToken = null;
             _isAuthenticated = false;
         }
-
-        // public async Task<TDKHarvesterResponse> GetHarvester(string id)
-        // {
-        //     var req = new UnityWebRequest
-        //     {
-        //         url = $"{TDK.Instance.AppConfig.TDKApiUrl}/harvesters/{id}",
-        //         method = "GET",
-        //         downloadHandler = new DownloadHandlerBuffer()
-        //     };
-        //     req.SetRequestHeader("Content-Type", "application/json");
-        //     req.SetRequestHeader("X-Chain-Id", (await _wallet.GetChainId()).ToString());
-        //     req.SetRequestHeader("Authorization", $"Bearer {_authToken}");
-        //     await req.SendWebRequest();
-
-        //     var rawResponse = req.downloadHandler.text;
-        //     if (req.result != UnityWebRequest.Result.Success)
-        //     {
-        //         throw new UnityException($"[GetHarvester] {req.error}: {rawResponse}");
-        //     }
-
-        //     return JsonConvert.DeserializeObject<TDKHarvesterResponse>(rawResponse);
-        // }
-
-        public async Task<string> WriteContract(string address, string functionName, string[] args)
-        {
-            var body = JsonConvert.SerializeObject(new TDKContractWriteRequest()
-            {
-                functionName = functionName,
-                args = args,
-            });
-            var req = new UnityWebRequest
-            {
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/contracts/{address}",
-                method = "POST",
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", (await _wallet.GetChainId()).ToString());
-            req.SetRequestHeader("Authorization", $"Bearer {_authToken}");
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[WriteContract] {req.error}: {rawResponse}");
-            }
-
-            var response = JsonConvert.DeserializeObject<TDKContractWriteResponse>(rawResponse);
-            return response.queueId;
-        }
-
-        public async Task<TDKTransactionResponse> GetTransaction(string queueId)
-        {
-            var req = new UnityWebRequest
-            {
-                url = $"{TDK.Instance.AppConfig.TDKApiUrl}/transactions/{queueId}",
-                method = "GET",
-                downloadHandler = new DownloadHandlerBuffer()
-            };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("Authorization", $"Bearer {_authToken}");
-            await req.SendWebRequest();
-
-            var rawResponse = req.downloadHandler.text;
-            if (req.result != UnityWebRequest.Result.Success)
-            {
-                throw new UnityException($"[GetTransaction] {req.error}: {rawResponse}");
-            }
-
-            return JsonConvert.DeserializeObject<TDKTransactionResponse>(rawResponse);
-        }
-
-        public async Task WaitForTransaction(string queueId)
-        {
-            var retries = 0;
-            TDKTransactionResponse transaction;
-            do
-            {
-                if (retries > 0)
-                {
-                    await Task.Delay(2_500);
-                }
-
-                transaction = await GetTransaction(queueId);
-                retries++;
-            } while (
-                retries < 15 &&
-                transaction.status != "errored" &&
-                transaction.status != "cancelled" &&
-                transaction.status != "mined"
-            );
-
-            if (transaction.status == "errored")
-            {
-                throw new UnityException($"[WaitForTransaction] Transaction {queueId} errored: {transaction.errorMessage}");
-            }
-
-            if (transaction.status == "cancelled")
-            {
-                throw new UnityException($"[WaitForTransaction] Transaction {queueId} cancelled");
-            }
-
-            if (transaction.status != "mined")
-            {
-                throw new UnityException($"[WaitForTransaction] Transaction {queueId} timed out with status: {transaction.status}");
-            }
-        }
-
-        // public async Task ApproveMagic(string operatorAddress, BigInteger amount)
-        // {
-        //     var queueId = await WriteContract(
-        //         address: "0x55d0cf68a1afe0932aff6f36c87efa703508191c",
-        //         functionName: "approve",
-        //         args: new string[] { operatorAddress, amount.ToString() }
-        //     );
-        //     await WaitForTransaction(queueId);
-        // }
-
-        // public async Task ApproveConsumables(string operatorAddress)
-        // {
-        //     var queueId = await WriteContract(
-        //         address: "0x9d012712d24C90DDEd4574430B9e6065183896BE",
-        //         functionName: "setApprovalForAll",
-        //         args: new string[] { operatorAddress, "true" }
-        //     );
-        //     await WaitForTransaction(queueId);
-        // }
-
-        // public async Task HarvesterStakeNft(string nftHandlerAddress, string permitsAddress, BigInteger permitsTokenId)
-        // {
-        //     var queueId = await WriteContract(
-        //         address: nftHandlerAddress,
-        //         functionName: "stakeNft",
-        //         args: new string[] { permitsAddress, permitsTokenId.ToString(), "1" }
-        //     );
-        //     await WaitForTransaction(queueId);
-        // }
-
-        // public async Task HarvesterDepositMagic(string harvesterAddress, BigInteger amount)
-        // {
-        //     var queueId = await WriteContract(
-        //         address: harvesterAddress,
-        //         functionName: "deposit",
-        //         args: new string[] { amount.ToString(), "0" }
-        //     );
-        //     await WaitForTransaction(queueId);
-        // }
         #endregion
     }
 }
