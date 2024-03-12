@@ -134,7 +134,7 @@ namespace Treasure
                     TDKLogger.Log("Using existing session key");
                 }
             }
-            catch (Exception e)
+            catch
             {
                 // Call can expectedly throw if smart wallet is not deployed already
             }
