@@ -3638,7 +3638,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4404896360829706404, guid: 379ed01658d62a14484f953196ff19db, type: 3}
       propertyPath: factoryAddress
-      value: 0xE6A7A5935553d05cA47F5BfaD55c14d9b55B88C9
+      value: 0xae7f7e9286f5f9ede167a19d1d605df4fdbc417b
       objectReference: {fileID: 0}
     - target: {fileID: 4404896360829706404, guid: 379ed01658d62a14484f953196ff19db, type: 3}
       propertyPath: supportedChains.Array.size
