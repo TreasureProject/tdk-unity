@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5992008048206825528}
   - component: {fileID: 2766375109700870981}
   m_Layer: 0
-  m_Name: ThemeManager
+  m_Name: TDKLoginThemeManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
