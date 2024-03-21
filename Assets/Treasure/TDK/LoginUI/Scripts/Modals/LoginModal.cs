@@ -96,7 +96,11 @@ namespace Treasure
             if (ValidateEmail(emailInputField.text, out var message))
             {
                 errorText.gameObject.SetActive(false);
-                StartCoroutine(WaitToGoToConfirmLogin());
+                // StartCoroutine(WaitToGoToConfirmLogin());
+                
+                connectButton.GetComponent<LoadingButton>().SetLoading(true);
+
+                TDK.Identity.ConnectEmail(emailInputField.text);
             }
             else
             {
@@ -106,13 +110,13 @@ namespace Treasure
         }
 
         // test code
-        IEnumerator WaitToGoToConfirmLogin()
-        {
-            connectButton.GetComponent<LoadingButton>().SetLoading(true);
-            yield return new WaitForSeconds(2.5f);
-            connectButton.GetComponent<LoadingButton>().SetLoading(false);
-            UIManager.Instance.ShowConfirmLoginModal();
-        }
+        // IEnumerator WaitToGoToConfirmLogin()
+        // {
+        //     connectButton.GetComponent<LoadingButton>().SetLoading(true);
+        //     yield return new WaitForSeconds(2.5f);
+        //     connectButton.GetComponent<LoadingButton>().SetLoading(false);
+        //     UIManager.Instance.ShowConfirmLoginModal();
+        // }
 
         private bool ValidateEmail(string email, out string errorMessage)
         {
