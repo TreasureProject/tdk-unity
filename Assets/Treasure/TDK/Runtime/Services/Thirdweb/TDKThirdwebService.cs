@@ -18,9 +18,9 @@ namespace Treasure
         private ChainData _currentChainData;
         private string _address;
 
-        public UnityEvent<WalletConnection> onConnectionRequested;
-        public UnityEvent<Exception> onConnectionError;
-        public UnityEvent<string> onConnected;
+        public UnityEvent<WalletConnection> onConnectionRequested = new UnityEvent<WalletConnection>();
+        public UnityEvent<Exception> onConnectionError = new UnityEvent<Exception>();
+        public UnityEvent<string> onConnected = new UnityEvent<string>();
 
         public Wallet Wallet
         {
@@ -44,7 +44,7 @@ namespace Treasure
             return await ThirdwebManager.Instance.SDK.wallet.Sign(message);
         }
 
-        public void ConnectEmail(string email)
+        public async Task<bool> ConnectEmail(string email)
         {
             var wc = useSmartWallets
                 ? new WalletConnection(
@@ -60,10 +60,10 @@ namespace Treasure
                     email: email,
                     authOptions: new AuthOptions(AuthProvider.EmailOTP)
                 );
-            Connect(wc);
+           return await Connect(wc);
         }
 
-        private async void Connect(WalletConnection wc)
+        private async Task<bool> Connect(WalletConnection wc)
         {
             ThirdwebDebug.Log($"Connecting to {wc.provider}...");
 
@@ -82,10 +82,12 @@ namespace Treasure
                 _address = null;
                 ThirdwebDebug.LogError($"Failed to connect: {e}");
                 onConnectionError.Invoke(e);
-                return;
+                return false;
             }
 
             PostConnect(wc);
+
+            return true;
         }
 
         private async void PostConnect(WalletConnection wc = null)
@@ -111,7 +113,7 @@ namespace Treasure
             // currentNetworkIcon.sprite = networkIcons.Find(x => x.chain == _currentChainData.identifier)?.sprite ?? networkIcons[0].sprite;
             // currentNetworkText.text = PrettifyNetwork(_currentChainData.identifier);
 
-            onConnected.Invoke(_address);
+            onConnected?.Invoke(_address);
         }
     }
 }

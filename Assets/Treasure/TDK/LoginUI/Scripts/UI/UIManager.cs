@@ -1,4 +1,5 @@
 using System.Collections;
+using Thirdweb.Wallets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,13 +10,14 @@ namespace Treasure
     {
         public static UIManager Instance = null;
 
+        [Header("Modals")]
         [SerializeField] private ModalBase loginModal;
         [SerializeField] private ModalBase confirmLoginModal;
-        [Space]
+        [Header("Test buttons")]
         [SerializeField] private Button switchThemeButton;
         [SerializeField] private Button switchSceneButton;
         [SerializeField] private ScreenOrientation currentOriantation;
-        [Space]
+        [Header("Active object")]
         [SerializeField] private GameObject logedInHolder;
 
         private ModalBase currentModalOpended;
@@ -23,9 +25,7 @@ namespace Treasure
         private void Awake()
         {
             if (Instance == null)
-                Instance = this;
-
-            Application.targetFrameRate = 60;
+                Instance = this;          
         }
 
         private void Start()
@@ -37,8 +37,19 @@ namespace Treasure
             });
 
             currentModalOpended = loginModal;
+            if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
+                Debug.LogError("Service is null");
+
+            TDKServiceLocator.GetService<TDKThirdwebService>().onConnected.AddListener(address =>
+            {
+                //(TODO) check address variable
+                ShowLoggedInView();
+            });
+
+            Application.targetFrameRate = 60;
         }
 
+        //test code
         IEnumerator SwitchScene()
         {
             switchSceneButton.interactable = false;

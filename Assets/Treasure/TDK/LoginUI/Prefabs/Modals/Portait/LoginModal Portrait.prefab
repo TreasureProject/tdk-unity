@@ -3741,7 +3741,7 @@ MonoBehaviour:
   icon: {fileID: 923348049289722203}
   spinnerPrefab: {fileID: 100000, guid: 35c6751822afa42368d7ae9ee9d3e3bc, type: 3}
   isLoadOnClick: 0
-  isChangeTextColor: 1
+  isChangeTextColor: 0
   text: {fileID: 7342748278476692555}
   iconImage: {fileID: 4557523691062820558}
 --- !u!224 &4440724049273640174 stripped

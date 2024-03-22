@@ -27,59 +27,33 @@ namespace Treasure
         {
             SetupFromSettings();
 
-            confirmCode.onClick.AddListener(() =>
-            {
-                _enteredCode = codeInput.text;
-                if (!IsDigitsOnlyRegex(_enteredCode) || _enteredCode.Length != 6)
-                {
-                    errorText.text = "Please enter 6 digits code";
-                    errorText.gameObject.SetActive(true);
-                    return;
-                }
-                errorText.gameObject.SetActive(false);
-                StartCoroutine(WaitToConfirmLogin());
-            });
-
-            /* foreach (var (input, index) in codeInputs.WithIndex())
-             {
-                 input.onValidateInput += delegate (string s, int i, char c)
-                 {
-                     if (i > 0) return default;
-                     if (!char.IsDigit(c)) return default;
-
-                     var array = _enteredCode.ToCharArray();
-                     array[index] = c;
-                     _enteredCode = new string(array);
-
-                     return c;
-                 };
-
-                 input.onValueChanged.AddListener(value =>
-                 {
-                     var direction = string.IsNullOrEmpty(value) ? 0 : 1;
-
-                     if (index >= codeInputs.Count - 1 && direction == 1) return;
-
-                     if (direction == 0)
-                     {
-                         var array = _enteredCode.ToCharArray();
-                         if (!char.IsDigit(array[index]))
-                             direction = -1;
-
-                         array[index] = 'a';
-                         _enteredCode = new string(array);
-                     }
-
-                     if (direction == -1 && index == 0) return;
-                     codeInputs[index + direction].Select();
-                 });
-
-                 input.onSelect.AddListener(value => SetKeyboardSpace(true));
-                 input.onDeselect.AddListener(value => SetKeyboardSpace(false));
-             }*/
-
             codeInput.onSelect.AddListener(value => SetKeyboardSpace(true));
             codeInput.onDeselect.AddListener(value => SetKeyboardSpace(false));
+        }
+
+        private void OnEnable()
+        {
+            confirmCode.GetComponent<LoadingButton>().SetLoading(false);
+        }
+
+        public bool CheckConfirmationCodeIsValid()
+        {
+            _enteredCode = codeInput.text;
+            if (!IsDigitsOnlyRegex(_enteredCode) || _enteredCode.Length != 6)
+            {
+                errorText.text = "Please enter 6 digits code";
+                errorText.gameObject.SetActive(true);
+                return false;
+            }
+
+            errorText.gameObject.SetActive(false);
+            return true;
+        }
+
+        public  void SetErrorText(string text)
+        {
+            errorText.text = text;
+            errorText.gameObject.SetActive(true);
         }
 
         private void SetupFromSettings()
@@ -91,13 +65,13 @@ namespace Treasure
         }
 
         // test code
-        IEnumerator WaitToConfirmLogin()
+       /* IEnumerator WaitToConfirmLogin()
         {
             confirmCode.GetComponent<LoadingButton>().SetLoading(true);
             yield return new WaitForSeconds(2.5f);
             confirmCode.GetComponent<LoadingButton>().SetLoading(false);
             UIManager.Instance.ShowLoggedInView();
-        }
+        }*/
 
         private void SetKeyboardSpace(bool value)
         {

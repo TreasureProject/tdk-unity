@@ -1209,7 +1209,7 @@ GameObject:
   - component: {fileID: 8012446944925988692}
   - component: {fileID: 1483846465081451298}
   m_Layer: 5
-  m_Name: InputField (TMP)
+  m_Name: InputField(ConfirmCodeOTP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2435,7 +2435,7 @@ MonoBehaviour:
   icon: {fileID: 6616920371170256041}
   spinnerPrefab: {fileID: 100000, guid: 35c6751822afa42368d7ae9ee9d3e3bc, type: 3}
   isLoadOnClick: 0
-  isChangeTextColor: 1
+  isChangeTextColor: 0
   text: {fileID: 3666717941772468665}
   iconImage: {fileID: 7510862386403304252}
 --- !u!1001 &4659021884420967679

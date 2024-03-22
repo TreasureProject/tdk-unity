@@ -68,6 +68,7 @@ namespace Treasure
         private void OnEnable()
         {
             SetupFromSettings();
+            connectButton.GetComponent<LoadingButton>().SetLoading(false);
         }
 
         private void SetupFromSettings()
@@ -91,7 +92,7 @@ namespace Treasure
             }
         }
 
-        private void OnClickConnectwithEmail()
+        private async void OnClickConnectwithEmail()
         {
             if (ValidateEmail(emailInputField.text, out var message))
             {
@@ -100,7 +101,11 @@ namespace Treasure
                 
                 connectButton.GetComponent<LoadingButton>().SetLoading(true);
 
-                TDK.Identity.ConnectEmail(emailInputField.text);
+                var result = await TDK.Identity.ConnectEmail(emailInputField.text);
+
+                connectButton.GetComponent<LoadingButton>().SetLoading(false);
+
+                Debug.Log($"Result : {result}");
             }
             else
             {
@@ -133,7 +138,7 @@ namespace Treasure
             var isEmailValid = match.Length == email.Length;
             if (!isEmailValid)
             {
-                errorMessage = "Please enter valid email";
+                errorMessage = "Please enter a valid email";
                 return false;
             }
 

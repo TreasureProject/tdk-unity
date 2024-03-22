@@ -111,9 +111,9 @@ namespace Treasure
         #endregion
 
         #region public api
-        public void ConnectEmail(string email)
+        public async Task<bool> ConnectEmail(string email)
         {
-            TDKServiceLocator.GetService<TDKThirdwebService>().ConnectEmail(email);
+            return await TDKServiceLocator.GetService<TDKThirdwebService>().ConnectEmail(email);
         }
 
         public void LogOut()
