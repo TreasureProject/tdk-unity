@@ -29,6 +29,11 @@ namespace Treasure
 
             codeInput.onSelect.AddListener(value => SetKeyboardSpace(true));
             codeInput.onDeselect.AddListener(value => SetKeyboardSpace(false));
+
+            didntReceiveEmailButton.onClick.AddListener(() =>
+            {
+                UIManager.Instance.ShowLoginModal();
+            });
         }
 
         private void OnEnable()
@@ -60,7 +65,7 @@ namespace Treasure
         {
             confirmationInputCodeHolder.SetActive(appSettingsData.hasCodeToConfirmEmail);
             infoText.text = appSettingsData.hasCodeToConfirmEmail ?
-                "We’ve sent a code to your email, please enter it below to confirm your login" :
+                $"We have sent a code to {TDKServiceLocator.GetService<TDKThirdwebService>().GetUserEmail()}, please enter it below to confirm  your login" :
                 "Please click the link in the email to verify your login";
         }
 

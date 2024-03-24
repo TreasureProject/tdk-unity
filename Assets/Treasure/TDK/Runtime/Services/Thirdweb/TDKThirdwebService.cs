@@ -17,6 +17,7 @@ namespace Treasure
         private bool useSmartWallets = true;
         private ChainData _currentChainData;
         private string _address;
+        private string _email;
 
         public UnityEvent<WalletConnection> onConnectionRequested = new UnityEvent<WalletConnection>();
         public UnityEvent<Exception> onConnectionError = new UnityEvent<Exception>();
@@ -46,6 +47,7 @@ namespace Treasure
 
         public async Task<bool> ConnectEmail(string email)
         {
+            _email = email;
             var wc = useSmartWallets
                 ? new WalletConnection(
                     provider: WalletProvider.SmartWallet,
@@ -66,6 +68,11 @@ namespace Treasure
         public string GetWalletAddress()
         {
             return _address;
+        }
+
+        public string GetUserEmail()
+        {
+            return _email;
         }
 
         private async Task<bool> Connect(WalletConnection wc)

@@ -42,7 +42,6 @@ namespace Treasure
 
             TDKServiceLocator.GetService<TDKThirdwebService>().onConnected.AddListener(address =>
             {
-                //(TODO) check address variable
                 ShowLoggedInView();
             });
 
@@ -58,9 +57,20 @@ namespace Treasure
             SceneManager.LoadScene(currentOriantation == ScreenOrientation.Portrait ? 1 : 0);
         }
 
+        public void ShowLoginModal()
+        {
+            if (currentModalOpended != null)
+                currentModalOpended.Hide();
+
+            loginModal.Show();
+            currentModalOpended = loginModal;
+        }
+
         public void ShowConfirmLoginModal()
         {
-            currentModalOpended.Hide();
+            if (currentModalOpended != null)
+                currentModalOpended.Hide();
+
             confirmLoginModal.Show();
             currentModalOpended = confirmLoginModal;
         }

@@ -16,7 +16,7 @@ namespace Treasure
         [Tooltip("Invoked when the user completes OTP process.")]
         public UnityEvent OnEmailOTPVerificationSuccess;
         [Space]
-        [SerializeReference] private ConfirmLoginModal confirmLoginModal;
+        [SerializeField] private ConfirmLoginModal confirmLoginModal;
 
         private void Start()
         {
