@@ -108,11 +108,14 @@ namespace Treasure
             }
 
             await new WaitUntil(() => _user != null || _exception != null);
-            SetOtpCodeIsWrong();
+
             //(TODO) need to handle when OTP is wrong 
             //EmbeddedWalletCanvas.SetActive(false);
             if (_exception != null)
+            {
+                SetOtpCodeIsWrong();
                 throw _exception;
+            }
             return _user;
         }
 
