@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,21 +7,27 @@ namespace Treasure
     {
         [SerializeField] private Button button;
         [SerializeField] private Image icon;
-        [SerializeField] private TMP_Text texttoCopy;
         [Space]
         [SerializeField] private Sprite copyIcon;
         [SerializeField] private Sprite checkIcon;
+
+        private string _textToCopy = "";
 
         private void Reset()
         {
             button = GetComponent<Button>();
         }
 
+        public void SetTextToCopy(string text)
+        {
+            _textToCopy = text;
+        }
+
         private void Start()
         {
             button.onClick.AddListener(() =>
             {
-                GUIUtility.systemCopyBuffer = texttoCopy.text;
+                GUIUtility.systemCopyBuffer = _textToCopy;
                 icon.sprite = checkIcon;
             });
         }

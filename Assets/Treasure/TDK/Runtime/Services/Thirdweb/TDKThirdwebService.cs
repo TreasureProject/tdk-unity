@@ -63,6 +63,11 @@ namespace Treasure
            return await Connect(wc);
         }
 
+        public string GetWalletAddress()
+        {
+            return _address;
+        }
+
         private async Task<bool> Connect(WalletConnection wc)
         {
             ThirdwebDebug.Log($"Connecting to {wc.provider}...");

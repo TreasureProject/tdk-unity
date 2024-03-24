@@ -839,6 +839,8 @@ MonoBehaviour:
   animeTime: 0.3
   disconnectButton: {fileID: 3112995785179967501}
   profileButton: {fileID: 813213631948135960}
+  adressText: {fileID: 2201975853932602567}
+  copyButton: {fileID: 8655490194977073153}
 --- !u!114 &-950491587484317519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1048,7 +1050,7 @@ GameObject:
   - component: {fileID: 2201975853932602567}
   - component: {fileID: 3463973353909700858}
   m_Layer: 5
-  m_Name: WalletIdText
+  m_Name: IdText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2255,6 +2257,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   button: {fileID: 7239464201666966361}
   icon: {fileID: 247392722177661106}
-  texttoCopy: {fileID: 2201975853932602567}
   copyIcon: {fileID: 21300000, guid: 338acb16c94bcf64cacfc942c41e1925, type: 3}
   checkIcon: {fileID: 21300000, guid: 8102abc348cde2c42b89b547f7b3b189, type: 3}

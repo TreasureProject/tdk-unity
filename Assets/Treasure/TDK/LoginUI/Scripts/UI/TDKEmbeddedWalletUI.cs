@@ -6,11 +6,15 @@ using Thirdweb;
 using Thirdweb.EWS;
 using Thirdweb.Wallets;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Treasure
 {
     public class TDKEmbeddedWalletUI : EmbeddedWalletUI
     {
+        [Space]
+        [Tooltip("Invoked when the user completes OTP process.")]
+        public UnityEvent OnEmailOTPVerificationSuccess;
         [Space]
         [SerializeReference] private ConfirmLoginModal confirmLoginModal;
 
@@ -117,6 +121,41 @@ namespace Treasure
                 throw _exception;
             }
             return _user;
+        }
+
+        public override async void OnSubmitOTP()
+        {
+            OTPInput.interactable = false;
+            RecoveryInput.interactable = false;
+            SubmitButton.interactable = false;
+            try
+            {
+                string otp = OTPInput.text;
+                var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
+                if (res.User == null)
+                {
+                    if (res.CanRetry && OnEmailOTPVerificationFailed.GetPersistentEventCount() > 0)
+                    {
+                        OnEmailOTPVerificationFailed.Invoke();
+                        return;
+                    }
+                    _exception = new UnityException("User OTP Verification Failed.");
+                    return;
+                }
+                _user = res.User;
+                ShowRecoveryCodes(res);
+            }
+            catch (Exception e)
+            {
+                _exception = e;
+            }
+            finally
+            {
+                OTPInput.interactable = true;
+                RecoveryInput.interactable = true;
+                SubmitButton.interactable = true;
+                OnEmailOTPVerificationSuccess?.Invoke();
+            }
         }
 
         private void SetOtpCodeIsWrong()
