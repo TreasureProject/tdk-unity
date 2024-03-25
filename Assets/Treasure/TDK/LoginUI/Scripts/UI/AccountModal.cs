@@ -7,6 +7,8 @@ namespace Treasure
     public class AccountModal : ModalBase
     {
         [Space]
+        [SerializeField] private Button closeButton;
+        [Space]
         [SerializeField] private Button disconnectButton;
         [SerializeField] private Button profileButton;
         [Space]
@@ -15,6 +17,10 @@ namespace Treasure
 
         private void Start()
         {
+            closeButton.onClick.AddListener(() =>
+            {
+                Hide();
+            });
             profileButton.onClick.AddListener(() =>
             {
 
