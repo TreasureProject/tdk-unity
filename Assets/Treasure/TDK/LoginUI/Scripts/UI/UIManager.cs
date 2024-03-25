@@ -42,7 +42,7 @@ namespace Treasure
 
             TDKServiceLocator.GetService<TDKThirdwebService>().onConnected.AddListener(address =>
             {
-                ShowLoggedInView();
+                ShowAccountModal();
             });
 
             Application.targetFrameRate = 60;
@@ -84,7 +84,7 @@ namespace Treasure
             currentModalOpended = confirmLoginModal;
         }
 
-        public void ShowLoggedInView()
+        public void ShowAccountModal()
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();

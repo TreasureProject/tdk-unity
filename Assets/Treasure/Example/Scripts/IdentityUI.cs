@@ -9,4 +9,14 @@ public class IdentityUI : MonoBehaviour
 
         Debug.Log("Wallet address is:" + walletAddr);
     }
+
+    public void OnConnectBtn()
+    {
+        UIManager.Instance.ShowLoginModal();
+    }
+
+    public void OnAccountBtn()
+    {
+        UIManager.Instance.ShowAccountModal();
+    }
 }
