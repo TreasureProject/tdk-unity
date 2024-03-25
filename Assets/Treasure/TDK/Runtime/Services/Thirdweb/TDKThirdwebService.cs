@@ -86,7 +86,7 @@ namespace Treasure
             try
             {
                 _address = await ThirdwebManager.Instance.SDK.wallet.Connect(wc);
-                TDKLogger.LogWarning("fooooooo");
+                
                 // exportButton.SetActive(wc.provider == WalletProvider.LocalWallet);
             }
             catch (Exception e)
