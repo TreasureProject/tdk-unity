@@ -41,7 +41,7 @@ namespace Treasure
             });
 
             await OnSendOTP();
-            UIManager.Instance.ShowConfirmLoginModal();
+            TDKIdentityUIManager.Instance.ShowConfirmLoginModal();
         }
 
         public override async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)

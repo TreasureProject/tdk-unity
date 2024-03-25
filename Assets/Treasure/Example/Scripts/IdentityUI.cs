@@ -12,11 +12,11 @@ public class IdentityUI : MonoBehaviour
 
     public void OnConnectBtn()
     {
-        UIManager.Instance.ShowLoginModal();
+        TDKIdentityUIManager.Instance.ShowLoginModal();
     }
 
     public void OnAccountBtn()
     {
-        UIManager.Instance.ShowAccountModal();
+        TDKIdentityUIManager.Instance.ShowAccountModal();
     }
 }

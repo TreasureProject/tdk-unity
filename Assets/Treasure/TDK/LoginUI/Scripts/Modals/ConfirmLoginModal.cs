@@ -32,7 +32,7 @@ namespace Treasure
 
             didntReceiveEmailButton.onClick.AddListener(() =>
             {
-                UIManager.Instance.ShowLoginModal();
+                TDKIdentityUIManager.Instance.ShowLoginModal();
             });
         }
 

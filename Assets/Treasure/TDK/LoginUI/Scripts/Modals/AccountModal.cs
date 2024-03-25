@@ -20,7 +20,7 @@ namespace Treasure
             closeButton.onClick.AddListener(() =>
             {
                 Hide();
-                UIManager.Instance.HideUI();
+                TDKIdentityUIManager.Instance.HideUI();
             });
             profileButton.onClick.AddListener(() =>
             {
@@ -28,7 +28,7 @@ namespace Treasure
             });
             disconnectButton.onClick.AddListener(() =>
             {
-                UIManager.Instance.LogOut();
+                TDKIdentityUIManager.Instance.LogOut();
             });
 
             SetAddress(TDKServiceLocator.GetService<TDKThirdwebService>().GetWalletAddress());

@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 namespace Treasure
 {
-    public class UIManager : MonoBehaviour
+    public class TDKIdentityUIManager : MonoBehaviour
     {
-        public static UIManager Instance = null;
+        public static TDKIdentityUIManager Instance = null;
 
         [Header("Modals")]
         [SerializeField] private ModalBase loginModal;

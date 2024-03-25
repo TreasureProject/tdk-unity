@@ -753,7 +753,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2047599984710088789}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 989c2991fc663c64596cd34077ab4b62, type: 3}
+  m_Script: {fileID: 11500000, guid: fc4f6d0df81a6fb449cd9cee962e346b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   loginModal: {fileID: 481405605589740029}
@@ -782,6 +782,9 @@ MonoBehaviour:
   RecoveryCodesText: {fileID: 7808273692854208960}
   RecoveryCodesCopy: {fileID: 5990076992123628515}
   OnEmailOTPVerificationFailed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEmailOTPVerificationSuccess:
     m_PersistentCalls:
       m_Calls: []
   confirmLoginModal: {fileID: 4457305158817837224}
