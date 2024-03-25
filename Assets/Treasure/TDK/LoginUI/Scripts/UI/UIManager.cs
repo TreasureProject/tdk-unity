@@ -48,6 +48,15 @@ namespace Treasure
             Application.targetFrameRate = 60;
         }
 
+        private void OnEnable()
+        {
+            if (currentModalOpended != null)
+                currentModalOpended.Hide();
+
+            loginModal.Show();
+            currentModalOpended = loginModal;
+        }
+
         //test code
         IEnumerator SwitchScene()
         {
@@ -89,6 +98,14 @@ namespace Treasure
 
             loginModal.Show();
             currentModalOpended = loginModal;
+        }
+
+        public void HideUI()
+        {
+            if (currentModalOpended != null)
+                currentModalOpended.Hide();
+            currentModalOpended = null;
+            gameObject.SetActive(false);
         }
     }
 }
