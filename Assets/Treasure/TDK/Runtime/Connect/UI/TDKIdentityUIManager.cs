@@ -182,7 +182,7 @@ namespace Treasure
 
             try
             {
-                _address = await ThirdwebManager.Instance.SDK.wallet.Connect(wc);
+                _address = await ThirdwebManager.Instance.SDK.Wallet.Connect(wc);
             }
             catch (Exception e)
             {
@@ -209,7 +209,7 @@ namespace Treasure
 
         public async Task<bool> IsConnected()
         {
-            return await ThirdwebManager.Instance.SDK.wallet.IsConnected();
+            return await ThirdwebManager.Instance.SDK.Wallet.IsConnected();
         }
 
         // public string GetWalletAddress()
@@ -224,7 +224,7 @@ namespace Treasure
 
         public async void Disconnect(bool endSession = false)
         {
-            await ThirdwebManager.Instance.SDK.wallet.Disconnect(endSession);
+            await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession);
         }
         #endregion
     }

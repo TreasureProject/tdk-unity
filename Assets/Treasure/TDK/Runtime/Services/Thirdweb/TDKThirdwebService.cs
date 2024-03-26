@@ -16,7 +16,7 @@ namespace Treasure
 
         public Wallet Wallet
         {
-            get { return ThirdwebManager.Instance.SDK.wallet; }
+            get { return ThirdwebManager.Instance.SDK.Wallet; }
         }
 
         public override void Awake()
@@ -28,7 +28,7 @@ namespace Treasure
 
         public async Task<string> Sign(string message)
         {
-            return await ThirdwebManager.Instance.SDK.wallet.Sign(message);
+            return await ThirdwebManager.Instance.SDK.Wallet.Sign(message);
         }
     }
 }
