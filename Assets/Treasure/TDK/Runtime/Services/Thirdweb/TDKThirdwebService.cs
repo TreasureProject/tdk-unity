@@ -65,6 +65,11 @@ namespace Treasure
            return await Connect(wc);
         }
 
+        public async Task<bool> IsConnected()
+        {
+            return await ThirdwebManager.Instance.SDK.wallet.IsConnected();
+        }
+
         public string GetWalletAddress()
         {
             return _address;

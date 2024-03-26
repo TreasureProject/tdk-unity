@@ -40,7 +40,7 @@ namespace Treasure
             });
             backGroundButton.onClick.AddListener(() =>
             {
-                HideUI();
+                Hide();
             });
 
             if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
@@ -48,19 +48,46 @@ namespace Treasure
 
             TDKServiceLocator.GetService<TDKThirdwebService>().onConnected.AddListener(address =>
             {
-                ShowAccountModal();
+                if(contentHolder.activeInHierarchy)
+                    ShowAccountModal();
             });
 
             Application.targetFrameRate = 60;
         }
 
-        //test code
+        #region test code
         IEnumerator SwitchScene()
         {
             switchSceneButton.interactable = false;
             Screen.orientation = currentOriantation == ScreenOrientation.Portrait ? ScreenOrientation.LandscapeLeft : ScreenOrientation.Portrait;
             yield return null;
             SceneManager.LoadScene(currentOriantation == ScreenOrientation.Portrait ? 1 : 0);
+        }
+        #endregion
+
+        public void Show()
+        {
+            CheckIsConnected();
+        }
+
+        private async void CheckIsConnected()
+        {
+            var isConnected = await TDKServiceLocator.GetService<TDKThirdwebService>().IsConnected();
+            if (isConnected)
+                ShowAccountModal();
+            else
+                ShowLoginModal();
+        }
+
+        public void Hide()
+        {
+            if (currentModalOpended != null)
+                currentModalOpended.Hide();
+
+            currentModalOpended = null;
+
+            contentHolder.SetActive(false);
+            _isActive = false;
         }
 
         public void ShowLoginModal()
@@ -98,17 +125,6 @@ namespace Treasure
 
             loginModal.Show();
             currentModalOpended = loginModal;
-        }
-
-        public void HideUI()
-        {
-            if (currentModalOpended != null)
-                currentModalOpended.Hide();
-
-            currentModalOpended = null;
-
-            contentHolder.SetActive(false);
-            _isActive = false;
         }
 
         private void Activate()

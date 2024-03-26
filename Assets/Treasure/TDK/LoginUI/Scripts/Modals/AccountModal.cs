@@ -20,7 +20,7 @@ namespace Treasure
             closeButton.onClick.AddListener(() =>
             {
                 Hide();
-                TDKIdentityUIManager.Instance.HideUI();
+                TDKIdentityUIManager.Instance.Hide();
             });
             profileButton.onClick.AddListener(() =>
             {
