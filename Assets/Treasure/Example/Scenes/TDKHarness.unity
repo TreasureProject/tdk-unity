@@ -3370,10 +3370,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1400359869}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
+      - m_Target: {fileID: 1155095622}
+        m_TargetAssemblyTypeName: IdentityUI, Assembly-CSharp
+        m_MethodName: OnConnectBtn
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -6600,11 +6600,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1398733169}
   m_CullTransparentMesh: 0
---- !u!1 &1400359869 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2047599984710088789, guid: 6776d51a271f5bc428b27a671d976cd2, type: 3}
-  m_PrefabInstance: {fileID: 115238087}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1405157653
 GameObject:
   m_ObjectHideFlags: 0
