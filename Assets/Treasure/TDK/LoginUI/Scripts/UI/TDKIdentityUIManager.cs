@@ -201,6 +201,10 @@ namespace Treasure
         {
             TDKLogger.LogError($"[TDKIdentityUIManager:PostConnect] address: {_address}");
             onConnected?.Invoke(_address);
+
+#if TDK_HELIKA
+            TDKServiceLocator.GetService<TDKHelikaService>().SetPlayerId(_address);
+#endif
         }
 
         public async Task<bool> IsConnected()
