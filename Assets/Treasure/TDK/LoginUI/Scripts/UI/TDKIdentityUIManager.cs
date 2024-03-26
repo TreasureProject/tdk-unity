@@ -125,6 +125,8 @@ namespace Treasure
 
             loginModal.Show();
             currentModalOpended = loginModal;
+
+            TDKServiceLocator.GetService<TDKThirdwebService>().Disconnect();
         }
 
         private void Activate()

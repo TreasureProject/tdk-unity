@@ -107,6 +107,11 @@ namespace Treasure
             return true;
         }
 
+        public async void Disconnect(bool endSession = false)
+        {
+            await ThirdwebManager.Instance.SDK.wallet.Disconnect(endSession);
+        }
+
         private async void PostConnect(WalletConnection wc = null)
         {
             ThirdwebDebug.Log($"Connected to {_address}");
