@@ -58,8 +58,6 @@ namespace Treasure
             if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
                 Debug.LogError("Service is null");;
 
-            Application.targetFrameRate = 60;
-
             _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
 
             onConnected.AddListener(value =>
