@@ -15,8 +15,16 @@ namespace Treasure
 
             var contents = new List<string>
             {
+                "Assets/Plugins/Android/ThirdwebActivity.java",
+                "Assets/Plugins/Android/Linker.java",
+
+                "Assets/Plugins/iOS/CanOpenURL.m",
+                "Assets/Plugins/iOS/Common.h",
+                "Assets/Plugins/iOS/iOSBrowser.mm",
+
                 $"Assets/{_packageName}",
                 $"Assets/WebGLTemplates/{_packageName}",
+                
                 $"Assets/Treasure/TDK/Editor/Services/{_packageName}",
                 $"Assets/Treasure/TDK/Runtime/Services/{_packageName}"
             };
