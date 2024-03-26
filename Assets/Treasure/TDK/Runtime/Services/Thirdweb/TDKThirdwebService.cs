@@ -1,6 +1,12 @@
 #if TDK_THIRDWEB
+using UnityEngine;
+using UnityEngine.Events;
+using Unity.Android.Types;
+using System;
 using System.Threading.Tasks;
 using Thirdweb;
+
+using System.Numerics;
 
 namespace Treasure
 {

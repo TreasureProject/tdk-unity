@@ -7,6 +7,11 @@ public class IdentityUI : MonoBehaviour
     {
         var walletAddr = await TDK.Identity.GetWalletAddress();
 
-        Debug.Log("Wallet address is:" + walletAddr);
+        TDKLogger.Log("Wallet address is:" + walletAddr);
+    }
+
+    public void OnTreasureConnectBtn()
+    {
+        TDKIdentityUIManager.Instance.Show();
     }
 }
