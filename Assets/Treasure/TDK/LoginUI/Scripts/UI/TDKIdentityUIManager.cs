@@ -56,7 +56,7 @@ namespace Treasure
             });
 
             if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
-                Debug.LogError("Service is null");;
+                TDKLogger.LogError("[TDKIdentityUIManager:Start] Service is null");
 
             _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
 
@@ -176,7 +176,7 @@ namespace Treasure
 
         private async Task<bool> Connect(WalletConnection wc)
         {
-            ThirdwebDebug.Log($"Connecting to {wc.provider}...");
+            TDKLogger.LogError($"[TDKIdentityUIManager:Connect] Connecting to {wc.provider}...");
 
             await new WaitForSeconds(0.5f);
 
@@ -187,7 +187,7 @@ namespace Treasure
             catch (Exception e)
             {
                 _address = null;
-                ThirdwebDebug.LogError($"Failed to connect: {e}");
+                TDKLogger.LogError($"[TDKIdentityUIManager:Connect] error: {e}");
                 onConnectionError?.Invoke(e);
                 return false;
             }
@@ -199,8 +199,7 @@ namespace Treasure
 
         private void PostConnect(WalletConnection wc = null)
         {
-            ThirdwebDebug.Log($"Connected to {_address}");
-
+            TDKLogger.LogError($"[TDKIdentityUIManager:PostConnect] address: {_address}");
             onConnected?.Invoke(_address);
         }
 
