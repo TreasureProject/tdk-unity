@@ -652,7 +652,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5759513628744606653
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1182,7 +1182,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4742016516637491615
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1880,6 +1880,12 @@ MonoBehaviour:
   switchThemeButton: {fileID: 4521979920749245363}
   switchSceneButton: {fileID: 5918252390982917006}
   currentOriantation: 3
+  onConnectionError:
+    m_PersistentCalls:
+      m_Calls: []
+  onConnected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &8321207916387907658
 MonoBehaviour:
   m_ObjectHideFlags: 0
