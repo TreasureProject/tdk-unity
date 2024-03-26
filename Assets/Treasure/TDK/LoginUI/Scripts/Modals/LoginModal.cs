@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
@@ -101,7 +100,7 @@ namespace Treasure
                 
                 connectButton.GetComponent<LoadingButton>().SetLoading(true);
 
-                var result = await TDK.Identity.ConnectEmail(emailInputField.text);
+                var result = await TDKIdentityUIManager.Instance.ConnectEmail(emailInputField.text);
 
                 connectButton.GetComponent<LoadingButton>().SetLoading(false);
 

@@ -65,7 +65,7 @@ namespace Treasure
         {
             confirmationInputCodeHolder.SetActive(appSettingsData.hasCodeToConfirmEmail);
             infoText.text = appSettingsData.hasCodeToConfirmEmail ?
-                $"We have sent a code to {TDKServiceLocator.GetService<TDKThirdwebService>().GetUserEmail()}, please enter it below to confirm  your login" :
+                $"We have sent a code to {TDKIdentityUIManager.Instance.GetUserEmail()}, please enter it below to confirm  your login" :
                 "Please click the link in the email to verify your login";
         }
 

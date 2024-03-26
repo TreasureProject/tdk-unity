@@ -31,7 +31,7 @@ namespace Treasure
                 TDKIdentityUIManager.Instance.LogOut();
             });
 
-            SetAddress(TDKServiceLocator.GetService<TDKThirdwebService>().GetWalletAddress());
+            SetAddress(TDKIdentityUIManager.Instance.GetWalletAddress());
         }
 
         public void SetAddress(string address)

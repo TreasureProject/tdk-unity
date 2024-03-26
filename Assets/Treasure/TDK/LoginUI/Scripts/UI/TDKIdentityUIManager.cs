@@ -1,6 +1,10 @@
+using System;
 using System.Collections;
-using Thirdweb.Wallets;
+using System.Numerics;
+using System.Threading.Tasks;
+using Thirdweb;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -25,6 +29,14 @@ namespace Treasure
 
         private bool _isActive = false;
 
+        public UnityEvent<Exception> onConnectionError = new UnityEvent<Exception>();
+        public UnityEvent<string> onConnected = new UnityEvent<string>();
+
+        private string _address;
+        private string _email;
+        private bool useSmartWallets = true;
+        private ChainData _currentChainData;
+
         private void Awake()
         {
             if (Instance == null)
@@ -44,15 +56,16 @@ namespace Treasure
             });
 
             if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
-                Debug.LogError("Service is null");
-
-            TDKServiceLocator.GetService<TDKThirdwebService>().onConnected.AddListener(address =>
-            {
-                if(contentHolder.activeInHierarchy)
-                    ShowAccountModal();
-            });
+                Debug.LogError("Service is null");;
 
             Application.targetFrameRate = 60;
+
+            _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
+
+            onConnected.AddListener(value =>
+            {
+                ShowAccountModal();
+            });
         }
 
         #region test code
@@ -65,6 +78,7 @@ namespace Treasure
         }
         #endregion
 
+        #region Show and Hide
         public void Show()
         {
             CheckIsConnected();
@@ -72,7 +86,7 @@ namespace Treasure
 
         private async void CheckIsConnected()
         {
-            var isConnected = await TDKServiceLocator.GetService<TDKThirdwebService>().IsConnected();
+            var isConnected = await IsConnected();
             if (isConnected)
                 ShowAccountModal();
             else
@@ -89,7 +103,9 @@ namespace Treasure
             contentHolder.SetActive(false);
             _isActive = false;
         }
+        #endregion
 
+        #region Changing modals
         public void ShowLoginModal()
         {
             Activate();
@@ -126,7 +142,7 @@ namespace Treasure
             loginModal.Show();
             currentModalOpended = loginModal;
 
-            TDKServiceLocator.GetService<TDKThirdwebService>().Disconnect();
+            Disconnect();
         }
 
         private void Activate()
@@ -134,5 +150,78 @@ namespace Treasure
             contentHolder.SetActive(true);
             _isActive = true;
         }
+        #endregion
+
+        #region Connecting
+        public async Task<bool> ConnectEmail(string email)
+        {
+            _email = email;
+            var wc = useSmartWallets
+                ? new WalletConnection(
+                    provider: WalletProvider.SmartWallet,
+                    chainId: BigInteger.Parse(_currentChainData.chainId),
+                    email: email,
+                    authOptions: new AuthOptions(AuthProvider.EmailOTP),
+                    personalWallet: WalletProvider.EmbeddedWallet
+                )
+                : new WalletConnection(
+                    provider: WalletProvider.EmbeddedWallet,
+                    chainId: BigInteger.Parse(_currentChainData.chainId),
+                    email: email,
+                    authOptions: new AuthOptions(AuthProvider.EmailOTP)
+                );
+            return await Connect(wc);
+        }
+
+        private async Task<bool> Connect(WalletConnection wc)
+        {
+            ThirdwebDebug.Log($"Connecting to {wc.provider}...");
+
+            await new WaitForSeconds(0.5f);
+
+            try
+            {
+                _address = await ThirdwebManager.Instance.SDK.wallet.Connect(wc);
+            }
+            catch (Exception e)
+            {
+                _address = null;
+                ThirdwebDebug.LogError($"Failed to connect: {e}");
+                onConnectionError?.Invoke(e);
+                return false;
+            }
+
+            PostConnect(wc);
+
+            return true;
+        }
+
+        private async void PostConnect(WalletConnection wc = null)
+        {
+            ThirdwebDebug.Log($"Connected to {_address}");
+
+            onConnected?.Invoke(_address);
+        }
+
+        public async Task<bool> IsConnected()
+        {
+            return await ThirdwebManager.Instance.SDK.wallet.IsConnected();
+        }
+
+        public string GetWalletAddress()
+        {
+            return _address;
+        }
+
+        public string GetUserEmail()
+        {
+            return _email;
+        }
+
+        public async void Disconnect(bool endSession = false)
+        {
+            await ThirdwebManager.Instance.SDK.wallet.Disconnect(endSession);
+        }
+        #endregion
     }
 }
