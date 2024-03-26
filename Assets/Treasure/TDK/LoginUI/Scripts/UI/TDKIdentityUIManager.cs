@@ -10,18 +10,20 @@ namespace Treasure
     {
         public static TDKIdentityUIManager Instance = null;
 
+        [SerializeField] private GameObject contentHolder;
         [Header("Modals")]
         [SerializeField] private ModalBase loginModal;
         [SerializeField] private ModalBase confirmLoginModal;
+        [SerializeField] private ModalBase logedInHolder;
         [SerializeField] private Button backGroundButton;
         [Header("Test buttons")]
         [SerializeField] private Button switchThemeButton;
         [SerializeField] private Button switchSceneButton;
-        [SerializeField] private ScreenOrientation currentOriantation;
-        [Header("Active object")]
-        [SerializeField] private GameObject logedInHolder;
+        [SerializeField] private ScreenOrientation currentOriantation;       
 
         private ModalBase currentModalOpended;
+
+        private bool _isActive = false;
 
         private void Awake()
         {
@@ -41,7 +43,6 @@ namespace Treasure
                 HideUI();
             });
 
-            currentModalOpended = loginModal;
             if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
                 Debug.LogError("Service is null");
 
@@ -51,15 +52,6 @@ namespace Treasure
             });
 
             Application.targetFrameRate = 60;
-        }
-
-        private void OnEnable()
-        {
-            if (currentModalOpended != null)
-                currentModalOpended.Hide();
-
-            loginModal.Show();
-            currentModalOpended = loginModal;
         }
 
         //test code
@@ -73,11 +65,12 @@ namespace Treasure
 
         public void ShowLoginModal()
         {
+            Activate();
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
 
             loginModal.Show();
-            currentModalOpended = loginModal;
+            currentModalOpended = loginModal;        
         }
 
         public void ShowConfirmLoginModal()
@@ -91,15 +84,17 @@ namespace Treasure
 
         public void ShowAccountModal()
         {
+            Activate();
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
 
-            logedInHolder.SetActive(true);
+            currentModalOpended = logedInHolder;
+            logedInHolder.Show();         
         }
 
         public void LogOut()
         {
-            logedInHolder.SetActive(false);
+            logedInHolder.Hide();
 
             loginModal.Show();
             currentModalOpended = loginModal;
@@ -109,8 +104,17 @@ namespace Treasure
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
+
             currentModalOpended = null;
-            gameObject.SetActive(false);
+
+            contentHolder.SetActive(false);
+            _isActive = false;
+        }
+
+        private void Activate()
+        {
+            contentHolder.SetActive(true);
+            _isActive = true;
         }
     }
 }
