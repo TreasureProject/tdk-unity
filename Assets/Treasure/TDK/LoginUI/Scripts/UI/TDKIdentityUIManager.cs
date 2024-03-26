@@ -13,6 +13,7 @@ namespace Treasure
         [Header("Modals")]
         [SerializeField] private ModalBase loginModal;
         [SerializeField] private ModalBase confirmLoginModal;
+        [SerializeField] private Button backGroundButton;
         [Header("Test buttons")]
         [SerializeField] private Button switchThemeButton;
         [SerializeField] private Button switchSceneButton;
@@ -34,6 +35,10 @@ namespace Treasure
             switchSceneButton.onClick.AddListener(() =>
             {
                 StartCoroutine(SwitchScene());
+            });
+            backGroundButton.onClick.AddListener(() =>
+            {
+                HideUI();
             });
 
             currentModalOpended = loginModal;
