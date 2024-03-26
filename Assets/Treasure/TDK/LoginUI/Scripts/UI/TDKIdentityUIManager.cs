@@ -106,8 +106,11 @@ namespace Treasure
         #endregion
 
         #region Changing modals
-        public void ShowLoginModal()
+        public void ShowLoginModal(bool disconnect = false)
         {
+            if (disconnect)
+                Disconnect();
+
             Activate();
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
