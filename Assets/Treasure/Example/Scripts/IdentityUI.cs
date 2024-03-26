@@ -10,13 +10,8 @@ public class IdentityUI : MonoBehaviour
         Debug.Log("Wallet address is:" + walletAddr);
     }
 
-    public void OnConnectBtn()
+    public void OnTreasureConnectBtn()
     {
-        TDKIdentityUIManager.Instance.ShowLoginModal();
-    }
-
-    public void OnAccountBtn()
-    {
-        TDKIdentityUIManager.Instance.ShowAccountModal();
+        TDKIdentityUIManager.Instance.Show();
     }
 }
