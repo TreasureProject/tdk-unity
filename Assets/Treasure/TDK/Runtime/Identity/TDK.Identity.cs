@@ -175,6 +175,11 @@ namespace Treasure
 #endif
         }
 
+        public async Task<User> GetUser()
+        {
+            return await TDK.API.GetUser();
+        }
+
         public void LogOut()
         {
             _authToken = null;
