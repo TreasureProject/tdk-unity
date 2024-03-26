@@ -99,7 +99,7 @@ namespace Treasure
                     throw new UnityException("Ancient Permits balance too low");
                 }
 
-                if (!userApprovedPermits)
+                if (!userPermitsApproved)
                 {
                     approvalTasks.Add(ApprovePermits());
                 }

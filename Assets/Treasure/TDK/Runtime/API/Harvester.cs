@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -8,15 +9,28 @@ namespace Treasure
     [Serializable]
     public partial class Harvester
     {
+        public struct Booster
+        {
+            public BigInteger tokenId;
+            public string user;
+            public int endTimestamp;
+        }
+
         public string id;
         public string nftHandlerAddress;
         public string permitsAddress;
         public int permitsTokenId;
         public BigInteger permitsDepositCap;
+        public string boostersStakingRulesAddress;
+        public int boostersMaxStakeable;
+        public List<Booster> boosters;
+        public BigInteger boostersTotalBoost;
         public BigInteger userMagicBalance;
-        public int userPermitsBalance;
         public BigInteger userMagicAllowance;
-        public bool userApprovedPermits;
+        public int userPermitsBalance;
+        public bool userPermitsApproved;
+        public List<(int, int)> userBoostersBalances;
+        public bool userBoostersApproved;
         public BigInteger userDepositCap;
         public BigInteger userDepositAmount;
     }
