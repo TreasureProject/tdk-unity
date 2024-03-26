@@ -736,7 +736,7 @@ GameObject:
   - component: {fileID: 23725542384211057}
   - component: {fileID: 2421418802694091983}
   m_Layer: 5
-  m_Name: TDKLoginCanvasPortrait
+  m_Name: TDKConnectCanvasPortrait
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

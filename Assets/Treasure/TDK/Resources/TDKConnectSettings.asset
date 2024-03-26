@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b186a28374a1e2d4e860609f1a85e5b0, type: 3}
-  m_Name: TDKLoginSettings
+  m_Name: TDKConnectSettings
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 5d3487bda3f0b514fb818469b85a752c, type: 3}
   title: Zeeverse

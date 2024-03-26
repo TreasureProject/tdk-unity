@@ -176,7 +176,7 @@ namespace Treasure
 
         private async Task<bool> Connect(WalletConnection wc)
         {
-            TDKLogger.LogError($"[TDKIdentityUIManager:Connect] Connecting to {wc.provider}...");
+            TDKLogger.Log($"[TDKIdentityUIManager:Connect] Connecting to {wc.provider}...");
 
             await new WaitForSeconds(0.5f);
 
@@ -199,7 +199,7 @@ namespace Treasure
 
         private void PostConnect(WalletConnection wc = null)
         {
-            TDKLogger.LogError($"[TDKIdentityUIManager:PostConnect] address: {_address}");
+            TDKLogger.Log($"[TDKIdentityUIManager:PostConnect] address: {_address}");
             onConnected?.Invoke(_address);
 
 #if TDK_HELIKA
