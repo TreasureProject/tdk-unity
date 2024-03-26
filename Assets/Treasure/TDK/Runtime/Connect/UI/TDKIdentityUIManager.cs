@@ -197,14 +197,13 @@ namespace Treasure
             return true;
         }
 
-        private void PostConnect(WalletConnection wc = null)
+        private async void PostConnect(WalletConnection wc = null)
         {
             TDKLogger.Log($"[TDKIdentityUIManager:PostConnect] address: {_address}");
             onConnected?.Invoke(_address);
 
-#if TDK_HELIKA
-            TDKServiceLocator.GetService<TDKHelikaService>().SetPlayerId(_address);
-#endif
+            var chainId = await TDK.Identity.GetChainId();
+            TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
         }
 
         public async Task<bool> IsConnected()
