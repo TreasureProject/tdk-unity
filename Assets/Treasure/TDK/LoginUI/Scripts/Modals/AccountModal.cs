@@ -15,7 +15,7 @@ namespace Treasure
         [SerializeField] private TMP_Text adressText;
         [SerializeField] private CopyButton copyButton;
 
-        private void Start()
+        private async void Start()
         {
             closeButton.onClick.AddListener(() =>
             {
@@ -31,7 +31,7 @@ namespace Treasure
                 TDKIdentityUIManager.Instance.LogOut();
             });
 
-            SetAddress(TDKIdentityUIManager.Instance.GetWalletAddress());
+            SetAddress(await TDK.Identity.GetWalletAddress());
         }
 
         public void SetAddress(string address)

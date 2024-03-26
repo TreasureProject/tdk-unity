@@ -196,7 +196,7 @@ namespace Treasure
             return true;
         }
 
-        private async void PostConnect(WalletConnection wc = null)
+        private void PostConnect(WalletConnection wc = null)
         {
             ThirdwebDebug.Log($"Connected to {_address}");
 
@@ -208,10 +208,10 @@ namespace Treasure
             return await ThirdwebManager.Instance.SDK.wallet.IsConnected();
         }
 
-        public string GetWalletAddress()
-        {
-            return _address;
-        }
+        // public string GetWalletAddress()
+        // {
+        //     return _address;
+        // }
 
         public string GetUserEmail()
         {
