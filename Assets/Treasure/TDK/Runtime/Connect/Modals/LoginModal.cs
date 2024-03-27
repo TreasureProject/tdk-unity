@@ -101,7 +101,7 @@ namespace Treasure
                 connectButton.GetComponent<LoadingButton>().SetLoading(true);
 
                 // var result;
-                await TDKIdentityUIManager.Instance.ConnectEmail(emailInputField.text);
+                await TDKConnectUIManager.Instance.ConnectEmail(emailInputField.text);
 
                 connectButton.GetComponent<LoadingButton>().SetLoading(false);
 

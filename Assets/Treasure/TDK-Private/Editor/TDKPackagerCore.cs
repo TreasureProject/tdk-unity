@@ -19,6 +19,7 @@ namespace Treasure
                 "Assets/Treasure/Example",
 
                 // Editor
+                "Assets/Treasure/TDK/Editor/TDK.Editor.asmdef",
                 "Assets/Treasure/TDK/Editor/TDKConfigEditor.cs",
                 "Assets/Treasure/TDK/Editor/TDKConfigWindow.cs",
 
@@ -29,14 +30,22 @@ namespace Treasure
                 "Assets/Treasure/TDK/Runtime/Common",
                 "Assets/Treasure/TDK/Runtime/Identity",
                 "Assets/Treasure/TDK/Runtime/Infrastructure",
+
+                "Assets/Treasure/TDK/Runtime/Services/Treasure",
                 
                 "Assets/Treasure/TDK/Runtime/TDK.cs",
+                "Assets/Treasure/TDK/Runtime/TDK.Runtime.asmdef",
                 "Assets/Treasure/TDK/Runtime/TDKConfig.cs",
                 "Assets/Treasure/TDK/Runtime/TDKVersion.cs",
                 "Assets/Treasure/TDK/Runtime/Utils",
+
+                // Resources
+                "Assets/Treasure/TDK/Resources/TDKConnectSettings.asset",
+                "Assets/Treasure/TDK/Resources/TDKConnectThemeData.asset",
+
                 "Assets/package.json",
 
-                "Assets/Treasure/TDK/Runtime/Services/Treasure"
+                
             };
 
             AssetDatabase.Refresh();

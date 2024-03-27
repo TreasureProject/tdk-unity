@@ -12,6 +12,8 @@ public class IdentityUI : MonoBehaviour
 
     public void OnTreasureConnectBtn()
     {
-        TDKIdentityUIManager.Instance.Show();
+#if TDK_THIRDWEB
+        TDK.Connect.Show();
+#endif
     }
 }
