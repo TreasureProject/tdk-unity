@@ -1,4 +1,3 @@
-#if TDK_THIRDWEB
 using UnityEngine;
 using UnityEngine.Events;
 using Unity.Android.Types;
@@ -12,6 +11,7 @@ namespace Treasure
 {
     public class TDKThirdwebService : TDKBaseService
     {
+#if TDK_THIRDWEB
         private TDKThirdwebConfig _config;
 
         public Wallet Wallet
@@ -30,6 +30,6 @@ namespace Treasure
         {
             return await ThirdwebManager.Instance.SDK.Wallet.Sign(message);
         }
+#endif
     }
 }
-#endif
