@@ -8,7 +8,7 @@ namespace Treasure
     {
         private static string _packageName = "Thirdweb";
 
-        [MenuItem("Treasure/TDK/Export Packages/Service-Thirdweb", false, 800)]
+        [MenuItem("Treasure/TDK/Export Packages/Service-Thirdweb", false, 803)]
         public static void ExportPackage()
         {
             Debug.Log($"Exporting TDK {_packageName} Module Package...");

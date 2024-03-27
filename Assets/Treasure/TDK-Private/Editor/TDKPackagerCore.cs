@@ -8,7 +8,7 @@ namespace Treasure
     {
         private static string _packageName = "Core";
 
-        [MenuItem("Treasure/TDK/Export Packages/Core", false, 800)]
+        [MenuItem("Treasure/TDK/Export Packages/Core", false, 801)]
         public static void ExportPackage()
         {
             Debug.Log(string.Format("Exporting TDK {0} Core Package...", _packageName.ToString()));
