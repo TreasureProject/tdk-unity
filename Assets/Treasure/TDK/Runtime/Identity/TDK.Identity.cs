@@ -1,14 +1,13 @@
-using Newtonsoft.Json;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
+using System;
+using System.Numerics;
 
 #if TDK_THIRDWEB
 using Thirdweb;
 using Nethereum.Siwe.Core;
 #endif
-
-using UnityEngine;
-using UnityEngine.Networking;
 
 namespace Treasure
 {
@@ -37,13 +36,11 @@ namespace Treasure
         #endregion
 
         #region accessors / mutators
-
 #if TDK_THIRDWEB
         private Wallet _wallet
         {
             get
             {
-
                 return TDKServiceLocator.GetService<TDKThirdwebService>().Wallet;
             }
         }
@@ -114,11 +111,56 @@ namespace Treasure
         #endregion
 
         #region public api
+        public void LogOut()
+        {
+            _authToken = null;
+            _isAuthenticated = false;
+        }
+
         public async Task<string> Authenticate(string projectSlug)
         {
+#if TDK_THIRDWEB
             var project = await TDK.API.GetProjectBySlug(projectSlug);
             var address = await GetWalletAddress();
             var chainId = (int)await GetChainId();
+            var backendWallet = project.backendWallets[0].ToLowerInvariant();
+            var requestedCallTargets = project.callTargets.Select(callTarget => callTarget.ToLowerInvariant());
+            var didCreateSession = false;
+            var hasActiveSession = false;
+            try
+            {
+                var activeSigners = await _wallet.GetAllActiveSigners();
+                hasActiveSession = activeSigners.Any((signer) =>
+                {
+                    var signerCallTargets = signer.permissions.approvedCallTargets.Select(callTarget => callTarget.ToLowerInvariant());
+                    return signer.signer.ToLowerInvariant() == backendWallet &&
+                        requestedCallTargets.All(callTarget => signerCallTargets.Contains(callTarget));
+                });
+                if (hasActiveSession)
+                {
+                    TDKLogger.Log("Using existing session key");
+                }
+            }
+            catch
+            {
+                // Call can expectedly throw if smart wallet is not deployed already
+            }
+
+            // Create session (and deploy smart wallet if undeployed)
+            if (!didCreateSession && !hasActiveSession)
+            {
+                TDKLogger.Log("Creating new session key");
+                var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
+                await _wallet.CreateSessionKey(
+                    signerAddress: project.backendWallets[0],
+                    approvedTargets: project.callTargets,
+                    nativeTokenLimitPerTransactionInWei: "0",
+                    permissionStartTimestamp: "0",
+                    permissionEndTimestamp: permissionEndTimestamp.ToString(),
+                    reqValidityStartTimestamp: "0",
+                    reqValidityEndTimestamp: permissionEndTimestamp.ToString()
+                );
+            }
 
             // Create auth token
             TDKLogger.Log("Generating auth payload");
@@ -130,20 +172,6 @@ namespace Treasure
             TDKLogger.Log("Logging in smart wallet");
             var token = await TDK.API.LogIn(payload, signature);
 
-#if TDK_THIRDWEB
-            // Create session key
-            TDKLogger.Log("Creating smart wallet session key");
-            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
-            await _wallet.CreateSessionKey(
-                signerAddress: project.backendWallets[0],
-                approvedTargets: project.callTargets,
-                nativeTokenLimitPerTransactionInWei: "0",
-                permissionStartTimestamp: "0",
-                permissionEndTimestamp: permissionEndTimestamp.ToString(),
-                reqValidityStartTimestamp: "0",
-                reqValidityEndTimestamp: permissionEndTimestamp.ToString()
-            );
-
             _authToken = token;
             _isAuthenticated = true;
 
@@ -152,12 +180,6 @@ namespace Treasure
             TDKLogger.LogError("Unable to authenticate. TDK Identity wallet service not implemented.");
             return await Task.FromResult<string>(string.Empty);
 #endif
-        }
-
-        public void LogOut()
-        {
-            _authToken = null;
-            _isAuthenticated = false;
         }
         #endregion
     }

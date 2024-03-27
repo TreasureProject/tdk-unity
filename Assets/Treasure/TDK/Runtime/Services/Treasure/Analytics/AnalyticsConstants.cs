@@ -33,8 +33,11 @@ namespace Treasure
         public const string PROP_APP_IS_EDITOR = "app_is_editor";
         public const string PROP_APP_VERSION = "app_version";
         public const string PROP_APP_ENVIRONMENT = "app_environment";
+        public const string SMART_ACCOUNT = "smart_account";
+        public const string CHAIN_ID = "chain_id";
 
         // events
         public const string EVT_APP_START = "app_start";
+        public const string EVT_SMART_ACCOUNT_SET = "smart_account_set";
     }
 }

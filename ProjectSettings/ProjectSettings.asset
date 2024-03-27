@@ -835,7 +835,7 @@ PlayerSettings:
   webGLPowerPreference: 2
   scriptingDefineSymbols:
     Android: TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary
-    Standalone: TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary
+    Standalone: TDK_HELIKA;RH_SerializedDictionary;TDK_THIRDWEB
     WebGL: TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary
     iPhone: TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary
   additionalCompilerArguments: {}

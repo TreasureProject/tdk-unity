@@ -60,6 +60,7 @@ namespace Treasure
             Instance.InitAnalytics();
             Instance.InitAPI();
             Instance.InitIdentity();
+            Instance.InitConnect();
             Instance.InitBridgeworld();
 
             // track app start event
