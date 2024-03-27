@@ -32,7 +32,7 @@ namespace Treasure
 
             didntReceiveEmailButton.onClick.AddListener(() =>
             {
-                TDKIdentityUIManager.Instance.ShowLoginModal(true);
+                TDKConnectUIManager.Instance.ShowLoginModal(true);
             });
         }
 
@@ -41,7 +41,7 @@ namespace Treasure
             confirmCode.GetComponent<LoadingButton>().SetLoading(false);
 
             infoText.text = appSettingsData.hasCodeToConfirmEmail ?
-                $"We have sent a code to {TDKIdentityUIManager.Instance.GetUserEmail()}, please enter it below to confirm  your login" :
+                $"We have sent a code to {TDKConnectUIManager.Instance.GetUserEmail()}, please enter it below to confirm  your login" :
                 "Please click the link in the email to verify your login";
         }
 

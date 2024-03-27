@@ -10,9 +10,9 @@ using UnityEngine.UI;
 
 namespace Treasure
 {
-    public class TDKIdentityUIManager : MonoBehaviour
+    public class TDKConnectUIManager : MonoBehaviour
     {
-        public static TDKIdentityUIManager Instance = null;
+        public static TDKConnectUIManager Instance = null;
 
         [SerializeField] private GameObject contentHolder;
         [Header("Modals")]
@@ -56,7 +56,7 @@ namespace Treasure
             });
 
             if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
-                TDKLogger.LogError("[TDKIdentityUIManager:Start] Service is null");
+                TDKLogger.LogError("[TDKConnectUIManager:Start] Service is null");
 
             _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
 
@@ -176,7 +176,7 @@ namespace Treasure
 
         private async Task<bool> Connect(WalletConnection wc)
         {
-            TDKLogger.Log($"[TDKIdentityUIManager:Connect] Connecting to {wc.provider}...");
+            TDKLogger.Log($"[TDKConnectUIManager:Connect] Connecting to {wc.provider}...");
 
             await new WaitForSeconds(0.5f);
 
@@ -187,7 +187,7 @@ namespace Treasure
             catch (Exception e)
             {
                 _address = null;
-                TDKLogger.LogError($"[TDKIdentityUIManager:Connect] error: {e}");
+                TDKLogger.LogError($"[TDKConnectUIManager:Connect] error: {e}");
                 onConnectionError?.Invoke(e);
                 return false;
             }
@@ -199,7 +199,7 @@ namespace Treasure
 
         private async void PostConnect(WalletConnection wc = null)
         {
-            TDKLogger.Log($"[TDKIdentityUIManager:PostConnect] address: {_address}");
+            TDKLogger.Log($"[TDKConnectUIManager:PostConnect] address: {_address}");
             onConnected?.Invoke(_address);
 
             var chainId = await TDK.Identity.GetChainId();
