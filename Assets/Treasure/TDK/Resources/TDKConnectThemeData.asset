@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6cc46485244f94fb154432157abfff, type: 3}
+  m_Name: TDKConnectThemeData
+  m_EditorClassIdentifier: 
+  data:
+  - type: 0
+    lightColor: {r: 1, g: 0.9882353, b: 0.9607843, a: 1}
+    darkColor: {r: 0.047058824, g: 0.078431375, b: 0.1254902, a: 1}
+  - type: 1
+    lightColor: {r: 1, g: 0.98039216, b: 0.9372549, a: 1}
+    darkColor: {r: 0.09803922, g: 0.14509805, b: 0.22745098, a: 1}
+  - type: 2
+    lightColor: {r: 0.90588236, g: 0.9098039, b: 0.9137255, a: 1}
+    darkColor: {r: 0.12156863, g: 0.1764706, b: 0.27058825, a: 1}
+  - type: 3
+    lightColor: {r: 0.2784314, g: 0.2901961, b: 0.3137255, a: 1}
+    darkColor: {r: 0.53333336, g: 0.54901963, b: 0.5764706, a: 1}
+  - type: 4
+    lightColor: {r: 0.039215688, g: 0.06666667, b: 0.10980392, a: 1}
+    darkColor: {r: 1, g: 1, b: 1, a: 1}
+  - type: 5
+    lightColor: {r: 0.4392157, g: 0.45490196, b: 0.49019608, a: 1}
+    darkColor: {r: 0.62352943, g: 0.6392157, b: 0.6627451, a: 1}
+  - type: 6
+    lightColor: {r: 0.99215686, g: 0.92156863, b: 0.7529412, a: 1}
+    darkColor: {r: 0.07450981, g: 0.11372549, b: 0.18039216, a: 1}
+  - type: 7
+    lightColor: {r: 1, g: 1, b: 1, a: 1}
+    darkColor: {r: 0.07450981, g: 0.11372549, b: 0.18039216, a: 1}
+  - type: 8
+    lightColor: {r: 0.8117647, g: 0.81960785, b: 0.83137256, a: 1}
+    darkColor: {r: 0.09803922, g: 0.14509805, b: 0.22745098, a: 1}
+  - type: 9
+    lightColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    darkColor: {r: 1, g: 1, b: 1, a: 1}
+  - type: 10
+    lightColor: {r: 0.21176471, g: 0.27450982, b: 0.3882353, a: 1}
+    darkColor: {r: 1, g: 1, b: 1, a: 1}
+  - type: 11
+    lightColor: {r: 1, g: 0.8392157, b: 0.8392157, a: 1}
+    darkColor: {r: 0.07450981, g: 0.11372549, b: 0.18039216, a: 1}
+  - type: 12
+    lightColor: {r: 0.95686275, g: 0.18431373, b: 0.18431373, a: 1}
+    darkColor: {r: 1, g: 1, b: 1, a: 1}

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using System;
+using System.Numerics;
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -110,6 +111,12 @@ namespace Treasure
         #endregion
 
         #region public api
+        public void LogOut()
+        {
+            _authToken = null;
+            _isAuthenticated = false;
+        }
+
         public async Task<string> Authenticate(string projectSlug)
         {
 #if TDK_THIRDWEB
@@ -178,12 +185,6 @@ namespace Treasure
         public async Task<User> GetUser()
         {
             return await TDK.API.GetUser();
-        }
-
-        public void LogOut()
-        {
-            _authToken = null;
-            _isAuthenticated = false;
         }
         #endregion
     }

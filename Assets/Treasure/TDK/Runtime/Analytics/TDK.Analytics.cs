@@ -29,6 +29,21 @@ namespace Treasure
             // no-op, but for tracking foreground/background
         }
 
+        internal void SetTreasureConnectInfo(string smartWalletAddress, int chainId)
+        {
+#if TDK_ANALYTICS
+            TDKServiceLocator.GetService<TDKAnalyticsService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
+#endif
+
+#if TDK_HELIKA
+            TDKServiceLocator.GetService<TDKHelikaService>().SetPlayerId(smartWalletAddress);
+#endif
+            TrackCustomEvent(AnalyticsConstants.EVT_SMART_ACCOUNT_SET, new Dictionary<string, object>()
+            {
+                { AnalyticsConstants.CHAIN_ID, chainId }
+            });
+        }
+
         public void TrackCustomEvent(string eventName, Dictionary<string, object> eventProps = null)
         {
             // send events to treasure analytics

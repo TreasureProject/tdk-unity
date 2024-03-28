@@ -8,7 +8,7 @@ namespace Treasure
     {
         private static string _packageName = "Helika";
 
-        [MenuItem("Treasure/TDK/Export Packages/Service-Helika", false, 800)]
+        [MenuItem("Treasure/TDK/Export Packages/Service-Helika", false, 802)]
         public static void ExportPackage()
         {
             Debug.Log($"Exporting TDK {_packageName} Module Package...");
@@ -25,7 +25,7 @@ namespace Treasure
             AssetDatabase.ExportPackage(
                 contents.ToArray(),
                 string.Format("{0}_v{1}_{2}.unitypackage", TDKVersion.name, TDKVersion.version, _packageName.ToString()),
-                ExportPackageOptions.Recurse | ExportPackageOptions.IncludeDependencies);
+                ExportPackageOptions.Recurse);
 
             Debug.Log($"TDK {_packageName} Module Package exported");
         }
