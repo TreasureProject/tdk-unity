@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Thirdweb;
 using Thirdweb.EWS;
@@ -37,14 +35,14 @@ namespace Treasure
                 {
                     SubmitButton.GetComponent<LoadingButton>().SetLoading(true);
                     OnSubmitOTP();
-                }              
+                }
             });
 
             await OnSendOTP();
             TDKConnectUIManager.Instance.ShowConfirmLoginModal();
         }
 
-        public override async Task<User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
+        public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;
