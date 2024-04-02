@@ -18,21 +18,32 @@ namespace Treasure
 
         public string id;
         public string nftHandlerAddress;
+        public string permitsStakingRulesAddress;
+        public string boostersStakingRulesAddress;
+        public string legionsStakingRulesAddress;
+        public string treasuresStakingRulesAddress;
+        public string charactersStakingRulesAddress;
         public string permitsAddress;
         public int permitsTokenId;
-        public BigInteger permitsDepositCap;
-        public string boostersStakingRulesAddress;
+        public int permitsMaxStakeable;
+        public BigInteger permitsMagicMaxStakeable;
         public int boostersMaxStakeable;
+        public BigInteger magicMaxStakeable;
+        public double totalEmissionsActivated;
+        public BigInteger totalMagicStaked;
+        public double totalBoost;
+        public double totalBoostersBoost;
         public List<Booster> boosters;
-        public BigInteger boostersTotalBoost;
         public BigInteger userMagicBalance;
         public BigInteger userMagicAllowance;
         public int userPermitsBalance;
         public bool userPermitsApproved;
-        public List<(int, int)> userBoostersBalances;
+        public Dictionary<int, int> userBoostersBalances;
         public bool userBoostersApproved;
-        public BigInteger userDepositCap;
-        public BigInteger userDepositAmount;
+        public double userTotalBoost;
+        public BigInteger userMagicMaxStakeable;
+        public BigInteger userMagicStaked;
+        public BigInteger userMagicRewardsClaimable;
     }
 
     public partial class API
