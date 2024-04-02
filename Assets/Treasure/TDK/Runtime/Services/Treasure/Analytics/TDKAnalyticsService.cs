@@ -8,8 +8,6 @@ namespace Treasure
 {
     public partial class TDKAnalyticsService : TDKBaseService
     {
-        public const uint EventsVersion = 1;
-
         private Dictionary<string, object> _deviceInfo;
         private Dictionary<string, object> _appInfo;
         private string _sessionId;
@@ -122,7 +120,8 @@ namespace Treasure
                 { AnalyticsConstants.PROP_NAME, eventName }, // event_name
                 { AnalyticsConstants.PROP_SESSION_ID, _sessionId }, // session_id
                 { AnalyticsConstants.PROP_ID, Guid.NewGuid().ToString("N") }, // event_id
-                { AnalyticsConstants.PROP_VERSION, EventsVersion }, // event_version
+                { AnalyticsConstants.PROP_TDK_VERSION, TDKVersion.version }, // tdk_version
+                { AnalyticsConstants.PROP_TDK_FLAVOUR, TDKVersion.name }, // tdk_flavour
                 { AnalyticsConstants.PROP_TIME_LOCAL, TDKTimeKeeper.LocalEpochTime }, // event_time_local
                 { AnalyticsConstants.PROP_TIME_SERVER, TDKTimeKeeper.ServerEpochTime }, // event_time_server
                 { AnalyticsConstants.PROP_PROPERTIES, eventProps }, // event_properties

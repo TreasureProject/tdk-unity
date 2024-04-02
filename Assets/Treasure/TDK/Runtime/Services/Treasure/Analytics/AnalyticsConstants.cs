@@ -16,7 +16,6 @@ namespace Treasure
         public const string CARTRIDGE_TAG = "cartridge_tag";
         public const string PROP_NAME = "name";
         public const string PROP_ID = "id";
-        public const string PROP_VERSION = "version";
         public const string PROP_TIME_LOCAL = "time_local";
         public const string PROP_TIME_SERVER = "time_server";
         public const string PROP_PROPERTIES = "properties";
@@ -32,6 +31,8 @@ namespace Treasure
         public const string PROP_APP_IDENTIFIER = "app_identifier";
         public const string PROP_APP_IS_EDITOR = "app_is_editor";
         public const string PROP_APP_VERSION = "app_version";
+        public const string PROP_TDK_FLAVOUR = "tdk_flavour";
+        public const string PROP_TDK_VERSION = "tdk_version";
         public const string PROP_APP_ENVIRONMENT = "app_environment";
         public const string PROP_SMART_ACCOUNT = "smart_account";
         public const string PROP_CHAIN_ID = "chain_id";
