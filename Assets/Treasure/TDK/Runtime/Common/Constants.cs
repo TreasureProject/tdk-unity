@@ -21,7 +21,8 @@ namespace Treasure
         public const string PPREFS_EPOCH_DIFF = "treasure.epoch_diff";
 
         // misc values
-        public const string SERVER_TIME_ENDPOINT =  "https://trove-api.treasure.lol/v1/time";
+        public const string SERVER_TIME_ENDPOINT_DEV =  "https://darkmatter-dev.treasure.lol/utils/time-unix"; //"https://trove-api.treasure.lol/v1/time";
+        public const string SERVER_TIME_ENDPOINT_PROD =  "https://darkmatter.treasure.lol/utils/time-unix"; //"https://trove-api.treasure.lol/v1/time";
         
         // contract accresses
         public static Dictionary<ChainId, Dictionary<Contract, string>> ContractAddresses = new Dictionary<ChainId, Dictionary<Contract, string>> {

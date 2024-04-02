@@ -3,7 +3,7 @@ namespace Treasure
     public static class AnalyticsConstants
     {
         // event cache values
-        public const int MAX_CACHE_EVENT_COUNT = 50;
+        public const int MAX_CACHE_EVENT_COUNT = 10;
         public const int MAX_CACHE_SIZE_KB = 64;
         public const int CACHE_FLUSH_TIME_SECONDS = 10;
         
@@ -33,11 +33,15 @@ namespace Treasure
         public const string PROP_APP_IS_EDITOR = "app_is_editor";
         public const string PROP_APP_VERSION = "app_version";
         public const string PROP_APP_ENVIRONMENT = "app_environment";
-        public const string SMART_ACCOUNT = "smart_account";
-        public const string CHAIN_ID = "chain_id";
+        public const string PROP_SMART_ACCOUNT = "smart_account";
+        public const string PROP_CHAIN_ID = "chain_id";
+        public const string PROP_TYPE = "type";
+        public const string PROP_SESSION_ID = "session_id";
 
         // events
         public const string EVT_APP_START = "app_start";
-        public const string EVT_SMART_ACCOUNT_SET = "smart_account_set";
+        public const string EVT_CONNECT_BTN = "connect_btn";
+        public const string EVT_CONNECT_CONNECTED = "connect_connected";
+        public const string EVT_CONNECT_DISCONNECTED = "connect_disconnected";
     }
 }

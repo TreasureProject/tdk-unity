@@ -1,10 +1,16 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
 
 namespace Treasure
 {
     public partial class TDKAnalyticsService : TDKBaseService
     {
+        private void StartNewSession()
+        {
+            _sessionId = Guid.NewGuid().ToString("N");
+        }
+
         /// <summary>
         /// All other tracking methods should route through this function
         /// </summary>
