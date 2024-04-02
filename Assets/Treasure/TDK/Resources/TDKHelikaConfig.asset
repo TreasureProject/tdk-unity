@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5923874b3f3a46e1982b04660ea70c6, type: 3}
   m_Name: TDKHelikaConfig
   m_EditorClassIdentifier: 
-  _prodApiKeyWeb: eae4bdd6d37785ab0cec2c2d7307e2.kozeeverse-web-prod-41i
-  _prodApiKeyIos: 2b3fc45fd983f6c09e24bbf0c106d0.kozeeverse-ios-prod-ftd0c
-  _prodApiKeyAndroid: 7d20d917a0dffcbfb2b3ee3e4bcff7.kozeeverse-android-prod-hkodig4zr
-  _devApiKeyWeb: 3c0e76e6d6bcaa30689018f19ea98a.kozeeverse-web-dev-9uowej6
-  _devApiKeyIos: bc77ee4d2ccfc64f7a996cf9a50af3.kozeeverse-ios-dev-n184qi7p
-  _devApiKeyAndroid: d8e8730d0388f064759f983743ad8f.kozeeverse-android-dev-qfz
+  _prodApiKeyWeb: 21bce555ea28fe3d2dffeacc81fe2b.kotreasure-web-obvdlv09f
+  _prodApiKeyIos: 2f65b3abc4094571158df4f4f01534.kotreasure-ios-3yhn2dq
+  _prodApiKeyAndroid: 807a02965c84b7ddd0e563d47cb824.kotreasure-android-q7kqo4
+  _devApiKeyWeb: cce688c5c9ec3a6b2435d691e876c7.kotreasure-web-obvdlv09f
+  _devApiKeyIos: 2e516d82e129fb2f82624b5058839a.kotreasure-ios-3yhn2dq
+  _devApiKeyAndroid: ac340039a7b9c21059a200d173cd5f.kotreasure-android-q7kqo4
