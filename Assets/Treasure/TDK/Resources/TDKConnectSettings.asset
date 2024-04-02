@@ -15,10 +15,10 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 5d3487bda3f0b514fb818469b85a752c, type: 3}
   title: Zeeverse
   loginSettings:
-    hasSocialLogin: 1
+    hasSocialLogin: 0
     hasGoogleLogin: 1
     hasAppleLogin: 1
     hasXLogin: 1
     hasEmailLogin: 1
-    hasWalletLogin: 1
+    hasWalletLogin: 0
   hasCodeToConfirmEmail: 1
