@@ -1,6 +1,5 @@
 using System;
 using System.Numerics;
-using System.Threading.Tasks;
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -28,7 +27,7 @@ public class HarvesterUI : MonoBehaviour
     private async void refreshHarvester()
     {
 #if TDK_THIRDWEB
-        _harvester = await TDK.Bridgeworld.GetHarvester(Treasure.Contract.HarvesterEmerion);
+        _harvester = await TDK.Bridgeworld.GetHarvester(Treasure.Contract.HarvesterEmberwing);
         string smartAccountAddress = null;
         if (TDK.Identity.IsAuthenticated)
         {
@@ -42,8 +41,8 @@ public class HarvesterUI : MonoBehaviour
 
 Harvester: {_harvester.id}
 
-    {Utils.ToEth(_harvester.userDepositCap.ToString())} MAGIC deposit cap for smart account
-    {Utils.ToEth(_harvester.userDepositAmount.ToString())} MAGIC deposited by smart account";
+    {Utils.ToEth(_harvester.userMagicMaxStakeable.ToString())} MAGIC max stakeable for smart account
+    {Utils.ToEth(_harvester.userMagicStaked.ToString())} MAGIC staked by smart account";
 #else
         await Task.FromResult<string>(string.Empty);
 #endif

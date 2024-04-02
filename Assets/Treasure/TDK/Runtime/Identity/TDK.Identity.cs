@@ -2,7 +2,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using System;
-using System.Numerics;
 
 #if TDK_THIRDWEB
 using Thirdweb;
