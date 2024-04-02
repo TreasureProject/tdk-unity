@@ -24,7 +24,9 @@ namespace Treasure
                 yield return new WaitForSeconds(RETRY_INTERVAL);
             }
 
-            var endpoint = TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD ? Constants.SERVER_TIME_ENDPOINT_PROD : Constants.SERVER_TIME_ENDPOINT_DEV;
+            var endpoint = TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD ?
+                Constants.SERVER_TIME_ENDPOINT_PROD :
+                Constants.SERVER_TIME_ENDPOINT_DEV;
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(endpoint))
             {
@@ -36,24 +38,14 @@ namespace Treasure
                 }
                 else
                 {
-                    long server = long.Parse(webRequest.downloadHandler.text);
-                    // TDKLogger.Log();
                     try
                     {
-                        // deserialize the JSON string into your data model
-                        // ServerTimeResponse responseData = JsonConvert.DeserializeObject<ServerTimeResponse>(jsonResponse);
-                        // TDKLogger.Log("[TDKTimeKeeper.GetServerTime] ServerTimeResponse: " + serverTimeResponseStr);
-
-                        // convert UTC time to epoch time
-                        // DateTime utcDateTime = DateTime.Parse(serverTimeResponseStr);
-                        // DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(long.Parse(serverTimeResponseStr));
-                        // DateTime dateTime = dateTimeOffset.UtcDateTime;
-                        // long server = (long)(utcDateTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+                        long server = long.Parse(webRequest.downloadHandler.text);
+                        TDKLogger.Log("[TDKTimeKeeper.GetServerTime] Got server epoch time: " + server);
                         
                         _epochTimeDiff = server - LocalEpochTime;
                         
                         PlayerPrefs.SetString(Constants.PPREFS_EPOCH_DIFF, _epochTimeDiff.ToString()); 
-                        TDKLogger.Log("[TDKTimeKeeper.GetServerTime] Got server epoch time: " + server);
                     }
                     catch(Exception e)
                     {
@@ -84,11 +76,5 @@ namespace Treasure
         {
             get { return LocalEpochTime + _epochTimeDiff; }
         }
-
-        // public class ServerTimeResponse
-        // {
-        //     public string utc { get; set; }
-        //     public string local { get; set; }
-        // }
     }
 }
