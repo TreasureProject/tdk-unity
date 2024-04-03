@@ -12,13 +12,13 @@ namespace Treasure
         public static ThemeManager Instance;
 
         [SerializeField] private ThemeData themeData;
+        [SerializeField] private Theme theme = Theme.Light;
 
-        private Theme theme = Theme.Light;
         public Theme Theme => theme;
+        public static ThemeData ThemeData => Instance.themeData;
 
         public delegate void ThemeChanged(Theme theme);
         public static event ThemeChanged OnThemeChanged;
-        public static ThemeData ThemeData => Instance.themeData;
 
         private void Awake()
         {
