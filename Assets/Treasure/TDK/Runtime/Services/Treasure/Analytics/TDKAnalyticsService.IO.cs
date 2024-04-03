@@ -74,7 +74,8 @@ namespace Treasure
         private async Task<bool> SendEventBatch(List<string> events)
         {
             // construct the payload by joining all events into a single string
-            string payload = string.Join(",", events);
+            string payload = "[" + string.Join(",", events) + "]";
+            TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
 
             // send the payload to the analytics backend via HTTP POST request
             UnityWebRequest request = UnityWebRequest.PostWwwForm(TDK.Instance.AppConfig.AnalyticsApiUrl, payload);

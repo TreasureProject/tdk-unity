@@ -13,7 +13,8 @@ namespace Treasure
         [SerializeField] private string _cartridgeTag = string.Empty;
         [SerializeField] private string _prodTdkApiUrl = string.Empty;
         [SerializeField] private string _devTdkApiUrl = string.Empty;
-        [SerializeField] private string _analyticsApiUrl = string.Empty;
+        [SerializeField] private string _prodAnalyticsApiUrl = string.Empty;
+        [SerializeField] private string _devAnalyticsApiUrl = string.Empty;
         [SerializeField] private float _sessionLengthDays = 0;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
@@ -46,7 +47,17 @@ namespace Treasure
 
         public string AnalyticsApiUrl
         {
-            get { return _analyticsApiUrl; }
+            get
+            {
+                if (TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD)
+                {
+                    return _prodAnalyticsApiUrl;
+                }
+                else
+                {
+                    return _devAnalyticsApiUrl;
+                }
+            }
         }
 
         public float SessionLengthDays
@@ -78,7 +89,8 @@ namespace Treasure
             _cartridgeTag = config.cartridgeTag;
             _prodTdkApiUrl = config.prodTdkApiUrl;
             _devTdkApiUrl = config.devTdkApiUrl;
-            _analyticsApiUrl = config.analyticsApiUrl;
+            _prodAnalyticsApiUrl = config.prodAnalyticsApiUrl;
+            _devAnalyticsApiUrl = config.devAnalyticsApiUrl;
             _sessionLengthDays = config.sessionLengthDays;
         }
     }
@@ -89,7 +101,8 @@ namespace Treasure
         [SerializeField] public string cartridgeTag;
         [SerializeField] public string prodTdkApiUrl;
         [SerializeField] public string devTdkApiUrl;
-        [SerializeField] public string analyticsApiUrl;
+        [SerializeField] public string prodAnalyticsApiUrl;
+        [SerializeField] public string devAnalyticsApiUrl;
         [SerializeField] public float sessionLengthDays;
     }
 }

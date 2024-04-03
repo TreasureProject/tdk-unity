@@ -10,7 +10,7 @@ namespace Treasure
     {
         private const float RETRY_INTERVAL = 5f;
 
-        private static double _epochTimeDiff = double.NaN;
+        private static long _epochTimeDiff = 0;
 
         private void Start()
         {
@@ -24,7 +24,11 @@ namespace Treasure
                 yield return new WaitForSeconds(RETRY_INTERVAL);
             }
 
-            using (UnityWebRequest webRequest = UnityWebRequest.Get(Constants.SERVER_TIME_ENDPOINT))
+            var endpoint = TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD ?
+                Constants.SERVER_TIME_ENDPOINT_PROD :
+                Constants.SERVER_TIME_ENDPOINT_DEV;
+
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(endpoint))
             {
                 yield return webRequest.SendWebRequest();
 
@@ -34,22 +38,14 @@ namespace Treasure
                 }
                 else
                 {
-                    string jsonResponse = webRequest.downloadHandler.text;
                     try
                     {
-                        // deserialize the JSON string into your data model
-                        ServerTimeResponse responseData = JsonConvert.DeserializeObject<ServerTimeResponse>(jsonResponse);
-
-                        // convert UTC time to epoch time
-                        DateTime utcDateTime = DateTime.Parse(responseData.utc);
-                        long server = (long)(utcDateTime - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
-
-                        var local = LocalEpochTime;
+                        long server = long.Parse(webRequest.downloadHandler.text);
+                        TDKLogger.Log("[TDKTimeKeeper.GetServerTime] Got server epoch time: " + server);
                         
-                        _epochTimeDiff = server - local;
+                        _epochTimeDiff = server - LocalEpochTime;
                         
                         PlayerPrefs.SetString(Constants.PPREFS_EPOCH_DIFF, _epochTimeDiff.ToString()); 
-                        TDKLogger.Log("[TDKTimeKeeper.GetServerTime] Got server epoch time: " + server);
                     }
                     catch(Exception e)
                     {
@@ -61,7 +57,7 @@ namespace Treasure
 
         public static void ResetSync()
         {
-            _epochTimeDiff = double.NaN;
+            _epochTimeDiff = 0;
 
             var timekeeper = TDK.Instance.GetComponent(typeof(TDKTimeKeeper)) as TDKTimeKeeper;
 
@@ -71,61 +67,14 @@ namespace Treasure
             }
         }
 
-        public static double LocalToServerEpochTimeDiff
+        public static long LocalEpochTime
         {
-            get
-            {
-                if (double.IsNaN(_epochTimeDiff) && PlayerPrefs.HasKey(Constants.PPREFS_EPOCH_DIFF))
-                {
-                    var diff = PlayerPrefs.GetString(Constants.PPREFS_EPOCH_DIFF);
-                    _epochTimeDiff = Convert.ToDouble(diff);
-                }
-
-                return _epochTimeDiff;
-            }
-        }
-
-        public static bool ServerTimeReady
-        {
-            get { return !double.IsNaN(LocalToServerEpochTimeDiff); }
-        }
-
-        public static double LocalEpochTime
-        {
-            get
-            {
-                var t = DateTime.UtcNow - new DateTime(1970, 1, 1);
-                return t.TotalMilliseconds;
-            }
-        }
-
-        public static long LocalEpochTimeInt64
-        {
-            get { return Convert.ToInt64(LocalEpochTime); }
+            get { return DateTimeOffset.Now.ToUnixTimeMilliseconds(); }
         }
 
         public static double ServerEpochTime
         {
-            get
-            {
-                if (!ServerTimeReady)
-                {
-                    return double.NaN;
-                }
-
-                return LocalEpochTime + LocalToServerEpochTimeDiff;
-            }
-        }
-
-        public static long ServerEpochTimeInt64
-        {
-            get { return Convert.ToInt64(ServerEpochTime); }
-        }
-
-        public class ServerTimeResponse
-        {
-            public string utc { get; set; }
-            public string local { get; set; }
+            get { return LocalEpochTime + _epochTimeDiff; }
         }
     }
 }

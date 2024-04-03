@@ -224,6 +224,7 @@ namespace Treasure
         public async void Disconnect(bool endSession = false)
         {
             await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession);
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_DISCONNECTED);
         }
         #endregion
     }

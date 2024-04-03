@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: TDKConfig
   m_EditorClassIdentifier: 
   _environment: 0
-  _cartridgeTag: app
+  _cartridgeTag: harness
   _prodTdkApiUrl: https://tdk-api.treasure.lol
   _devTdkApiUrl: https://tdk-api-dev.treasure.lol
-  _analyticsApiUrl: https://ingress.treasure.lol
+  _prodAnalyticsApiUrl: https://darkmatter.treasure.lol/ingress/events
+  _devAnalyticsApiUrl: https://darkmatter-dev.treasure.lol/ingress/events
   _sessionLengthDays: 3
   moduleConfigurations:
     m_keys:
