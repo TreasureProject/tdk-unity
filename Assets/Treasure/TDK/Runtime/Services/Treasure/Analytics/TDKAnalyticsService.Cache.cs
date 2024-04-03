@@ -64,9 +64,9 @@ namespace Treasure
         {
             await Task.Run(() =>
             {
-                string payload = string.Join(",", events);
+                string payload = "[" + string.Join(",", events) + "]";
 
-                // simulate writing the payload to disk
+                // write the payload to disk
                 var fileGuid = Guid.NewGuid().ToString("N");
                 string filePath = Path.Combine(persistentFolderPath, $"tdk_{fileGuid}.eventbatch");
                 File.WriteAllText(filePath, payload);

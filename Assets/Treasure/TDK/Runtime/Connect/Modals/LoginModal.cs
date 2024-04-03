@@ -52,14 +52,24 @@ namespace Treasure
                 {
                     emailLoginButtons.SetActive(false);
                     walletLoginButtons.SetActive(true);
+
+                    TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_BTN, new System.Collections.Generic.Dictionary<string, object>()
+                    {
+                        { AnalyticsConstants.PROP_TYPE, "wallet" }
+                    });
                 });
             }
             if (connectEmailButton != null)
             {
                 connectEmailButton.onClick.AddListener(() =>
                 {
-                   emailLoginButtons.SetActive(true);
-                   walletLoginButtons.SetActive(false);
+                    emailLoginButtons.SetActive(true);
+                    walletLoginButtons.SetActive(false);
+
+                    TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_BTN, new System.Collections.Generic.Dictionary<string, object>()
+                    {
+                        { AnalyticsConstants.PROP_TYPE, "email" }
+                    });
                 });
             }
         }

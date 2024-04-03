@@ -32,7 +32,7 @@ namespace Treasure
                     yield return null;
                 }
 
-                using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm(TDK.Instance.AppConfig.AnalyticsApiUrl, payload))
+                using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm($"{TDK.Instance.AppConfig.AnalyticsApiUrl}/events", payload))
                 {
                     webRequest.SetRequestHeader("Content-Type", "application/json");
 
@@ -74,10 +74,11 @@ namespace Treasure
         private async Task<bool> SendEventBatch(List<string> events)
         {
             // construct the payload by joining all events into a single string
-            string payload = string.Join(",", events);
+            string payload = "[" + string.Join(",", events) + "]";
+            TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
 
             // send the payload to the analytics backend via HTTP POST request
-            UnityWebRequest request = UnityWebRequest.PostWwwForm(TDK.Instance.AppConfig.AnalyticsApiUrl, payload);
+            UnityWebRequest request = UnityWebRequest.PostWwwForm($"{TDK.Instance.AppConfig.AnalyticsApiUrl}/events", payload);
             request.SetRequestHeader("Content-Type", "application/json");
 
             // send the request asynchronously

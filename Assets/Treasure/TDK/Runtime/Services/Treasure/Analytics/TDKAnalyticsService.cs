@@ -2,26 +2,25 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Treasure
 {
     public partial class TDKAnalyticsService : TDKBaseService
     {
-        public const uint EventsVersion = 1;
-
         private Dictionary<string, object> _deviceInfo;
         private Dictionary<string, object> _appInfo;
+        private string _sessionId;
         private List<string> _eventCache = new List<string>();
         private string _smartAccountAddress;
-        private int _chainId;
+        private int _chainId = -1;
 
 #region lifecycle
         public override void Awake()
         {
             base.Awake();
+
+            StartNewSession();
             BuildDeviceInfo();
             BuildAppInfo();
         }
@@ -115,14 +114,16 @@ namespace Treasure
             // create a dictionary to represent the event
             var evt = new Dictionary<string, object>
             {
-                { AnalyticsConstants.SMART_ACCOUNT, _smartAccountAddress }, // smart_account
-                { AnalyticsConstants.CHAIN_ID, _chainId }, // chain_id
+                { AnalyticsConstants.PROP_SMART_ACCOUNT, string.IsNullOrEmpty(_smartAccountAddress) ? string.Empty : _smartAccountAddress }, // smart_account
+                { AnalyticsConstants.PROP_CHAIN_ID, _chainId }, // chain_id
                 { AnalyticsConstants.CARTRIDGE_TAG, TDK.Instance.AppConfig.CartridgeTag }, // cartridgeTag
                 { AnalyticsConstants.PROP_NAME, eventName }, // event_name
+                { AnalyticsConstants.PROP_SESSION_ID, _sessionId }, // session_id
                 { AnalyticsConstants.PROP_ID, Guid.NewGuid().ToString("N") }, // event_id
-                { AnalyticsConstants.PROP_VERSION, EventsVersion }, // event_version
-                { AnalyticsConstants.PROP_TIME_LOCAL, TDKTimeKeeper.LocalEpochTimeInt64 }, // event_time_local
-                { AnalyticsConstants.PROP_TIME_SERVER, TDKTimeKeeper.ServerEpochTimeInt64 }, // event_time_server
+                { AnalyticsConstants.PROP_TDK_VERSION, TDKVersion.version }, // tdk_version
+                { AnalyticsConstants.PROP_TDK_FLAVOUR, TDKVersion.name }, // tdk_flavour
+                { AnalyticsConstants.PROP_TIME_LOCAL, TDKTimeKeeper.LocalEpochTime }, // event_time_local
+                { AnalyticsConstants.PROP_TIME_SERVER, TDKTimeKeeper.ServerEpochTime }, // event_time_server
                 { AnalyticsConstants.PROP_PROPERTIES, eventProps }, // event_properties
                 { AnalyticsConstants.PROP_DEVICE, _deviceInfo },
                 { AnalyticsConstants.PROP_APP, _appInfo }

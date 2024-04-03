@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -99,7 +97,7 @@ namespace Treasure
                     throw new UnityException("Ancient Permits balance too low");
                 }
 
-                if (!userApprovedPermits)
+                if (!userPermitsApproved)
                 {
                     approvalTasks.Add(ApprovePermits());
                 }
