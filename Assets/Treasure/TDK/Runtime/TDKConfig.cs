@@ -11,10 +11,8 @@ namespace Treasure
 
         [SerializeField] private Env _environment = Env.DEV;
         [SerializeField] private string _cartridgeTag = string.Empty;
-        [SerializeField] private string _prodTdkApiUrl = string.Empty;
-        [SerializeField] private string _devTdkApiUrl = string.Empty;
-        [SerializeField] private string _prodAnalyticsApiUrl = string.Empty;
-        [SerializeField] private string _devAnalyticsApiUrl = string.Empty;
+        [SerializeField] private string _tdkApiUrl = string.Empty;
+        [SerializeField] private string _analyticsApiUrl = string.Empty;
         [SerializeField] private float _sessionLengthDays = 0;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
@@ -36,11 +34,11 @@ namespace Treasure
             {
                 if (TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD)
                 {
-                    return _prodTdkApiUrl;
+                    return string.Format(_tdkApiUrl, string.Empty);
                 }
                 else
                 {
-                    return _devTdkApiUrl;
+                    return string.Format(_tdkApiUrl, "-dev");
                 }
             }
         }
@@ -51,11 +49,11 @@ namespace Treasure
             {
                 if (TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD)
                 {
-                    return _prodAnalyticsApiUrl;
+                    return string.Format(_analyticsApiUrl, string.Empty);
                 }
                 else
                 {
-                    return _devAnalyticsApiUrl;
+                    return string.Format(_analyticsApiUrl, "-dev");
                 }
             }
         }
@@ -87,10 +85,8 @@ namespace Treasure
         public void SetConfig(SerializedTDKConfig config)
         {
             _cartridgeTag = config.cartridgeTag;
-            _prodTdkApiUrl = config.prodTdkApiUrl;
-            _devTdkApiUrl = config.devTdkApiUrl;
-            _prodAnalyticsApiUrl = config.prodAnalyticsApiUrl;
-            _devAnalyticsApiUrl = config.devAnalyticsApiUrl;
+            _tdkApiUrl = config.tdkApiUrl;
+            _analyticsApiUrl = config.analyticsApiUrl;
             _sessionLengthDays = config.sessionLengthDays;
         }
     }
@@ -99,10 +95,8 @@ namespace Treasure
     public class SerializedTDKConfig
     {
         [SerializeField] public string cartridgeTag;
-        [SerializeField] public string prodTdkApiUrl;
-        [SerializeField] public string devTdkApiUrl;
-        [SerializeField] public string prodAnalyticsApiUrl;
-        [SerializeField] public string devAnalyticsApiUrl;
+        [SerializeField] public string tdkApiUrl;
+        [SerializeField] public string analyticsApiUrl;
         [SerializeField] public float sessionLengthDays;
     }
 }
