@@ -29,9 +29,6 @@ namespace Treasure
 
         private bool _isActive = false;
 
-        public UnityEvent<Exception> onConnectionError = new UnityEvent<Exception>();
-        public UnityEvent<string> onConnected = new UnityEvent<string>();
-
         private string _address;
         private string _email;
         private bool useSmartWallets = true;
@@ -60,7 +57,7 @@ namespace Treasure
 
             _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
 
-            onConnected.AddListener(value =>
+            TDK.Identity.OnConnected.AddListener(value =>
             {
                 ShowAccountModal();
             });
@@ -188,7 +185,7 @@ namespace Treasure
             {
                 _address = null;
                 TDKLogger.LogError($"[TDKConnectUIManager:Connect] error: {e}");
-                onConnectionError?.Invoke(e);
+                TDK.Identity.OnConnectionError?.Invoke(e);
                 return false;
             }
 
@@ -200,7 +197,7 @@ namespace Treasure
         private async void PostConnect(WalletConnection wc = null)
         {
             TDKLogger.Log($"[TDKConnectUIManager:PostConnect] address: {_address}");
-            onConnected?.Invoke(_address);
+            TDK.Identity.OnConnected?.Invoke(_address);
 
             var chainId = await TDK.Identity.GetChainId();
             TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
@@ -211,11 +208,6 @@ namespace Treasure
             return await ThirdwebManager.Instance.SDK.Wallet.IsConnected();
         }
 
-        // public string GetWalletAddress()
-        // {
-        //     return _address;
-        // }
-
         public string GetUserEmail()
         {
             return _email;
@@ -225,6 +217,8 @@ namespace Treasure
         {
             await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession);
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_DISCONNECTED);
+
+            TDK.Identity.OnDisconnected?.Invoke();
         }
         #endregion
     }
