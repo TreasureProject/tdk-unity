@@ -29,6 +29,9 @@ namespace Treasure
 
         public async void TrackEvent(string eventName, Dictionary<string, object> eventProps = null)
         {
+            // helika doesn't handel null event props
+            if(eventProps == null) { eventProps = new Dictionary<string, object>();}
+
             await EventManager.Instance.SendEvent(eventName, eventProps);
         }
     }
