@@ -3,6 +3,8 @@ using System.Numerics;
 
 #if TDK_THIRDWEB
 using Thirdweb;
+#else
+using System.Threading.Tasks;
 #endif
 
 using TMPro;
