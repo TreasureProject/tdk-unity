@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 using System;
 
 #if TDK_THIRDWEB
@@ -33,6 +34,10 @@ namespace Treasure
         private string _authToken;
         private bool _isAuthenticated;
         #endregion
+
+        public UnityEvent<string> OnConnected = new UnityEvent<string>();
+        public UnityEvent<Exception> OnConnectionError = new UnityEvent<Exception>();
+        public UnityEvent OnDisconnected = new UnityEvent();
 
         #region accessors / mutators
 #if TDK_THIRDWEB
