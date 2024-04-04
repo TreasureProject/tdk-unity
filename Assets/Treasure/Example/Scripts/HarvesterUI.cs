@@ -17,9 +17,13 @@ public class HarvesterUI : MonoBehaviour
 
     public Button AuthBtn;
     public Button DepositBtn;
+    public Button WithdrawBtn;
+    public Button StakeCharactersBtn;
+    public Button UnstakeCharactersBtn;
     public TMP_Text InfoText;
 
     private Harvester _harvester;
+    private BigInteger _magicAmount = BigInteger.Parse(Utils.ToWei("1000"));
 
     void Start()
     {
@@ -43,11 +47,26 @@ public class HarvesterUI : MonoBehaviour
 
 Harvester: {_harvester.id}
 
-    {Utils.ToEth(_harvester.userMagicMaxStakeable.ToString())} MAGIC max stakeable for smart account
-    {Utils.ToEth(_harvester.userMagicStaked.ToString())} MAGIC staked by smart account";
+    Global Details
+    Mining Power: {_harvester.totalBoost}X
+    Corruption: {Utils.ToEth(_harvester.totalCorruption.ToString())} / {Utils.ToEth(_harvester.corruptionMaxGenerated.ToString())}
+    {Utils.ToEth(_harvester.totalMagicStaked.ToString())} MAGIC staked
+
+    User Details
+    Mining Power: {_harvester.userTotalBoost}X
+    {_harvester.userPermitsStaked} Ancient Permits staked
+    {Utils.ToEth(_harvester.userMagicMaxStakeable.ToString())} MAGIC max stakeable
+    {Utils.ToEth(_harvester.userMagicStaked.ToString())} MAGIC staked
+    {Utils.ToEth(_harvester.userMagicRewardsClaimable.ToString())} MAGIC rewards claimable
+    {_harvester.userCharactersStaked} character(s) staked";
 #else
         await Task.FromResult<string>(string.Empty);
 #endif
+
+        DepositBtn.interactable = _harvester.userMagicBalance >= _magicAmount;
+        WithdrawBtn.interactable = _harvester.userMagicStaked >= _magicAmount;
+        StakeCharactersBtn.interactable = _harvester.userInventoryCharacters.Count > 0;
+        UnstakeCharactersBtn.interactable = _harvester.userCharactersStaked > 0;
     }
 
     public async void OnAuthBtn()
@@ -59,7 +78,6 @@ Harvester: {_harvester.id}
                 var token = await TDK.Identity.Authenticate(TDK.Instance.AppConfig.CartridgeTag);
                 TDKLogger.Log($"Received auth token: {token}");
                 AuthBtn.GetComponentInChildren<Text>().text = "Log Out";
-                DepositBtn.interactable = true;
                 refreshHarvester();
             }
             catch (Exception e)
@@ -72,14 +90,44 @@ Harvester: {_harvester.id}
         {
             TDK.Identity.LogOut();
             AuthBtn.GetComponentInChildren<Text>().text = "Authenticate";
-            DepositBtn.interactable = false;
+            refreshHarvester();
         }
     }
 
     public async void OnDepositBtn()
     {
 #if TDK_THIRDWEB
-        await _harvester.Deposit(BigInteger.Parse(Utils.ToWei("1000")));
+        await _harvester.Deposit(_magicAmount);
+        refreshHarvester();
+#else
+        await Task.FromResult<string>(string.Empty);
+#endif
+    }
+
+    public async void OnWithdrawBtn()
+    {
+#if TDK_THIRDWEB
+        await _harvester.WithdrawMagic(_magicAmount);
+        refreshHarvester();
+#else
+        await Task.FromResult<string>(string.Empty);
+#endif
+    }
+
+    public async void OnStakeCharactersBtn()
+    {
+#if TDK_THIRDWEB
+        await _harvester.StakeCharacters(_harvester.userInventoryCharacters.ConvertAll(token => token.tokenId));
+        refreshHarvester();
+#else
+        await Task.FromResult<string>(string.Empty);
+#endif
+    }
+
+    public async void OnUnstakeCharactersBtn()
+    {
+#if TDK_THIRDWEB
+        await _harvester.UnstakeCharacters(_harvester.userStakedCharacters.ConvertAll(token => token.tokenId));
         refreshHarvester();
 #else
         await Task.FromResult<string>(string.Empty);

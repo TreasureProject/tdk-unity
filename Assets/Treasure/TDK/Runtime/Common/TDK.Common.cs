@@ -66,10 +66,50 @@ namespace Treasure
             return await WaitForTransaction(transaction.queueId);
         }
 
+        public async Task<Transaction> ApproveERC20(string address, string operatorAddress, BigInteger amount)
+        {
+            var transaction = await TDK.API.WriteTransaction(
+                address: address,
+                functionName: "approve",
+                args: new string[] { operatorAddress, amount.ToString() }
+            );
+            return await WaitForTransaction(transaction.queueId);
+        }
+
         public async Task<Transaction> ApproveERC1155(Contract contract, string operatorAddress)
         {
             var transaction = await TDK.API.WriteTransaction(
                 contract: contract,
+                functionName: "setApprovalForAll",
+                args: new string[] { operatorAddress, "true" }
+            );
+            return await WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> ApproveERC1155(string address, string operatorAddress)
+        {
+            var transaction = await TDK.API.WriteTransaction(
+                address: address,
+                functionName: "setApprovalForAll",
+                args: new string[] { operatorAddress, "true" }
+            );
+            return await WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> ApproveERC721(Contract contract, string operatorAddress)
+        {
+            var transaction = await TDK.API.WriteTransaction(
+                contract: contract,
+                functionName: "setApprovalForAll",
+                args: new string[] { operatorAddress, "true" }
+            );
+            return await WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> ApproveERC721(string address, string operatorAddress)
+        {
+            var transaction = await TDK.API.WriteTransaction(
+                address: address,
                 functionName: "setApprovalForAll",
                 args: new string[] { operatorAddress, "true" }
             );
