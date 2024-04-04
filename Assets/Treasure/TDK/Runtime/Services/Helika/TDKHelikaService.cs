@@ -1,5 +1,6 @@
 #if TDK_HELIKA
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Helika;
 
 namespace Treasure
