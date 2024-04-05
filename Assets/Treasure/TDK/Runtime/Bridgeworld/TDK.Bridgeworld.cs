@@ -1,6 +1,9 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.Collections.Generic;
+using System;
+using System.Linq;
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -30,13 +33,13 @@ namespace Treasure
 
     public partial class Harvester
     {
-        private async Task<Transaction> ApprovePermits()
+        public async Task<Transaction> ApprovePermits()
         {
             TDKLogger.Log("Approving Consumables for transfer to Harvester");
             return await TDK.Common.ApproveERC1155(Contract.Consumables, nftHandlerAddress);
         }
 
-        private async Task<Transaction> StakePermits(int amount)
+        public async Task<Transaction> StakePermits(int amount)
         {
             TDKLogger.Log($"Staking {amount} Permit(s) to Harvester");
             var transaction = await TDK.API.WriteTransaction(
@@ -47,7 +50,18 @@ namespace Treasure
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
-        private async Task<Transaction> ApproveMagic(BigInteger amount)
+        public async Task<Transaction> UnstakePermits(int amount)
+        {
+            TDKLogger.Log($"Unstaking {amount} Permit(s) from Harvester");
+            var transaction = await TDK.API.WriteTransaction(
+                address: nftHandlerAddress,
+                functionName: "unstakeNft",
+                args: new string[] { permitsAddress, permitsTokenId.ToString(), amount.ToString() }
+            );
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> ApproveMagic(BigInteger amount)
         {
 #if TDK_THIRDWEB
             TDKLogger.Log($"Approving {Utils.ToEth(amount.ToString())} MAGIC for transfer to Harvester");
@@ -58,7 +72,7 @@ namespace Treasure
 #endif
         }
 
-        private async Task<Transaction> DepositMagic(BigInteger amount)
+        public async Task<Transaction> DepositMagic(BigInteger amount)
         {
 #if TDK_THIRDWEB
             TDKLogger.Log($"Depositing {Utils.ToEth(amount.ToString())} MAGIC to Harvester");
@@ -75,9 +89,78 @@ namespace Treasure
 #endif
         }
 
+        public async Task<Transaction> WithdrawMagic(BigInteger amount)
+        {
+            TDKLogger.Log($"Withdrawing {Utils.ToEth(amount.ToString())} MAGIC from Harvester");
+            var transaction = await TDK.API.WriteTransaction(
+                address: id,
+                functionName: "withdrawAmountFromAll",
+                args: new string[] { amount.ToString() }
+            );
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> WithdrawAllMagic()
+        {
+            TDKLogger.Log($"Withdrawing all MAGIC from Harvester");
+            var transaction = await TDK.API.WriteTransaction(
+                address: id,
+                functionName: "withdrawAndHarvestAll",
+                args: new string[] { }
+            );
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> ClaimMagicRewards()
+        {
+            TDKLogger.Log($"Claiming MAGIC rewards from Harvester");
+            var transaction = await TDK.API.WriteTransaction(
+                address: id,
+                functionName: "harvestAll",
+                args: new string[] { }
+            );
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> ApproveCharacters()
+        {
+            TDKLogger.Log("Approving characters for transfer to Harvester");
+            return await TDK.Common.ApproveERC721(charactersAddress, nftHandlerAddress);
+        }
+
+        public async Task<Transaction> StakeCharacters(List<int> tokenIds)
+        {
+            TDKLogger.Log($"Staking {tokenIds.Count} character(s) to Harvester");
+            var transaction = await TDK.API.WriteTransaction(
+                address: nftHandlerAddress,
+                functionName: "batchStakeNft",
+                args: new object[] {
+                    Enumerable.Repeat(charactersAddress, tokenIds.Count).ToArray(),
+                    tokenIds.ToArray(),
+                    Enumerable.Repeat(1, tokenIds.Count).ToArray(),
+                 }
+            );
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> UnstakeCharacters(List<int> tokenIds)
+        {
+            TDKLogger.Log($"Unstaking {tokenIds.Count} character(s) from Harvester");
+            var transaction = await TDK.API.WriteTransaction(
+                address: nftHandlerAddress,
+                functionName: "batchUnstakeNft",
+                args: new object[] {
+                    Enumerable.Repeat(charactersAddress, tokenIds.Count).ToArray(),
+                    tokenIds.ToArray(),
+                    Enumerable.Repeat(1, tokenIds.Count).ToArray(),
+                 }
+            );
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
+        }
+
         public async Task Deposit(BigInteger amount)
         {
-#if TDK_THIIRDWEB
+#if TDK_THIRDWEB
             if (userMagicBalance < amount)
             {
                 throw new UnityException("MAGIC balance too low");
@@ -86,11 +169,11 @@ namespace Treasure
             var approvalTasks = new List<Task>();
             var stakeTasks = new List<Task>();
 
-            var remainingDepositCap = userDepositCap - userDepositAmount;
+            var remainingDepositCap = userMagicMaxStakeable - userMagicStaked;
             if (remainingDepositCap < amount)
             {
                 var capRequired = decimal.Parse(Utils.ToEth((amount - remainingDepositCap).ToString()));
-                var capPerPart = decimal.Parse(Utils.ToEth(permitsDepositCap.ToString()));
+                var capPerPart = decimal.Parse(Utils.ToEth(permitsMagicMaxStakeable.ToString()));
                 var requiredPermits = (int)Math.Ceiling(capRequired / capPerPart);
                 if (requiredPermits < userPermitsBalance)
                 {

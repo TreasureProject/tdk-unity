@@ -18,7 +18,7 @@ namespace Treasure
     {
         public string address;
         public string functionName;
-        public string[] args;
+        public object[] args;
     }
 
     public partial class API
@@ -29,7 +29,7 @@ namespace Treasure
             return JsonConvert.DeserializeObject<Transaction>(response);
         }
 
-        public async Task<Transaction> WriteTransaction(string address, string functionName, string[] args)
+        public async Task<Transaction> WriteTransaction(string address, string functionName, object[] args)
         {
             var response = await Post("/transactions", JsonConvert.SerializeObject(new WriteTransactionBody()
             {
@@ -40,7 +40,7 @@ namespace Treasure
             return JsonConvert.DeserializeObject<Transaction>(response);
         }
 
-        public async Task<Transaction> WriteTransaction(Contract contract, string functionName, string[] args)
+        public async Task<Transaction> WriteTransaction(Contract contract, string functionName, object[] args)
         {
             var chainId = await TDK.Identity.GetChainId();
             return await WriteTransaction(
