@@ -38,6 +38,7 @@ namespace Treasure
         public string legionsStakingRulesAddress;
         public string treasuresStakingRulesAddress;
         public string charactersStakingRulesAddress;
+        public string charactersAddress;
         public string permitsAddress;
         public int permitsTokenId;
         public int permitsMaxStakeable;
@@ -61,6 +62,9 @@ namespace Treasure
         public double userTotalBoost;
         public int userPermitsMaxStakeable;
         public int userPermitsStaked;
+        public List<InventoryToken> userInventoryCharacters;
+        public List<Token> userStakedCharacters;
+        public bool userCharactersApproved;
         public int userCharactersMaxStakeable;
         public int userCharactersStaked;
         public double userCharactersMaxBoost;
