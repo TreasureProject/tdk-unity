@@ -16,21 +16,6 @@ namespace Treasure
             public int endTimestamp;
         }
 
-        public struct CorruptionRemovalRecipe
-        {
-            public struct Item
-            {
-                public string address;
-                public List<int> tokenIds;
-                public BigInteger amount;
-                public string customHandler;
-            }
-
-            public string id;
-            public BigInteger corruptionRemoved;
-            public List<Item> items;
-        }
-
         public string id;
         public string nftHandlerAddress;
         public string permitsStakingRulesAddress;
@@ -46,7 +31,6 @@ namespace Treasure
         public int boostersMaxStakeable;
         public BigInteger magicMaxStakeable;
         public BigInteger corruptionMaxGenerated;
-        public List<CorruptionRemovalRecipe> corruptionRemovalRecipes;
         public double totalEmissionsActivated;
         public BigInteger totalMagicStaked;
         public double totalBoost;
