@@ -65,7 +65,7 @@ Harvester: {_harvester.id}
 
         DepositBtn.interactable = _harvester.userMagicBalance >= _magicAmount;
         WithdrawBtn.interactable = _harvester.userMagicStaked >= _magicAmount;
-        StakeCharactersBtn.interactable = _harvester.userInventoryCharacters.Count > 0;
+        StakeCharactersBtn.interactable = _harvester.userInventoryCharacters != null && _harvester.userInventoryCharacters.Count > 0;
         UnstakeCharactersBtn.interactable = _harvester.userCharactersStaked > 0;
     }
 

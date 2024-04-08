@@ -33,7 +33,6 @@ namespace Treasure
         public string requestId;
         // TODO: change this to enum? Started | Ready
         public string status;
-        public BigInteger corruptionRemoved;
     }
 
     [Serializable]

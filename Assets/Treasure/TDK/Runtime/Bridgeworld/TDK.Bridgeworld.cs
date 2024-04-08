@@ -232,7 +232,7 @@ namespace Treasure
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
-        public async Task<Transaction> EndCorruptionRemovals(string[] requestIds)
+        public async Task<Transaction> EndCorruptionRemovals(List<string> requestIds)
         {
             TDKLogger.Log("Ending corruption removals");
             var transaction = await TDK.API.WriteTransaction(
