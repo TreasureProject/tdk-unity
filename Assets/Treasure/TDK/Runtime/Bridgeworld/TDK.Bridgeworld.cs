@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using Nethereum.ABI;
+using Nethereum.Hex.HexConvertors.Extensions;
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -102,13 +104,20 @@ namespace Treasure
 
         public async Task<Transaction> WithdrawAllMagic()
         {
-            TDKLogger.Log($"Withdrawing all MAGIC from Harvester");
-            var transaction = await TDK.API.WriteTransaction(
-                address: id,
-                functionName: "withdrawAndHarvestAll",
-                args: new string[] { }
-            );
-            return await TDK.Common.WaitForTransaction(transaction.queueId);
+            // If user has MAGIC to claim, use the withdrawAndHarvestAll function
+            if (userMagicRewardsClaimable > 0)
+            {
+                TDKLogger.Log($"Withdrawing and harvesting all MAGIC from Harvester");
+                var transaction = await TDK.API.WriteTransaction(
+                    address: id,
+                    functionName: "withdrawAndHarvestAll",
+                    args: new string[] { }
+                );
+                return await TDK.Common.WaitForTransaction(transaction.queueId);
+            }
+
+            // No MAGIC to calim, just call withdraw with full amount
+            return await WithdrawMagic(userMagicStaked);
         }
 
         public async Task<Transaction> ClaimMagicRewards()
@@ -200,6 +209,38 @@ namespace Treasure
             TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
             await Task.FromResult<string>(string.Empty);
 #endif
+        }
+
+        public async Task<Transaction> StartCorruptionRemovals(List<CorruptionRemovalRequest> requests)
+        {
+            TDKLogger.Log($"Starting {requests.Count} Corruption removals");
+            var args = new object[requests.Count, 3];
+            for (var i = 0; i < requests.Count; i++)
+            {
+                var request = requests[i];
+                var customData = new ABIEncode().GetABIEncoded(new ABIValue("uint256[]", request.tokenIds)).ToHex(true);
+                args[i, 0] = id;
+                args[i, 1] = request.recipeId;
+                args[i, 2] = new string[] { customData };
+            }
+
+            var transaction = await TDK.API.WriteTransaction(
+                contract: Contract.CorruptionRemoval,
+                functionName: "startRemovingCorruption",
+                args: new object[] { args }
+            );
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<Transaction> EndCorruptionRemovals(string[] requestIds)
+        {
+            TDKLogger.Log("Ending corruption removals");
+            var transaction = await TDK.API.WriteTransaction(
+                contract: Contract.CorruptionRemoval,
+                functionName: "endRemovingCorruption",
+                args: new object[] { requestIds }
+            );
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
     }
 }

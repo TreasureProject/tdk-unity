@@ -31,6 +31,12 @@ namespace Treasure
             public List<Item> items;
         }
 
+        public struct CorruptionRemovalRequest
+        {
+            public string recipeId;
+            public BigInteger[] tokenIds;
+        }
+
         public string id;
         public string nftHandlerAddress;
         public string permitsStakingRulesAddress;
@@ -62,6 +68,7 @@ namespace Treasure
         public double userTotalBoost;
         public int userPermitsMaxStakeable;
         public int userPermitsStaked;
+        public List<InventoryToken> userInventoryCorruptionRemovalRecipeItems;
         public List<InventoryToken> userInventoryCharacters;
         public List<Token> userStakedCharacters;
         public bool userCharactersApproved;
