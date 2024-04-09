@@ -16,6 +16,7 @@ namespace Treasure
         public int tokenId;
         public string name;
         public string image;
+        public string imageAlt;
         public List<Attribute> attributes;
     }
 
