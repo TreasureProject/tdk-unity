@@ -1,5 +1,7 @@
 using System;
 using System.Numerics;
+using System.Threading.Tasks;
+
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -23,6 +25,7 @@ public class HarvesterUI : MonoBehaviour
     public TMP_Text InfoText;
 
     private Harvester _harvester;
+    private HarvesterCorruptionRemoval _harvesterCorruptionRemoval;
     private BigInteger _magicAmount = BigInteger.Parse(Utils.ToWei("1000"));
 
     void Start()
@@ -33,26 +36,38 @@ public class HarvesterUI : MonoBehaviour
     private async void refreshHarvester()
     {
 #if TDK_THIRDWEB
-        _harvester = await TDK.Bridgeworld.GetHarvester(Treasure.Contract.HarvesterEmberwing);
+        var harvesterTask = TDK.Bridgeworld.GetHarvester(Treasure.Contract.HarvesterEmberwing);
+        var harvesterCorruptionRemovalTask = TDK.Bridgeworld.GetHarvesterCorruptionRemoval(Treasure.Contract.HarvesterEmberwing);
+
+        await Task.WhenAll(harvesterTask, harvesterCorruptionRemovalTask);
+
+        _harvester = harvesterTask.Result;
+        _harvesterCorruptionRemoval = harvesterCorruptionRemovalTask.Result;
+
         string smartAccountAddress = null;
         if (TDK.Identity.IsAuthenticated)
         {
             smartAccountAddress = await TDK.Identity.GetWalletAddress();
         }
 
-        InfoText.text = $@"Smart Account: {(smartAccountAddress != null ? smartAccountAddress : '-')}
+        InfoText.text = $@"
+Smart Account: {(smartAccountAddress != null ? smartAccountAddress : '-')}
 
     {Utils.ToEth(_harvester.userMagicBalance.ToString())} MAGIC balance
     {_harvester.userPermitsBalance} Ancient Permits
 
-Harvester: {_harvester.id}
+Harvester Details
 
-    Global Details
     Mining Power: {_harvester.totalBoost}X
     Corruption: {Utils.ToEth(_harvester.totalCorruption.ToString())} / {Utils.ToEth(_harvester.corruptionMaxGenerated.ToString())}
     {Utils.ToEth(_harvester.totalMagicStaked.ToString())} MAGIC staked
 
-    User Details
+Corruption Removal
+
+    {_harvesterCorruptionRemoval.corruptionRemovalRecipes.Count} recipe(s) available
+
+Harvester User Details
+
     Mining Power: {_harvester.userTotalBoost}X
     {_harvester.userPermitsStaked} Ancient Permits staked
     {Utils.ToEth(_harvester.userMagicMaxStakeable.ToString())} MAGIC max stakeable
