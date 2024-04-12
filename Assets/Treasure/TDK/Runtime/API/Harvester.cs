@@ -53,6 +53,12 @@ namespace Treasure
         public int userCharactersStaked;
         public double userCharactersMaxBoost;
         public double userCharactersBoost;
+        public List<InventoryToken> userInventoryLegions;
+        public List<Token> userStakedLegions;
+        public bool userLegionsApproved;
+        public int userLegionsMaxWeightStakeable;
+        public int userLegionsWeightStaked;
+        public double userLegionsBoost;
         public BigInteger userMagicMaxStakeable;
         public BigInteger userMagicStaked;
         public BigInteger userMagicRewardsClaimable;
