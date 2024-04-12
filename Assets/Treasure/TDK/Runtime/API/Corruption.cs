@@ -40,6 +40,7 @@ namespace Treasure
     {
         public List<CorruptionRemovalRecipe> corruptionRemovalRecipes;
         public List<InventoryToken> userInventoryCorruptionRemovalRecipeItems;
+        public List<Dictionary<string, Approval>> userApprovalsCorruptionRemovalRecipeItems;
         public List<CorruptionRemoval> userCorruptionRemovals;
     }
 
