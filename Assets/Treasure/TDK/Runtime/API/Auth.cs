@@ -56,6 +56,14 @@ namespace Treasure
         public string token;
     }
 
+    [Serializable]
+    public struct User
+    {
+        public string id;
+        public string smartAccountAddress;
+        public string email;
+    }
+
     public partial class API
     {
         public async Task<AuthPayload> GetAuthPayload(string address, string chainId)
@@ -79,6 +87,12 @@ namespace Treasure
                 }
             }));
             return JsonConvert.DeserializeObject<LogInResponse>(response).token;
+        }
+
+        public async Task<User> GetCurrentUser()
+        {
+            var response = await Get("/users/me");
+            return JsonConvert.DeserializeObject<User>(response);
         }
     }
 }
