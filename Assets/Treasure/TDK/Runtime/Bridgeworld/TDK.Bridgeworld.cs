@@ -23,13 +23,18 @@ namespace Treasure
         }
     }
 
-    public class Bridgeworld
+    public partial class Bridgeworld
     {
         public Bridgeworld() { }
 
         public async Task<Harvester> GetHarvester(Contract contract)
         {
             return await TDK.API.GetHarvester(contract);
+        }
+
+        public async Task<HarvesterCorruptionRemoval> GetHarvesterCorruptionRemoval(Contract contract)
+        {
+            return await TDK.API.GetHarvesterCorruptionRemoval(contract);
         }
     }
 

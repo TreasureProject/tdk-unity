@@ -40,7 +40,7 @@ namespace Treasure
     {
         public List<CorruptionRemovalRecipe> corruptionRemovalRecipes;
         public List<InventoryToken> userInventoryCorruptionRemovalRecipeItems;
-        public List<Dictionary<string, Approval>> userApprovalsCorruptionRemovalRecipeItems;
+        public Dictionary<string, Approval> userApprovalsCorruptionRemovalRecipeItems;
         public List<CorruptionRemoval> userCorruptionRemovals;
     }
 
@@ -50,6 +50,12 @@ namespace Treasure
         {
             var response = await Get($"/harvesters/{id}/corruption-removal");
             return JsonConvert.DeserializeObject<HarvesterCorruptionRemoval>(response);
+        }
+
+        public async Task<HarvesterCorruptionRemoval> GetHarvesterCorruptionRemoval(Contract contract)
+        {
+            var chainId = await TDK.Identity.GetChainId();
+            return await GetHarvesterCorruptionRemoval(Constants.ContractAddresses[chainId][contract]);
         }
     }
 }
