@@ -1,0 +1,3 @@
+<linker>
+    <assembly fullname="embedded-wallet" preserve="all" />
+</linker>
