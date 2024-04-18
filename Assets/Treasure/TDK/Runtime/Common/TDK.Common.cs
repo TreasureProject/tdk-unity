@@ -26,7 +26,13 @@ namespace Treasure
             {
                 if (retries > 0)
                 {
-                    await Task.Delay(2_500);
+                    var sw = new System.Diagnostics.Stopwatch();
+                    sw.Start();
+                    while (sw.ElapsedMilliseconds < 2500)
+                    {
+                        await Task.Yield();
+                    }
+                    sw.Stop();
                 }
 
                 transaction = await TDK.API.GetTransactionByQueueId(queueId);
