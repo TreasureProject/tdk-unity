@@ -98,7 +98,9 @@ namespace Treasure
 
         public async Task<Transaction> WithdrawMagic(BigInteger amount)
         {
+#if TDK_THIRDWEB
             TDKLogger.Log($"Withdrawing {Utils.ToEth(amount.ToString())} MAGIC from Harvester");
+#endif
             var transaction = await TDK.API.WriteTransaction(
                 address: id,
                 functionName: "withdrawAmountFromAll",

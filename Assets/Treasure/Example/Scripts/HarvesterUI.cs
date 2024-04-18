@@ -2,11 +2,8 @@ using System;
 using System.Numerics;
 using System.Threading.Tasks;
 
-
 #if TDK_THIRDWEB
 using Thirdweb;
-#else
-using System.Threading.Tasks;
 #endif
 
 using TMPro;
@@ -26,7 +23,12 @@ public class HarvesterUI : MonoBehaviour
 
     private Harvester _harvester;
     private HarvesterCorruptionRemoval _harvesterCorruptionRemoval;
+
+#if TDK_THIRDWEB
     private BigInteger _magicAmount = BigInteger.Parse(Utils.ToWei("1000"));
+#else
+    private BigInteger _magicAmount;
+#endif
 
     void Start()
     {
