@@ -8,6 +8,10 @@ using UnityEngine;
 using MinimalForwarder = Thirdweb.Contracts.Forwarder.ContractDefinition;
 using UnityEngine.Networking;
 using Thirdweb.Redcode.Awaiting;
+using Nethereum.Contracts;
+using Nethereum.ABI.FunctionEncoding;
+using System;
+using Newtonsoft.Json.Linq;
 
 #pragma warning disable CS0618
 
@@ -38,13 +42,9 @@ namespace Thirdweb
     /// </summary>
     public class Transaction
     {
-        private readonly Contract contract;
-        private readonly string fnName;
-        private object[] fnArgs;
-
-        /// <summary>
-        /// Gets the transaction input.
-        /// </summary>
+        public Contract Contract { get; private set; }
+        public string FunctionName { get; private set; }
+        public object[] FunctionArgs { get; private set; }
         public TransactionInput Input { get; private set; }
 
         /// <summary>
@@ -54,10 +54,15 @@ namespace Thirdweb
         /// <param name="txInput">The transaction input.</param>
         public Transaction(Contract contract, TransactionInput txInput, string fnName, object[] fnArgs)
         {
-            this.contract = contract;
+            this.Contract = contract;
             this.Input = txInput;
-            this.fnName = fnName;
-            this.fnArgs = fnArgs;
+            this.FunctionName = fnName;
+            this.FunctionArgs = fnArgs;
+        }
+
+        public Transaction(TransactionInput txInput)
+        {
+            this.Input = txInput;
         }
 
         /// <summary>
@@ -199,12 +204,12 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                this.fnArgs = args;
+                this.FunctionArgs = args;
             }
             else
             {
                 var web3 = Utils.GetWeb3();
-                var function = web3.Eth.GetContract(contract.ABI, contract.Address).GetFunction(Input.To);
+                var function = web3.Eth.GetContract(Contract.ABI, Contract.Address).GetFunction(Input.To);
                 Input.Data = function.GetData(args);
             }
             return this;
@@ -218,17 +223,12 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("getGasPrice"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
                 return BigInteger.Parse(val);
             }
             else
             {
-                var web3 = Utils.GetWeb3();
-                var gasPrice = await web3.Eth.GasPrice.SendRequestAsync();
-                var maxGasPrice = BigInteger.Parse("300000000000"); // 300 Gwei in Wei
-                var extraTip = gasPrice.Value / 10; // +10%
-                var txGasPrice = gasPrice.Value + extraTip;
-                return txGasPrice > maxGasPrice ? maxGasPrice : txGasPrice;
+                return await Utils.GetLegacyGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId);
             }
         }
 
@@ -240,7 +240,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                var val = await Bridge.InvokeRoute<string>(GetTxBuilderRoute("estimateGasLimit"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
                 return BigInteger.Parse(val);
             }
             else
@@ -259,7 +259,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<GasCosts>(GetTxBuilderRoute("estimateGasCosts"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<GasCosts>(GetTxBuilderRoute("estimateGasCosts"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
@@ -291,7 +291,7 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return JsonConvert.SerializeObject(await Bridge.InvokeRoute<object>(GetTxBuilderRoute("simulate"), Utils.ToJsonStringArray(Input, fnName, fnArgs)));
+                return JsonConvert.SerializeObject(await Bridge.InvokeRoute<object>(GetTxBuilderRoute("simulate"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs)));
             }
             else
             {
@@ -311,7 +311,7 @@ namespace Thirdweb
 
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sign"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sign"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
@@ -342,9 +342,9 @@ namespace Thirdweb
                     await EstimateAndSetGasLimitAsync();
                 if (Input.Value == null)
                     Input.Value = new HexBigInteger(0);
-                bool isGaslessSetup = ThirdwebManager.Instance.SDK.Session.Options.gasless.HasValue && ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin.HasValue;
+                bool isGaslessSetup = ThirdwebManager.Instance.SDK.Session.Options.gasless.HasValue && !string.IsNullOrEmpty(ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.relayerUrl);
                 if (gasless != null && gasless.Value && !isGaslessSetup)
-                    throw new UnityException("Gasless transactions are not enabled. Please enable them in the SDK options.");
+                    throw new UnityException("Gasless relayer transactions are not enabled. Please enable them in the SDK options.");
                 bool sendGaslessly = gasless == null ? isGaslessSetup : gasless.Value;
                 if (sendGaslessly)
                     return await SendGasless();
@@ -368,7 +368,7 @@ namespace Thirdweb
                 else
                     action = "executeGasless";
 
-                return await Bridge.InvokeRoute<TransactionResult>(GetTxBuilderRoute(action), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<TransactionResult>(GetTxBuilderRoute(action), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
@@ -407,8 +407,25 @@ namespace Thirdweb
                 {
                     var reason = await web3.Eth.GetContractTransactionErrorReason.SendRequestAsync(txHash);
                     if (!string.IsNullOrEmpty(reason))
-                        throw new UnityException($"Transaction failed: {reason}");
+                        throw new UnityException($"Transaction {txHash} execution reverted: {reason}");
                 }
+
+                var userOpEvent = receipt.DecodeAllEvents<Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperationEventEventDTO>();
+                if (userOpEvent != null && userOpEvent.Count > 0 && userOpEvent[0].Event.Success == false)
+                {
+                    var revertReasonEvent = receipt.DecodeAllEvents<Thirdweb.Contracts.EntryPoint.ContractDefinition.UserOperationRevertReasonEventDTO>();
+                    if (revertReasonEvent != null && revertReasonEvent.Count > 0)
+                    {
+                        byte[] revertReason = revertReasonEvent[0].Event.RevertReason;
+                        string revertReasonString = new FunctionCallDecoder().DecodeFunctionErrorMessage(revertReason.ByteArrayToHexString());
+                        throw new Exception($"Transaction {txHash} execution silently reverted: {revertReasonString}");
+                    }
+                    else
+                    {
+                        throw new Exception($"Transaction {txHash} execution silently reverted with no reason string");
+                    }
+                }
+
                 return receipt;
             }
         }
@@ -417,22 +434,46 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("send"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("send"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
+                var supports1559 = Utils.Supports1559(ThirdwebManager.Instance.SDK.Session.ChainId.ToString());
+                if (supports1559)
+                {
+                    if (Input.GasPrice == null)
+                    {
+                        var fees = await Utils.GetGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId);
+                        if (Input.MaxFeePerGas == null)
+                            Input.MaxFeePerGas = new HexBigInteger(fees.MaxFeePerGas);
+                        if (Input.MaxPriorityFeePerGas == null)
+                            Input.MaxPriorityFeePerGas = new HexBigInteger(fees.MaxPriorityFeePerGas);
+                    }
+                }
+                else
+                {
+                    if (Input.MaxFeePerGas == null && Input.MaxPriorityFeePerGas == null)
+                    {
+                        ThirdwebDebug.Log("Using Legacy Gas Pricing");
+                        Input.GasPrice = new HexBigInteger(await Utils.GetLegacyGasPriceAsync(ThirdwebManager.Instance.SDK.Session.ChainId));
+                    }
+                }
+
+                string hash;
                 if (
                     ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetSignerProvider() == WalletProvider.LocalWallet
                     && ThirdwebManager.Instance.SDK.Session.ActiveWallet.GetProvider() != WalletProvider.SmartWallet
                 )
                 {
-                    return await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
+                    hash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(Input);
                 }
                 else
                 {
                     var ethSendTx = new EthSendTransaction(ThirdwebManager.Instance.SDK.Session.Web3.Client);
-                    return await ethSendTx.SendRequestAsync(Input);
+                    hash = await ethSendTx.SendRequestAsync(Input);
                 }
+                ThirdwebDebug.Log($"Transaction hash: {hash}");
+                return hash;
             }
         }
 
@@ -440,14 +481,14 @@ namespace Thirdweb
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sendGasless"), Utils.ToJsonStringArray(Input, fnName, fnArgs));
+                return await Bridge.InvokeRoute<string>(GetTxBuilderRoute("sendGasless"), Utils.ToJsonStringArray(Input, FunctionName, FunctionArgs));
             }
             else
             {
-                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerUrl;
-                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.relayerForwarderAddress;
-                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainName;
-                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.gasless.Value.openzeppelin?.domainVersion;
+                string relayerUrl = ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.relayerUrl ?? throw new UnityException("Relayer URL not set in SDK options.");
+                string forwarderAddress = ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.relayerForwarderAddress ?? "0xD04F98C88cE1054c90022EE34d566B9237a1203C";
+                string forwarderDomain = ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.domainName ?? "GSNv2 Forwarder";
+                string forwarderVersion = ThirdwebManager.Instance.SDK.Session.Options.gasless?.engine.domainVersion ?? "0.0.1";
 
                 Input.Nonce = (
                     await TransactionManager.ThirdwebRead<MinimalForwarder.GetNonceFunction, MinimalForwarder.GetNonceOutputDTO>(
@@ -466,6 +507,8 @@ namespace Thirdweb
                     Data = Input.Data
                 };
 
+                ThirdwebDebug.Log($"Forwarding request: {JsonConvert.SerializeObject(request)}");
+
                 var signature = await EIP712.GenerateSignature_MinimalForwarder(
                     forwarderDomain,
                     forwarderVersion,
@@ -474,7 +517,13 @@ namespace Thirdweb
                     request
                 );
 
-                var postData = new RelayerRequest(request, signature, forwarderAddress);
+                var postData = new RelayerRequest()
+                {
+                    Type = "forward",
+                    Request = request,
+                    Signature = signature,
+                    ForwarderAddress = forwarderAddress,
+                };
 
                 using UnityWebRequest req = UnityWebRequest.Post(relayerUrl, "");
                 byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(postData));
@@ -490,23 +539,54 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var response = JsonConvert.DeserializeObject<RelayerResponse>(req.downloadHandler.text);
-                    if (response.status != "success")
-                    {
-                        throw new UnityException(
-                            $"Forward Request Failed!\nError: {req.downloadHandler.text}\nRelayer URL: {relayerUrl}\nRelayer Forwarder Address: {forwarderAddress}\nRequest: {request}\nSignature: {signature}\nPost Data: {postData}"
-                        );
-                    }
-                    var result = JsonConvert.DeserializeObject<RelayerResult>(response.result);
-                    return result.txHash;
+                    var queueId = JsonConvert.DeserializeObject<JObject>(req.downloadHandler.text)["result"]["queueId"].ToString();
+                    ThirdwebDebug.Log($"Forwarded request to relayer with queue ID: {queueId}");
+                    return await FetchTxHashFromQueueId(new Uri(relayerUrl).GetLeftPart(UriPartial.Authority), queueId);
                 }
             }
         }
 
+        private async Task<string> FetchTxHashFromQueueId(string engineUrl, string queueId)
+        {
+            string txHash = null;
+            while (string.IsNullOrEmpty(txHash) && Application.isPlaying)
+            {
+                using UnityWebRequest req = UnityWebRequest.Get($"{engineUrl}/transaction/status/{queueId}");
+                await new WaitForSeconds(1f);
+                await req.SendWebRequest();
+                if (req.result != UnityWebRequest.Result.Success)
+                {
+                    throw new UnityException($"Failed to fetch transaction hash from queue ID {queueId}.\nError: {req.downloadHandler.text}");
+                }
+                else
+                {
+                    txHash = JsonConvert.DeserializeObject<JObject>(req.downloadHandler.text)["result"]["transactionHash"].ToString();
+                }
+            }
+            ThirdwebDebug.Log($"Transaction hash fetched from queue ID {queueId}: {txHash}");
+            return txHash;
+        }
+
         private string GetTxBuilderRoute(string action)
         {
-            string route = contract.ABI != null ? $"{contract.Address}{Routable.subSeparator}{contract.ABI}" : contract.Address;
+            string route = Contract.ABI != null ? $"{Contract.Address}{Routable.subSeparator}{Contract.ABI}" : Contract.Address;
             return $"{route}{Routable.separator}tx{Routable.separator}{action}";
         }
+    }
+
+    [System.Serializable]
+    public struct RelayerRequest
+    {
+        [JsonProperty("type")]
+        public string Type;
+
+        [JsonProperty("request")]
+        public MinimalForwarder.ForwardRequest Request;
+
+        [JsonProperty("signature")]
+        public string Signature;
+
+        [JsonProperty("forwarderAddress")]
+        public string ForwarderAddress;
     }
 }

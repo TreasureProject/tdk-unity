@@ -94,10 +94,10 @@ namespace Thirdweb
                 case WalletProvider.Hyperplay:
                     ActiveWallet = new ThirdwebHyperplay(ChainId.ToString());
                     break;
-                case WalletProvider.EmbeddedWallet:
+                case WalletProvider.InAppWallet:
                     if (string.IsNullOrEmpty(Options.clientId))
-                        throw new UnityException("thirdweb client id is required for EmbeddedWallet connection method!");
-                    ActiveWallet = new ThirdwebEmbeddedWallet(Options.clientId, Options.bundleId);
+                        throw new UnityException("thirdweb client id is required for InAppWallet connection method!");
+                    ActiveWallet = new ThirdwebInAppWallet(Options.clientId, Options.bundleId);
                     break;
                 default:
                     throw new UnityException("This wallet connection method is not supported on this platform!");
@@ -194,7 +194,6 @@ namespace Thirdweb
             CurrentChainData = newChainData;
             RPC = CurrentChainData.rpcUrls[0];
             Web3 = await ActiveWallet.GetWeb3();
-            Web3.TransactionManager.UseLegacyAsDefault = !Utils.Supports1559(newChainId.ToString());
             Web3.Client.OverridingRequestInterceptor = new ThirdwebInterceptor(ActiveWallet);
         }
 

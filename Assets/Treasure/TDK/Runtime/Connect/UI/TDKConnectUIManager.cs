@@ -160,10 +160,10 @@ namespace Treasure
                     chainId: BigInteger.Parse(_currentChainData.chainId),
                     email: email,
                     authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                    personalWallet: WalletProvider.EmbeddedWallet
+                    personalWallet: WalletProvider.InAppWallet
                 )
                 : new WalletConnection(
-                    provider: WalletProvider.EmbeddedWallet,
+                    provider: WalletProvider.InAppWallet,
                     chainId: BigInteger.Parse(_currentChainData.chainId),
                     email: email,
                     authOptions: new AuthOptions(AuthProvider.EmailOTP)

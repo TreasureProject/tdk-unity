@@ -10,7 +10,7 @@ using UnityEngine.Events;
 
 namespace Treasure
 {
-    public class TDKEmbeddedWalletUI : EmbeddedWalletUI
+    public class TDKEmbeddedWalletUI : InAppWalletUI
     {
         [Space]
         [Tooltip("Invoked when the user completes OTP process.")]
@@ -20,7 +20,7 @@ namespace Treasure
 
         private void Start()
         {
-            OnEmailOTPVerificationFailed.AddListener(() =>
+            OnOTPVerificationFailed.AddListener(() =>
             {
                 SetOtpCodeIsWrong();
             });
@@ -44,7 +44,7 @@ namespace Treasure
             TDKConnectUIManager.Instance.ShowConfirmLoginModal();
         }
 
-        public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, AuthOptions authOptions)
+        public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;
@@ -52,6 +52,7 @@ namespace Treasure
                 _customScheme = _customScheme.EndsWith("://") ? _customScheme : $"{_customScheme}://";
             _embeddedWallet = embeddedWallet;
             _email = email;
+            _phone = phoneNumber;
             _user = null;
             _exception = null;
             OTPInput.text = "";
@@ -59,7 +60,7 @@ namespace Treasure
             RecoveryInput.gameObject.SetActive(false);
             SubmitButton.onClick.RemoveAllListeners();
             RecoveryCodesCopy.onClick.RemoveAllListeners();
-            EmbeddedWalletCanvas.SetActive(false);
+            InAppWalletCanvas.SetActive(false);
             RecoveryCodesCanvas.SetActive(false);
 
             try
@@ -134,9 +135,9 @@ namespace Treasure
                 var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 if (res.User == null)
                 {
-                    if (res.CanRetry && OnEmailOTPVerificationFailed.GetPersistentEventCount() > 0)
+                    if (res.CanRetry && OnOTPVerificationFailed.GetPersistentEventCount() > 0)
                     {
-                        OnEmailOTPVerificationFailed.Invoke();
+                        OnOTPVerificationFailed.Invoke();
                         return;
                     }
                     _exception = new UnityException("User OTP Verification Failed.");
