@@ -42,7 +42,11 @@ namespace Treasure
         // events
         public const string EVT_APP_START = "app_start";
         public const string EVT_CONNECT_BTN = "connect_btn";
-        public const string EVT_CONNECT_CONNECTED = "connect_connected";
-        public const string EVT_CONNECT_DISCONNECTED = "connect_disconnected";
+        public const string EVT_TREASURECONNECT_CONNECTED = "tc_connected";
+        public const string EVT_TREASURECONNECT_DISCONNECTED = "tc_disconnected";
+        public const string EVT_TREASURECONNECT_OTP_FAILED = "tc_otpfailed";
+        public const string EVT_TREASURECONNECT_UI_LOGIN = "tc_ui_login";
+        public const string EVT_TREASURECONNECT_UI_CONFIRM = "tc_ui_confirm";
+        public const string EVT_TREASURECONNECT_UI_ACCOUNT = "tc_ui_account";
     }
 }

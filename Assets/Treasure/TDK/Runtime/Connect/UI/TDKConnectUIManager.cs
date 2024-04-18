@@ -111,7 +111,9 @@ namespace Treasure
                 currentModalOpended.Hide();
 
             loginModal.Show();
-            currentModalOpended = loginModal;        
+            currentModalOpended = loginModal;
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_LOGIN);
         }
 
         public void ShowConfirmLoginModal()
@@ -121,6 +123,8 @@ namespace Treasure
 
             confirmLoginModal.Show();
             currentModalOpended = confirmLoginModal;
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_CONFIRM);
         }
 
         public void ShowAccountModal()
@@ -130,7 +134,9 @@ namespace Treasure
                 currentModalOpended.Hide();
 
             currentModalOpended = logedInHolder;
-            logedInHolder.Show();         
+            logedInHolder.Show();       
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);  
         }
 
         public void LogOut()
@@ -216,7 +222,7 @@ namespace Treasure
         public async void Disconnect(bool endSession = false)
         {
             await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession);
-            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_DISCONNECTED);
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURE_DISCONNECTED);
 
             TDK.Identity.OnDisconnected?.Invoke();
         }

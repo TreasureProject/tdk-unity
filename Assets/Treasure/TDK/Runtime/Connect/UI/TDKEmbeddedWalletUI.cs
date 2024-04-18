@@ -22,6 +22,7 @@ namespace Treasure
         {
             OnOTPVerificationFailed.AddListener(() =>
             {
+                TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
                 SetOtpCodeIsWrong();
             });
         }
