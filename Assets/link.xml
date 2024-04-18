@@ -1,3 +1,15 @@
 <linker>
+    <!--Thirdweb-->
+    <assembly fullname="Amazon.Extensions.CognitoAuthentication" preserve="all" />
+    <assembly fullname="AWSSDK.CognitoIdentity" preserve="all" />
+    <assembly fullname="AWSSDK.CognitoIdentityProvider" preserve="all" />
+    <assembly fullname="AWSSDK.Core" preserve="all" />
+    <assembly fullname="AWSSDK.Lambda" preserve="all" />
+    <assembly fullname="AWSSDK.SecurityToken" preserve="all" />
     <assembly fullname="embedded-wallet" preserve="all" />
+
+    <!--Other-->
+    <assembly fullname="System.Runtime.Serialization" preserve="all" />
+    <assembly fullname="Nethereum" preserve="all" />
+    <assembly fullname="Newtonsoft" preserve="all" />
 </linker>
