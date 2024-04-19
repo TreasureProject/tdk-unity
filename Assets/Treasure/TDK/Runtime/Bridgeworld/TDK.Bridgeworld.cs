@@ -54,6 +54,16 @@ namespace Treasure
                 functionName: "stakeNft",
                 args: new string[] { permitsAddress, permitsTokenId.ToString(), amount.ToString() }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_NFTS_STAKE,
+                new Dictionary<string, object>() {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction },
+                    { AnalyticsConstants.PROP_PERMIT_ADDRESS, permitsAddress },
+                    { AnalyticsConstants.PROP_PERMIT_TOKEN_ID, permitsTokenId.ToString() },
+                    { AnalyticsConstants.PROP_AMOUNT, amount }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
@@ -65,6 +75,16 @@ namespace Treasure
                 functionName: "unstakeNft",
                 args: new string[] { permitsAddress, permitsTokenId.ToString(), amount.ToString() }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_NFTS_UNSTAKE,
+                new Dictionary<string, object>() {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction },
+                    { AnalyticsConstants.PROP_PERMIT_ADDRESS, permitsAddress },
+                    { AnalyticsConstants.PROP_PERMIT_TOKEN_ID, permitsTokenId.ToString() },
+                    { AnalyticsConstants.PROP_AMOUNT, amount }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
@@ -89,6 +109,15 @@ namespace Treasure
                 functionName: "deposit",
                 args: new string[] { amount.ToString(), chainId == ChainId.ArbitrumSepolia ? "1" : "0" }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_DEPOSIT,
+                new Dictionary<string, object>() {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction },
+                    { AnalyticsConstants.PROP_AMOUNT, amount },
+                    { AnalyticsConstants.PROP_CHAIN_ID, chainId }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
 #else
             TDKLogger.LogError("Unable to deposit magic. TDK Identity wallet service not implemented.");
@@ -106,6 +135,14 @@ namespace Treasure
                 functionName: "withdrawAmountFromAll",
                 args: new string[] { amount.ToString() }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_WITHDRAW_MAGIC,
+                new Dictionary<string, object>() {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction },
+                    { AnalyticsConstants.PROP_AMOUNT, amount }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
@@ -120,6 +157,14 @@ namespace Treasure
                     functionName: "withdrawAndHarvestAll",
                     args: new string[] { }
                 );
+
+                TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_WITHDRAW_MAGIC_ALL,
+                    new Dictionary<string, object>()
+                    {
+                        { AnalyticsConstants.PROP_ENGINE_TX, transaction }
+                    }
+                );
+
                 return await TDK.Common.WaitForTransaction(transaction.queueId);
             }
 
@@ -135,6 +180,14 @@ namespace Treasure
                 functionName: "harvestAll",
                 args: new string[] { }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_REWARDS_CLAIM_MAGIC,
+                new Dictionary<string, object>()
+                {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
@@ -156,6 +209,15 @@ namespace Treasure
                     Enumerable.Repeat(1, tokenIds.Count).ToArray(),
                  }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_NFT_STAKE_BATCH,
+                new Dictionary<string, object>() {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction },
+                    { AnalyticsConstants.PROP_CHARACTERS_ADDRESS, charactersAddress },
+                    { AnalyticsConstants.PROP_TOKEN_IDS, tokenIds.ToArray() }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
@@ -171,6 +233,15 @@ namespace Treasure
                     Enumerable.Repeat(1, tokenIds.Count).ToArray(),
                  }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_NFT_UNSTAKE_BATCH,
+                new Dictionary<string, object>() {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction },
+                    { AnalyticsConstants.PROP_CHARACTERS_ADDRESS, charactersAddress },
+                    { AnalyticsConstants.PROP_TOKEN_IDS, tokenIds.ToArray() }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
@@ -236,6 +307,15 @@ namespace Treasure
                 functionName: "startRemovingCorruption",
                 args: new object[] { args }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_START,
+                new Dictionary<string, object>() {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction },
+                    { AnalyticsConstants.PROP_CONTRACT, Contract.CorruptionRemoval },
+                    { AnalyticsConstants.PROP_ARGS, args }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
@@ -247,6 +327,15 @@ namespace Treasure
                 functionName: "endRemovingCorruption",
                 args: new object[] { requestIds }
             );
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_END,
+                new Dictionary<string, object>() {
+                    { AnalyticsConstants.PROP_ENGINE_TX, transaction },
+                    { AnalyticsConstants.PROP_CONTRACT, Contract.CorruptionRemoval },
+                    { AnalyticsConstants.PROP_REQUEST_IDS, requestIds }
+                }
+            );
+
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
     }
