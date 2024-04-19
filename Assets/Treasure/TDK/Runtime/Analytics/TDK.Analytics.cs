@@ -38,7 +38,7 @@ namespace Treasure
 #if TDK_HELIKA
             TDKServiceLocator.GetService<TDKHelikaService>().SetPlayerId(smartWalletAddress);
 #endif
-            TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_CONNECTED, new Dictionary<string, object>()
+            TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_CONNECTED, new Dictionary<string, object>()
             {
                 { AnalyticsConstants.PROP_CHAIN_ID, chainId }
             });

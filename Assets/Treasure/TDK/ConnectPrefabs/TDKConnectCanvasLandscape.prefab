@@ -1898,14 +1898,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c828756fdb7cb34c8a1713a5cd044e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EmbeddedWalletCanvas: {fileID: 8864338573803921533}
+  InAppWalletCanvas: {fileID: 8864338573803921533}
   OTPInput: {fileID: 223311866253995133}
   RecoveryInput: {fileID: 2097169671440365552}
   SubmitButton: {fileID: 7849186440482084283}
   RecoveryCodesCanvas: {fileID: 1009709151091735377}
   RecoveryCodesText: {fileID: 5933526830873239973}
   RecoveryCodesCopy: {fileID: 2739986304995398198}
-  OnEmailOTPVerificationFailed:
+  OnOTPVerificationFailed:
     m_PersistentCalls:
       m_Calls: []
   OnEmailOTPVerificationSuccess:
