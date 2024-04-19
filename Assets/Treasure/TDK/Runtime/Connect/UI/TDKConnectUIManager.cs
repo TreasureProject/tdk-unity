@@ -111,7 +111,9 @@ namespace Treasure
                 currentModalOpended.Hide();
 
             loginModal.Show();
-            currentModalOpended = loginModal;        
+            currentModalOpended = loginModal;
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_LOGIN);
         }
 
         public void ShowConfirmLoginModal()
@@ -121,6 +123,8 @@ namespace Treasure
 
             confirmLoginModal.Show();
             currentModalOpended = confirmLoginModal;
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_CONFIRM);
         }
 
         public void ShowAccountModal()
@@ -130,7 +134,9 @@ namespace Treasure
                 currentModalOpended.Hide();
 
             currentModalOpended = logedInHolder;
-            logedInHolder.Show();         
+            logedInHolder.Show();       
+
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);  
         }
 
         public void LogOut()
@@ -160,10 +166,10 @@ namespace Treasure
                     chainId: BigInteger.Parse(_currentChainData.chainId),
                     email: email,
                     authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                    personalWallet: WalletProvider.EmbeddedWallet
+                    personalWallet: WalletProvider.InAppWallet
                 )
                 : new WalletConnection(
-                    provider: WalletProvider.EmbeddedWallet,
+                    provider: WalletProvider.InAppWallet,
                     chainId: BigInteger.Parse(_currentChainData.chainId),
                     email: email,
                     authOptions: new AuthOptions(AuthProvider.EmailOTP)
@@ -216,7 +222,7 @@ namespace Treasure
         public async void Disconnect(bool endSession = false)
         {
             await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession);
-            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_DISCONNECTED);
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);
 
             TDK.Identity.OnDisconnected?.Invoke();
         }

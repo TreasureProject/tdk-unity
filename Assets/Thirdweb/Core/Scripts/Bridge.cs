@@ -99,6 +99,7 @@ namespace Thirdweb
                 walletConnection.chainId.ToString(), 
                 string.IsNullOrEmpty(walletConnection.password) ? Utils.GetDeviceIdentifier() : walletConnection.password, 
                 walletConnection.email, 
+                walletConnection.phoneNumber,
                 walletConnection.personalWallet.ToString()[..1].ToLower() + walletConnection.personalWallet.ToString()[1..],
                 JsonConvert.SerializeObject(walletConnection.authOptions),
                 walletConnection.smartWalletAccountOverride,
@@ -449,6 +450,22 @@ namespace Thirdweb
             return JsonConvert.DeserializeObject<Result<string>>(result).result;
         }
 
+        public static async Task CopyBuffer(string text)
+        {
+            if (!Utils.IsWebGLBuild())
+            {
+                ThirdwebDebug.LogWarning("Interacting with the thirdweb SDK is not fully supported in the editor.");
+                return;
+            }
+            string taskId = Guid.NewGuid().ToString();
+            var task = new TaskCompletionSource<string>();
+            taskMap[taskId] = task;
+#if UNITY_WEBGL
+            ThirdwebCopyBuffer(taskId, text, jsCallback);
+#endif
+            await task.Task;
+        }
+
 #if UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern string ThirdwebInvoke(string taskId, string route, string payload, Action<string, string, string> cb);
@@ -457,7 +474,7 @@ namespace Thirdweb
         [DllImport("__Internal")]
         private static extern string ThirdwebInitialize(string chainOrRPC, string options);
         [DllImport("__Internal")]
-        private static extern string ThirdwebConnect(string taskId, string wallet, string chainId, string password, string email, string personalWallet, string authOptions, string smartWalletAccountOverride, Action<string, string, string> cb);
+        private static extern string ThirdwebConnect(string taskId, string wallet, string chainId, string password, string email, string phoneNumber, string personalWallet, string authOptions, string smartWalletAccountOverride, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebDisconnect(string taskId, Action<string, string, string> cb);
         [DllImport("__Internal")]
@@ -494,6 +511,8 @@ namespace Thirdweb
         private static extern string ThirdwebResolveENSFromAddress(string taskId, string address, Action<string, string, string> cb);
         [DllImport("__Internal")]
         private static extern string ThirdwebResolveAddressFromENS(string taskId, string ens, Action<string, string, string> cb);
+        [DllImport("__Internal")]
+        private static extern string ThirdwebCopyBuffer(string taskId, string text, Action<string, string, string> cb);
 #endif
     }
 }

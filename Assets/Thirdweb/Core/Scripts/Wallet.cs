@@ -11,7 +11,11 @@ using Nethereum.Signer.EIP712;
 using Newtonsoft.Json.Linq;
 using Nethereum.Hex.HexTypes;
 using System.Linq;
+using UnityEngine.Networking;
+using Thirdweb.Redcode.Awaiting;
 using Newtonsoft.Json;
+
+#pragma warning disable CS0618
 
 namespace Thirdweb
 {
@@ -163,6 +167,61 @@ namespace Thirdweb
         }
 
         /// <summary>
+        /// Authenticates the user by signing a payload that can be used to securely identify users. See https://portal.thirdweb.com/auth.
+        /// </summary>
+        /// <param name="domain">The domain to authenticate to.</param>
+        /// <returns>A string representing the server-side authentication result.</returns>
+        public async Task<string> AuthenticateAndLoginServerSide(string domain, BigInteger chainId, string authPayloadPath = "/auth/payload", string authLoginPath = "/auth/login")
+        {
+            string payloadURL = domain + authPayloadPath;
+            string loginURL = domain + authLoginPath;
+
+            var payloadBodyRaw = new { address = await ThirdwebManager.Instance.SDK.Wallet.GetAddress(), chainId = chainId.ToString() };
+            var payloadBody = JsonConvert.SerializeObject(payloadBodyRaw);
+
+            using UnityWebRequest payloadRequest = UnityWebRequest.Post(payloadURL, "");
+            payloadRequest.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(payloadBody));
+            payloadRequest.downloadHandler = new DownloadHandlerBuffer();
+            payloadRequest.SetRequestHeader("Content-Type", "application/json");
+            await payloadRequest.SendWebRequest();
+            if (payloadRequest.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception("Error: " + payloadRequest.error + "\nResponse: " + payloadRequest.downloadHandler.text);
+            }
+            var payloadString = payloadRequest.downloadHandler.text;
+
+            var loginBodyRaw = JsonConvert.DeserializeObject<LoginPayload>(payloadString);
+            var resourcesString = loginBodyRaw.payload.Resources != null ? "\nResources:" + string.Join("", loginBodyRaw.payload.Resources.Select(r => $"\n- {r}")) : string.Empty;
+            var payloadToSign =
+                $"{loginBodyRaw.payload.Domain} wants you to sign in with your Ethereum account:"
+                + $"\n{loginBodyRaw.payload.Address}\n\n"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.Statement) ? "" : $"{loginBodyRaw.payload.Statement}\n")}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.Uri) ? "" : $"\nURI: {loginBodyRaw.payload.Uri}")}"
+                + $"\nVersion: {loginBodyRaw.payload.Version}"
+                + $"\nChain ID: {loginBodyRaw.payload.ChainId}"
+                + $"\nNonce: {loginBodyRaw.payload.Nonce}"
+                + $"\nIssued At: {loginBodyRaw.payload.IssuedAt}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.ExpirationTime) ? "" : $"\nExpiration Time: {loginBodyRaw.payload.ExpirationTime}")}"
+                + $"{(string.IsNullOrEmpty(loginBodyRaw.payload.InvalidBefore) ? "" : $"\nNot Before: {loginBodyRaw.payload.InvalidBefore}")}"
+                + resourcesString;
+
+            loginBodyRaw.signature = await ThirdwebManager.Instance.SDK.Wallet.Sign(payloadToSign);
+            var loginBody = JsonConvert.SerializeObject(new { payload = loginBodyRaw });
+
+            using UnityWebRequest loginRequest = UnityWebRequest.Post(loginURL, "");
+            loginRequest.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(loginBody));
+            loginRequest.downloadHandler = new DownloadHandlerBuffer();
+            loginRequest.SetRequestHeader("Content-Type", "application/json");
+            await loginRequest.SendWebRequest();
+            if (loginRequest.result != UnityWebRequest.Result.Success)
+            {
+                throw new Exception("Error: " + loginRequest.error + "\nResponse: " + loginRequest.downloadHandler.text);
+            }
+            var responseString = loginRequest.downloadHandler.text;
+            return responseString;
+        }
+
+        /// <summary>
         /// Verifies the authenticity of a login payload.
         /// </summary>
         /// <param name="payload">The login payload to verify.</param>
@@ -291,7 +350,7 @@ namespace Thirdweb
         }
 
         /// <summary>
-        /// Gets the connected embedded wallet email if any.
+        /// Gets the connected In App Wallet email if any.
         /// </summary>
         public async Task<string> GetEmail()
         {
@@ -421,8 +480,14 @@ namespace Thirdweb
                 }
                 else
                 {
-                    var txHash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.GetEtherTransferService().TransferEtherAsync(to, decimal.Parse(amount));
-                    return await Transaction.WaitForTransactionResult(txHash);
+                    var txRequest = new TransactionRequest()
+                    {
+                        from = await GetAddress(),
+                        to = to,
+                        data = "0x",
+                        value = amount.ToWei(),
+                    };
+                    return await ExecuteRawTransaction(txRequest);
                 }
             }
         }
@@ -811,12 +876,33 @@ namespace Thirdweb
                     throw new UnityException("This functionality is only available for SmartWallets.");
 
                 string address = await GetAddress();
-                var raw = await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetAllActiveSignersFunction, Contracts.Account.ContractDefinition.GetAllActiveSignersOutputDTO>(
+
+                var rawSigners = await TransactionManager.ThirdwebRead<
+                    Contracts.Account.ContractDefinition.GetAllActiveSignersFunction,
+                    Contracts.Account.ContractDefinition.GetAllActiveSignersOutputDTO
+                >(address, new Contracts.Account.ContractDefinition.GetAllActiveSignersFunction());
+                var allSigners = rawSigners.Signers;
+
+                var rawAdmins = await TransactionManager.ThirdwebRead<Contracts.Account.ContractDefinition.GetAllAdminsFunction, Contracts.Account.ContractDefinition.GetAllAdminsOutputDTO>(
                     address,
-                    new Contracts.Account.ContractDefinition.GetAllActiveSignersFunction()
+                    new Contracts.Account.ContractDefinition.GetAllAdminsFunction()
                 );
+                foreach (var admin in rawAdmins.ReturnValue1)
+                {
+                    allSigners.Add(
+                        new Contracts.Account.ContractDefinition.SignerPermissions()
+                        {
+                            Signer = admin,
+                            ApprovedTargets = new List<string>() { Utils.AddressZero },
+                            NativeTokenLimitPerTransaction = BigInteger.Zero,
+                            StartTimestamp = 0,
+                            EndTimestamp = Utils.GetUnixTimeStampIn10Years()
+                        }
+                    );
+                }
+
                 var signers = new List<SignerWithPermissions>();
-                foreach (var rawSigner in raw.Signers)
+                foreach (var rawSigner in allSigners)
                 {
                     bool? isAdmin;
                     try
@@ -876,26 +962,45 @@ namespace Thirdweb
         /// Sends a raw transaction from the connected wallet.
         /// </summary>
         /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
-        /// <returns>The result of the transaction as a TransactionResult object.</returns>
-        public async Task<TransactionResult> SendRawTransaction(TransactionRequest transactionRequest)
+        /// <returns>The transaction hash.</returns>
+        public async Task<string> SendRawTransaction(TransactionRequest transactionRequest)
         {
             if (Utils.IsWebGLBuild())
             {
-                return await Bridge.InvokeRoute<TransactionResult>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
+                transactionRequest.gasPrice = null;
+                var res = await Bridge.InvokeRoute<JObject>(getRoute("sendRawTransaction"), Utils.ToJsonStringArray(transactionRequest));
+                return res["hash"].Value<string>();
             }
             else
             {
+                if (string.IsNullOrEmpty(transactionRequest.to))
+                    throw new UnityException("Please specify a to address.");
+
+                transactionRequest.from ??= await GetAddress();
+
                 var input = new Nethereum.RPC.Eth.DTOs.TransactionInput(
-                    transactionRequest.data,
+                    string.IsNullOrEmpty(transactionRequest.data) ? null : transactionRequest.data,
                     transactionRequest.to,
                     transactionRequest.from,
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
-                    new HexBigInteger(BigInteger.Parse(transactionRequest.value))
+                    string.IsNullOrEmpty(transactionRequest.gasLimit) ? null : new HexBigInteger(BigInteger.Parse(transactionRequest.gasLimit)),
+                    string.IsNullOrEmpty(transactionRequest.gasPrice) ? null : new HexBigInteger(BigInteger.Parse(transactionRequest.gasPrice)),
+                    string.IsNullOrEmpty(transactionRequest.value) ? new HexBigInteger(0) : new HexBigInteger(BigInteger.Parse(transactionRequest.value))
                 );
-                var hash = await ThirdwebManager.Instance.SDK.Session.Web3.Eth.TransactionManager.SendTransactionAsync(input);
-                return await Transaction.WaitForTransactionResult(hash);
+
+                var tx = new Transaction(input);
+                return await tx.Send();
             }
+        }
+
+        /// <summary>
+        /// Sends a raw transaction from the connected wallet and waits for the transaction to be mined.
+        /// </summary>
+        /// <param name="transactionRequest">The transaction request object containing transaction details.</param>
+        /// <returns>The result of the transaction as a TransactionResult object.</returns>
+        public async Task<TransactionResult> ExecuteRawTransaction(TransactionRequest transactionRequest)
+        {
+            var hash = await SendRawTransaction(transactionRequest);
+            return await Transaction.WaitForTransactionResult(hash);
         }
 
         /// <summary>
@@ -927,6 +1032,7 @@ namespace Thirdweb
         public BigInteger chainId;
         public string password;
         public string email;
+        public string phoneNumber;
         public WalletProvider personalWallet;
         public AuthOptions authOptions;
         public string smartWalletAccountOverride;
@@ -939,7 +1045,7 @@ namespace Thirdweb
         /// <param name="password">Optional wallet encryption password</param>
         /// <param name="email">The email to login with if using email based providers.</param>
         /// <param name="personalWallet">The personal wallet provider if using smart wallets.</param>
-        /// <param name="authOptions">The authentication options if using embedded wallets.</param>
+        /// <param name="authOptions">The authentication options if using in app wallets.</param>
         /// <param name="smartWalletAccountOverride">Optionally choose to connect to a smart account the personal wallet is not an admin of.</param>
         /// <returns>A new instance of the <see cref="WalletConnection"/> class.</returns>
         public WalletConnection(
@@ -947,6 +1053,7 @@ namespace Thirdweb
             BigInteger chainId,
             string password = null,
             string email = null,
+            string phoneNumber = null,
             WalletProvider personalWallet = WalletProvider.LocalWallet,
             AuthOptions authOptions = null,
             string smartWalletAccountOverride = null
@@ -956,6 +1063,7 @@ namespace Thirdweb
             this.chainId = chainId;
             this.password = password;
             this.email = email;
+            this.phoneNumber = phoneNumber;
             this.personalWallet = personalWallet;
             this.authOptions = authOptions ?? new AuthOptions(authProvider: AuthProvider.EmailOTP, jwtOrPayload: null, encryptionKey: null);
             this.smartWalletAccountOverride = smartWalletAccountOverride;
@@ -963,7 +1071,7 @@ namespace Thirdweb
     }
 
     /// <summary>
-    /// Embedded Wallet Authentication Options.
+    /// In App Wallet Authentication Options.
     /// </summary>
     [System.Serializable]
     public class AuthOptions
@@ -1000,11 +1108,11 @@ namespace Thirdweb
         LocalWallet,
         SmartWallet,
         Hyperplay,
-        EmbeddedWallet
+        InAppWallet
     }
 
     /// <summary>
-    /// Represents the available auth providers for Embedded Wallet.
+    /// Represents the available auth providers for In App Wallet.
     /// </summary>
     [System.Serializable]
     public enum AuthProvider
@@ -1038,5 +1146,10 @@ namespace Thirdweb
         /// Custom Authentication Flow, checks payload against developer-set Auth Endpoint.
         /// </summary>
         AuthEndpoint,
+
+        /// <summary>
+        /// Phone Number OTP Flow.
+        /// </summary>
+        PhoneOTP
     }
 }

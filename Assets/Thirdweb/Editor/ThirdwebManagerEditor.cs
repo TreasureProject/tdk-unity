@@ -39,7 +39,7 @@ namespace Thirdweb
         private SerializedProperty entryPointAddressProperty;
         private SerializedProperty WalletConnectPrefabProperty;
         private SerializedProperty MetamaskPrefabProperty;
-        private SerializedProperty EmbeddedWalletPrefabProperty;
+        private SerializedProperty InAppWalletPrefabProperty;
 
         private ReorderableList supportedChainsList;
         private bool[] sectionExpanded;
@@ -50,8 +50,8 @@ namespace Thirdweb
         private GUIContent warningIcon;
         private Texture2D bannerImage;
 
-        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.8.0";
-        private static readonly string OptionalStateKey = "ThirdwebManagerEditor_OptionalState_4.8.0";
+        private static readonly string ExpandedStateKey = "ThirdwebManagerEditor_ExpandedState_4.12.1";
+        private static readonly string OptionalStateKey = "ThirdwebManagerEditor_OptionalState_4.12.1";
 
         private void OnEnable()
         {
@@ -87,7 +87,7 @@ namespace Thirdweb
             entryPointAddressProperty = serializedObject.FindProperty("entryPointAddress");
             WalletConnectPrefabProperty = serializedObject.FindProperty("WalletConnectPrefab");
             MetamaskPrefabProperty = serializedObject.FindProperty("MetamaskPrefab");
-            EmbeddedWalletPrefabProperty = serializedObject.FindProperty("EmbeddedWalletPrefab");
+            InAppWalletPrefabProperty = serializedObject.FindProperty("InAppWalletPrefab");
 
             supportedChainsList = new ReorderableList(serializedObject, supportedChainsProperty, true, true, true, true);
             supportedChainsList.drawHeaderCallback = rect =>
@@ -263,13 +263,12 @@ namespace Thirdweb
 
             // OZ Defender Options
             sectionExpanded[3] = DrawSectionWithExpand(
-                "OpenZeppelin Defender Options",
+                "Gasless Relayer Options",
                 sectionExpanded[3],
                 () =>
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     EditorGUILayout.PropertyField(relayerUrlProperty);
-                    EditorGUILayout.PropertyField(forwarderAddressProperty);
 
                     EditorGUI.BeginChangeCheck();
                     showGaslessOptionalFields = EditorGUILayout.ToggleLeft("Show Optional Fields", showGaslessOptionalFields);
@@ -280,6 +279,7 @@ namespace Thirdweb
 
                     if (showGaslessOptionalFields)
                     {
+                        EditorGUILayout.PropertyField(forwarderAddressProperty);
                         EditorGUILayout.PropertyField(forwarderDomainOverrideProperty);
                         EditorGUILayout.PropertyField(forwaderVersionOverrideProperty);
                     }
@@ -374,7 +374,7 @@ namespace Thirdweb
                     {
                         EditorGUILayout.PropertyField(WalletConnectPrefabProperty);
                         EditorGUILayout.PropertyField(MetamaskPrefabProperty);
-                        EditorGUILayout.PropertyField(EmbeddedWalletPrefabProperty);
+                        EditorGUILayout.PropertyField(InAppWalletPrefabProperty);
                     }
 
                     EditorGUILayout.EndVertical();
