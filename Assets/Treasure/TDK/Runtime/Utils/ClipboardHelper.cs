@@ -3,8 +3,10 @@ using UnityEngine;
 
 public static class ClipboardHelper
 {
+#if UNITY_WEBGL
     [DllImport("__Internal")]
     private static extern void CopyToClipboard(string text);
+#endif
 
     public static void Copy(string text)
     {
