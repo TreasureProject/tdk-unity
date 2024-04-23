@@ -40,7 +40,7 @@ namespace Treasure
                     { Contract.Treasures, "0xebba467ecb6b21239178033189ceae27ca12eadf" },
                     { Contract.CorruptionRemoval, "0x08f3533acdf2b9c400204056f771bdd6f1f1c200" },
                     { Contract.ERC1155TokenSetCorruptionHandler, "0x3c62778d8e01ed17c1048b64edaf121d36c71a4e" },
-                    { Contract.HarvesterEmberwing, "" },
+                    { Contract.HarvesterEmberwing, "0x36882e71d11eadd9f869b0fd70d18d5045939986" },
                     { Contract.ZeeverseZee, "0x094fa8ae08426ab180e71e60fa253b079e13b9fe" },
                     { Contract.ZeeverseItems, "0x58318bceaa0d249b62fad57d134da7475e551b47" },
                 }
