@@ -27,7 +27,7 @@ namespace Treasure
         {
             button.onClick.AddListener(() =>
             {
-                GUIUtility.systemCopyBuffer = _textToCopy;
+                ClipboardHelper.Copy(_textToCopy);
                 icon.sprite = checkIcon;
             });
         }
