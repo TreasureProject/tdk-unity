@@ -29,8 +29,11 @@ namespace Treasure
             disconnectButton.onClick.AddListener(() =>
             {
                 TDKConnectUIManager.Instance.LogOut();
-            });
+            });            
+        }
 
+        private async void OnEnable()
+        {
             SetAddress(await TDK.Identity.GetWalletAddress());
         }
 
