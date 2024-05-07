@@ -31,6 +31,9 @@ namespace Treasure
                 "Assets/Treasure/TDK/Resources/TDKConnectSettings.asset",
                 "Assets/Treasure/TDK/Resources/TDKConnectThemeData.asset",
                 "Assets/Treasure/TDK/Runtime",
+
+                // code stripping
+                "Assets/link.xml"
             };
 
             AssetDatabase.Refresh();
