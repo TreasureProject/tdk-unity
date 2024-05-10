@@ -55,7 +55,7 @@ namespace Treasure
                 args: new string[] { permitsAddress, permitsTokenId.ToString(), amount.ToString() }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_NFTS_STAKE,
                 new Dictionary<string, object>() {
@@ -66,7 +66,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
         }
 
         public async Task<Transaction> UnstakePermits(int amount)
@@ -78,7 +78,7 @@ namespace Treasure
                 args: new string[] { permitsAddress, permitsTokenId.ToString(), amount.ToString() }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_NFTS_UNSTAKE,
                 new Dictionary<string, object>() {
@@ -89,7 +89,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
         }
 
         public async Task<Transaction> ApproveMagic(BigInteger amount)
@@ -114,7 +114,7 @@ namespace Treasure
                 args: new string[] { amount.ToString(), chainId == ChainId.ArbitrumSepolia ? "1" : "0" }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_DEPOSIT,
                 new Dictionary<string, object>() {
@@ -124,7 +124,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
 #else
             TDKLogger.LogError("Unable to deposit magic. TDK Identity wallet service not implemented.");
             return await Task.FromResult<Transaction>(null);
@@ -142,7 +142,7 @@ namespace Treasure
                 args: new string[] { amount.ToString() }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_WITHDRAW_MAGIC,
                 new Dictionary<string, object>() {
@@ -151,7 +151,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
         }
 
         public async Task<Transaction> WithdrawAllMagic()
@@ -166,7 +166,7 @@ namespace Treasure
                     args: new string[] { }
                 );
 
-                var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+                transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
                 TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_WITHDRAW_MAGIC_ALL,
                     new Dictionary<string, object>()
@@ -175,7 +175,7 @@ namespace Treasure
                     }
                 );
 
-                return tx;
+                return transaction;
             }
 
             // No MAGIC to calim, just call withdraw with full amount
@@ -191,7 +191,7 @@ namespace Treasure
                 args: new string[] { }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_REWARDS_CLAIM_MAGIC,
                 new Dictionary<string, object>()
@@ -200,7 +200,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
         }
 
         public async Task<Transaction> ApproveCharacters()
@@ -222,7 +222,7 @@ namespace Treasure
                  }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_NFT_STAKE_BATCH,
                 new Dictionary<string, object>() {
@@ -232,7 +232,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
         }
 
         public async Task<Transaction> UnstakeCharacters(List<int> tokenIds)
@@ -248,7 +248,7 @@ namespace Treasure
                  }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_NFT_UNSTAKE_BATCH,
                 new Dictionary<string, object>() {
@@ -258,7 +258,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
         }
 
         public async Task Deposit(BigInteger amount)
@@ -277,7 +277,7 @@ namespace Treasure
             {
                 var capRequired = decimal.Parse(Utils.ToEth((amount - remainingDepositCap).ToString()));
                 var capPerPart = decimal.Parse(Utils.ToEth(permitsMagicMaxStakeable.ToString()));
-                var requiredPermits = (int)Math.Ceiling(capRequired / capPerPart);
+                var requiredPermits = (int) Math.Ceiling(capRequired / capPerPart);
                 if (requiredPermits < userPermitsBalance)
                 {
                     throw new UnityException("Ancient Permits balance too low");
@@ -324,7 +324,7 @@ namespace Treasure
                 args: new object[] { args }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_START,
                 new Dictionary<string, object>() {
@@ -334,7 +334,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
         }
 
         public async Task<Transaction> EndCorruptionRemovals(List<string> requestIds)
@@ -346,7 +346,7 @@ namespace Treasure
                 args: new object[] { requestIds }
             );
 
-            var tx = await TDK.Common.WaitForTransaction(transaction.queueId);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_END,
                 new Dictionary<string, object>() {
@@ -356,7 +356,7 @@ namespace Treasure
                 }
             );
 
-            return tx;
+            return transaction;
         }
     }
 }
