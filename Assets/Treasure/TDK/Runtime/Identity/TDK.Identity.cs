@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using System;
+using Nethereum.Signer;
+
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -33,6 +35,10 @@ namespace Treasure
         #region private vars
         private string _authToken;
         private bool _isAuthenticated;
+
+#if TDK_THIRDWEB
+        private ChainId _chainId = ChainId.Unknown;
+#endif
         #endregion
 
         public UnityEvent<string> OnConnected = new UnityEvent<string>();
@@ -73,8 +79,10 @@ namespace Treasure
         public async Task<ChainId> GetChainId()
         {
 #if TDK_THIRDWEB
-            var chainId = (int)await _wallet.GetChainId();
-            return chainId == (int)ChainId.ArbitrumSepolia ? ChainId.ArbitrumSepolia : ChainId.Arbitrum;
+            if(_chainId == ChainId.Unknown) {
+                _chainId = (ChainId) (int) await _wallet.GetChainId();
+            }
+            return _chainId;
 #else
             TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
             return await Task.FromResult<ChainId>(ChainId.Arbitrum);

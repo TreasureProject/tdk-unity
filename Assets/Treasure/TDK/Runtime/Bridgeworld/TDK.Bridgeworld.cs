@@ -329,7 +329,10 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_START,
                 new Dictionary<string, object>() {
                     { AnalyticsConstants.PROP_ENGINE_TX, transaction },
-                    { AnalyticsConstants.PROP_CONTRACT, Contract.CorruptionRemoval },
+                    {
+                        AnalyticsConstants.PROP_CONTRACT,
+                        Constants.ContractAddresses[await TDK.Identity.GetChainId()][Contract.CorruptionRemoval]
+                    },
                     { AnalyticsConstants.PROP_ARGS, args }
                 }
             );
@@ -351,7 +354,10 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_END,
                 new Dictionary<string, object>() {
                     { AnalyticsConstants.PROP_ENGINE_TX, transaction },
-                    { AnalyticsConstants.PROP_CONTRACT, Contract.CorruptionRemoval },
+                    {
+                        AnalyticsConstants.PROP_CONTRACT,
+                        Constants.ContractAddresses[await TDK.Identity.GetChainId()][Contract.CorruptionRemoval]
+                    },
                     { AnalyticsConstants.PROP_REQUEST_IDS, requestIds }
                 }
             );
