@@ -32,7 +32,6 @@ namespace Treasure
     {
         #region private vars
         private string _authToken;
-        private bool _isAuthenticated;
         #endregion
 
         public UnityEvent<string> OnConnected = new UnityEvent<string>();
@@ -57,7 +56,7 @@ namespace Treasure
 
         public bool IsAuthenticated
         {
-            get { return _isAuthenticated; }
+            get { return !string.IsNullOrEmpty(_authToken); }
         }
 
         public async Task<string> GetWalletAddress()
@@ -132,7 +131,6 @@ namespace Treasure
         public void LogOut()
         {
             _authToken = null;
-            _isAuthenticated = false;
         }
 
         public async Task<User?> ValidateUserSession(Project project, string authToken, int chainId)
@@ -166,7 +164,6 @@ namespace Treasure
                 }
 
                 _authToken = authToken;
-                _isAuthenticated = true;
 
                 TDKLogger.Log("Existing user session is valid");
 
@@ -209,7 +206,7 @@ namespace Treasure
             var signature = await GenerateSignature(payload);
 
             TDKLogger.Log("Logging in and fetching TDK auth token");
-            var token = await TDK.API.LogIn(payload, signature);
+            _authToken = await TDK.API.LogIn(payload, signature);
 
             // Smart wallet was already deployed, so check for existing sessions
             if (!didCreateSession)
@@ -237,12 +234,9 @@ namespace Treasure
                 }
             }
 
-            _authToken = token;
-            _isAuthenticated = true;
-
             TDKLogger.Log("User session started successfully");
 
-            return token;
+            return _authToken;
 #else
             TDKLogger.LogError("Unable to start user session. TDK Identity wallet service not implemented.");
             return await Task.FromResult(string.Empty);
