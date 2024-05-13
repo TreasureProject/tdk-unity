@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using System;
-using Nethereum.Signer;
-
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -79,8 +77,9 @@ namespace Treasure
         public async Task<ChainId> GetChainId()
         {
 #if TDK_THIRDWEB
-            if(_chainId == ChainId.Unknown) {
-                _chainId = (ChainId) (int) await _wallet.GetChainId();
+            if (_chainId == ChainId.Unknown)
+            {
+                _chainId = (ChainId)(int)await _wallet.GetChainId();
             }
             return _chainId;
 #else
