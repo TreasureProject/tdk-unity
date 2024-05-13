@@ -21,7 +21,7 @@ namespace Treasure
         public Env Environment
         {
             get { return _environment; }
-            set { _environment = value;}
+            set { _environment = value; }
         }
 
         public string CartridgeTag
