@@ -18,10 +18,10 @@ namespace Treasure
             _window.minSize = new Vector2(450, 600);
         }
 
-        [MenuItem ("Treasure/Set Dev Mode", false, 101)]
+        [MenuItem ("Treasure/Set Dev Environment", false, 101)]
         public static void SetDevEnvironment() { SetDevEnvironment(true); }
 
-        [MenuItem ("Treasure/Set Prod Mode", false, 102)]
+        [MenuItem ("Treasure/Set Prod Environment", false, 102)]
         public static void SetProdEnvironment() { SetDevEnvironment(false); }
 
         void OnGUI()
