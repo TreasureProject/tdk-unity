@@ -33,10 +33,7 @@ namespace Treasure
         #region private vars
         private string _authToken;
         private bool _isAuthenticated;
-
-#if TDK_THIRDWEB
         private ChainId _chainId = ChainId.Unknown;
-#endif
         #endregion
 
         public UnityEvent<string> OnConnected = new UnityEvent<string>();
@@ -81,10 +78,11 @@ namespace Treasure
             {
                 _chainId = (ChainId)(int)await _wallet.GetChainId();
             }
+
             return _chainId;
 #else
             TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
-            return await Task.FromResult<ChainId>(ChainId.Arbitrum);
+            return await Task.FromResult(ChainId.Arbitrum);
 #endif
 
         }
