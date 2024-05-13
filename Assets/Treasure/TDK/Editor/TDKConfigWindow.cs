@@ -19,10 +19,10 @@ namespace Treasure
         }
 
         [MenuItem ("Treasure/Set Dev Mode", false, 101)]
-		public static void SetDevEnvironment() { SetDevEnvironment(true); }
+        public static void SetDevEnvironment() { SetDevEnvironment(true); }
 
         [MenuItem ("Treasure/Set Prod Mode", false, 102)]
-		public static void SetProdEnvironment() { SetDevEnvironment(false); }
+        public static void SetProdEnvironment() { SetDevEnvironment(false); }
 
         void OnGUI()
         {
@@ -56,26 +56,25 @@ namespace Treasure
         }
 
         public static void SetDevEnvironment(bool devEnvironment)
-		{
-			try
-			{
-				TDKConfig config = TDKConfig.LoadFromResources();
+        {
+            try
+            {
+                TDKConfig config = TDKConfig.LoadFromResources();
 
-				if(config == null)
-				{
-					Debug.LogError("TDK - Could not load configuration file");
-				}
+                if(config == null)
+                {
+                    Debug.LogError("TDK - Could not load configuration file");
+                }
 
-				config.Environment = devEnvironment ? TDKConfig.Env.DEV : TDKConfig.Env.PROD;
-
-				EditorUtility.SetDirty(config);
-			}
-			catch (System.Exception)
-			{
-				EditorUtility.DisplayDialog("Problem toggeling environment", "Please configure first.", "Ok");
-				throw;
-			}
-		}
+                config.Environment = devEnvironment ? TDKConfig.Env.DEV : TDKConfig.Env.PROD;
+                EditorUtility.SetDirty(config);
+            }
+            catch (System.Exception)
+            {
+                EditorUtility.DisplayDialog("Problem toggeling environment", "Please configure first.", "Ok");
+                throw;
+            }
+        }
     }
 
     [Serializable]
