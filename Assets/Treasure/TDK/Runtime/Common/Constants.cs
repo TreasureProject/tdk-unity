@@ -4,6 +4,7 @@ namespace Treasure
 {
     public enum ChainId : int
     {
+        Unknown = -1,
         Arbitrum = 42161,
         ArbitrumSepolia = 421614
     }

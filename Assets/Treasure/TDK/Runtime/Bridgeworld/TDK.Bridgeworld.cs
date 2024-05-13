@@ -277,7 +277,7 @@ namespace Treasure
             {
                 var capRequired = decimal.Parse(Utils.ToEth((amount - remainingDepositCap).ToString()));
                 var capPerPart = decimal.Parse(Utils.ToEth(permitsMagicMaxStakeable.ToString()));
-                var requiredPermits = (int) Math.Ceiling(capRequired / capPerPart);
+                var requiredPermits = (int)Math.Ceiling(capRequired / capPerPart);
                 if (requiredPermits < userPermitsBalance)
                 {
                     throw new UnityException("Ancient Permits balance too low");
@@ -318,8 +318,9 @@ namespace Treasure
                 args[i, 2] = new string[] { customData };
             }
 
+            var contractAddress = Constants.ContractAddresses[await TDK.Identity.GetChainId()][Contract.CorruptionRemoval];
             var transaction = await TDK.API.WriteTransaction(
-                contract: Contract.CorruptionRemoval,
+                address: contractAddress,
                 functionName: "startRemovingCorruption",
                 args: new object[] { args }
             );
@@ -329,7 +330,7 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_START,
                 new Dictionary<string, object>() {
                     { AnalyticsConstants.PROP_ENGINE_TX, transaction },
-                    { AnalyticsConstants.PROP_CONTRACT, Contract.CorruptionRemoval },
+                    { AnalyticsConstants.PROP_CONTRACT, contractAddress },
                     { AnalyticsConstants.PROP_ARGS, args }
                 }
             );
@@ -339,9 +340,10 @@ namespace Treasure
 
         public async Task<Transaction> EndCorruptionRemovals(List<string> requestIds)
         {
-            TDKLogger.Log("Ending corruption removals");
+            TDKLogger.Log($"Ending {requestIds.Count} Corruption removals");
+            var contractAddress = Constants.ContractAddresses[await TDK.Identity.GetChainId()][Contract.CorruptionRemoval];
             var transaction = await TDK.API.WriteTransaction(
-                contract: Contract.CorruptionRemoval,
+                address: contractAddress,
                 functionName: "endRemovingCorruption",
                 args: new object[] { requestIds }
             );
@@ -351,7 +353,7 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_END,
                 new Dictionary<string, object>() {
                     { AnalyticsConstants.PROP_ENGINE_TX, transaction },
-                    { AnalyticsConstants.PROP_CONTRACT, Contract.CorruptionRemoval },
+                    { AnalyticsConstants.PROP_CONTRACT, contractAddress },
                     { AnalyticsConstants.PROP_REQUEST_IDS, requestIds }
                 }
             );
