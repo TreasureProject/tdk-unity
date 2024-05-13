@@ -20,7 +20,7 @@ namespace Treasure
         public struct RequestOverrides
         {
             public string authToken;
-            public int chainId;
+            public ChainId chainId;
         }
 
         public API() { }
