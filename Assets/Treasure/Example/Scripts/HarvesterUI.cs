@@ -92,7 +92,8 @@ Harvester User Details
         {
             try
             {
-                var token = await TDK.Identity.Authenticate(TDK.Instance.AppConfig.CartridgeTag);
+                var project = await TDK.API.GetProjectBySlug(TDK.Instance.AppConfig.CartridgeTag);
+                var token = await TDK.Identity.StartUserSession(project);
                 TDKLogger.Log($"Received auth token: {token}");
                 AuthBtn.GetComponentInChildren<Text>().text = "Log Out";
                 refreshHarvester();

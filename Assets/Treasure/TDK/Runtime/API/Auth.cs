@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Treasure
@@ -41,13 +42,8 @@ namespace Treasure
     [Serializable]
     public struct LogInBody
     {
-        public struct Payload
-        {
-            public AuthPayload payload;
-            public string signature;
-        }
-
-        public Payload payload;
+        public AuthPayload payload;
+        public string signature;
     }
 
     [Serializable]
@@ -59,13 +55,25 @@ namespace Treasure
     [Serializable]
     public struct User
     {
+        public struct Signer
+        {
+            public bool isAdmin;
+            public string signer;
+            public string[] approvedTargets;
+            public string nativeTokenLimitPerTransaction;
+            public string startTimestamp;
+            public string endTimestamp;
+        }
+
         public string id;
         public string smartAccountAddress;
         public string email;
+        public List<Signer> allActiveSigners;
     }
 
     public partial class API
     {
+        [Obsolete("GetAuthPayload is deprecated. Use GetLoginPayload.")]
         public async Task<AuthPayload> GetAuthPayload(string address, string chainId)
         {
             var response = await Post("/auth/payload", JsonConvert.SerializeObject(new GetAuthPayloadBody()
@@ -76,22 +84,25 @@ namespace Treasure
             return JsonConvert.DeserializeObject<GetAuthPayloadResponse>(response).payload;
         }
 
+        public async Task<AuthPayload> GetLoginPayload(string address)
+        {
+            var response = await Get($"/login/payload?address={address}");
+            return JsonConvert.DeserializeObject<AuthPayload>(response);
+        }
+
         public async Task<string> LogIn(AuthPayload payload, string signature)
         {
-            var response = await Post("/auth/login", JsonConvert.SerializeObject(new LogInBody()
+            var response = await Post("/login", JsonConvert.SerializeObject(new LogInBody()
             {
-                payload = new LogInBody.Payload()
-                {
-                    payload = payload,
-                    signature = signature,
-                }
+                payload = payload,
+                signature = signature,
             }));
             return JsonConvert.DeserializeObject<LogInResponse>(response).token;
         }
 
-        public async Task<User> GetCurrentUser()
+        public async Task<User> GetCurrentUser(RequestOverrides overrides = new RequestOverrides())
         {
-            var response = await Get("/users/me");
+            var response = await Get("/users/me", overrides);
             return JsonConvert.DeserializeObject<User>(response);
         }
     }

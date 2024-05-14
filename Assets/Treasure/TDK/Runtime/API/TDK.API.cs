@@ -17,11 +17,17 @@ namespace Treasure
 
     public partial class API
     {
+        public struct RequestOverrides
+        {
+            public string authToken;
+            public ChainId chainId;
+        }
+
         public API() { }
 
-        public async Task<string> Get(string path)
+        public async Task<string> Get(string path, RequestOverrides overrides = new RequestOverrides())
         {
-            var chainId = (int)await TDK.Identity.GetChainId();
+            // Create request
             var req = new UnityWebRequest
             {
                 url = TDK.Instance.AppConfig.TDKApiUrl + path,
@@ -29,13 +35,32 @@ namespace Treasure
                 downloadHandler = new DownloadHandlerBuffer()
             };
             req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", chainId.ToString());
-            if (TDK.Identity.IsAuthenticated)
+
+            // Set chain ID with override option
+            if (overrides.chainId != 0)
+            {
+                req.SetRequestHeader("X-Chain-Id", overrides.chainId.ToString());
+            }
+            else
+            {
+                var chainId = (int)await TDK.Identity.GetChainId();
+                req.SetRequestHeader("X-Chain-Id", chainId.ToString());
+            }
+
+            // Set auth token with override option
+            if (!string.IsNullOrEmpty(overrides.authToken))
+            {
+                req.SetRequestHeader("Authorization", $"Bearer {overrides.authToken}");
+            }
+            else if (TDK.Identity.IsAuthenticated)
             {
                 req.SetRequestHeader("Authorization", $"Bearer {TDK.Identity.AuthToken}");
             }
+
+            // Send request
             await req.SendWebRequest();
 
+            // Read response
             var rawResponse = req.downloadHandler.text;
             if (req.result != UnityWebRequest.Result.Success)
             {
@@ -45,9 +70,9 @@ namespace Treasure
             return rawResponse;
         }
 
-        public async Task<string> Post(string path, string body)
+        public async Task<string> Post(string path, string body, RequestOverrides overrides = new RequestOverrides())
         {
-            var chainId = (int)await TDK.Identity.GetChainId();
+            // Create request
             var req = new UnityWebRequest
             {
                 url = TDK.Instance.AppConfig.TDKApiUrl + path,
@@ -56,13 +81,32 @@ namespace Treasure
                 downloadHandler = new DownloadHandlerBuffer()
             };
             req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("X-Chain-Id", chainId.ToString());
-            if (TDK.Identity.IsAuthenticated)
+
+            // Set chain ID with override option
+            if (overrides.chainId != 0)
+            {
+                req.SetRequestHeader("X-Chain-Id", overrides.chainId.ToString());
+            }
+            else
+            {
+                var chainId = (int)await TDK.Identity.GetChainId();
+                req.SetRequestHeader("X-Chain-Id", chainId.ToString());
+            }
+
+            // Set auth token with override option
+            if (!string.IsNullOrEmpty(overrides.authToken))
+            {
+                req.SetRequestHeader("Authorization", $"Bearer {overrides.authToken}");
+            }
+            else if (TDK.Identity.IsAuthenticated)
             {
                 req.SetRequestHeader("Authorization", $"Bearer {TDK.Identity.AuthToken}");
             }
+
+            // Send request
             await req.SendWebRequest();
 
+            // Read response
             var rawResponse = req.downloadHandler.text;
             if (req.result != UnityWebRequest.Result.Success)
             {

@@ -32,7 +32,7 @@ namespace Treasure
     {
         #region private vars
         private string _authToken;
-        private bool _isAuthenticated;
+        private ChainId _chainId = ChainId.Unknown;
         #endregion
 
         public UnityEvent<string> OnConnected = new UnityEvent<string>();
@@ -57,7 +57,7 @@ namespace Treasure
 
         public bool IsAuthenticated
         {
-            get { return _isAuthenticated; }
+            get { return !string.IsNullOrEmpty(_authToken); }
         }
 
         public async Task<string> GetWalletAddress()
@@ -73,11 +73,15 @@ namespace Treasure
         public async Task<ChainId> GetChainId()
         {
 #if TDK_THIRDWEB
-            var chainId = (int)await _wallet.GetChainId();
-            return chainId == (int)ChainId.ArbitrumSepolia ? ChainId.ArbitrumSepolia : ChainId.Arbitrum;
+            if (_chainId == ChainId.Unknown)
+            {
+                _chainId = (ChainId)(int)await _wallet.GetChainId();
+            }
+
+            return _chainId;
 #else
             TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
-            return await Task.FromResult<ChainId>(ChainId.Arbitrum);
+            return await Task.FromResult(ChainId.Arbitrum);
 #endif
 
         }
@@ -112,77 +116,135 @@ namespace Treasure
             return await Task.FromResult<string>(string.Empty);
 #endif
         }
+
+        private async Task CreateSessionKey(Project project)
+        {
+            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
+            await _wallet.CreateSessionKey(
+                signerAddress: project.backendWallet,
+                approvedTargets: project.callTargets,
+                nativeTokenLimitPerTransactionInWei: "0",
+                permissionStartTimestamp: "0",
+                permissionEndTimestamp: permissionEndTimestamp.ToString(),
+                reqValidityStartTimestamp: "0",
+                reqValidityEndTimestamp: permissionEndTimestamp.ToString()
+            );
+        }
         #endregion
 
         #region public api
         public void LogOut()
         {
             _authToken = null;
-            _isAuthenticated = false;
         }
 
-        public async Task<string> Authenticate(string projectSlug)
+        public async Task<User?> ValidateUserSession(Project project, string authToken, ChainId chainId)
         {
-#if TDK_THIRDWEB
-            var project = await TDK.API.GetProjectBySlug(projectSlug);
-            var address = await GetWalletAddress();
-            var chainId = (int)await GetChainId();
-            var backendWallet = project.backendWallets[0].ToLowerInvariant();
-            var requestedCallTargets = project.callTargets.Select(callTarget => callTarget.ToLowerInvariant());
-            var didCreateSession = false;
-            var hasActiveSession = false;
+            TDKLogger.Log("Validating existing user session");
+
+            var backendWallet = project.backendWallet;
+            var requestedCallTargets = project.requestedCallTargets;
+
             try
             {
+                // Fetch user details for provided auth token
+                TDKLogger.Log("Fetching user details");
+                var user = await TDK.API.GetCurrentUser(new API.RequestOverrides()
+                {
+                    authToken = authToken,
+                    chainId = chainId
+                });
+
+                // Check if any active signers match the requested projects' call targets
+                var hasActiveSession = user.allActiveSigners.Any((signer) =>
+                {
+                    return signer.signer.ToLowerInvariant() == backendWallet &&
+                        requestedCallTargets.All(callTarget => signer.approvedTargets.Contains(callTarget));
+                });
+
+                if (!hasActiveSession)
+                {
+                    TDKLogger.Log("Existing user session does not have required permissions. User must start a new session.");
+                    return null;
+                }
+
+                _authToken = authToken;
+
+                TDKLogger.Log("Existing user session is valid");
+
+                return user;
+            }
+            catch
+            {
+                // Auth token was invalid or expired
+                return null;
+            }
+        }
+
+        public async Task<string> StartUserSession(Project project)
+        {
+            TDKLogger.Log("Starting new user session");
+
+#if TDK_THIRDWEB
+            var address = await _wallet.GetAddress();
+            if (address == null)
+            {
+                TDKLogger.LogError("Unable to start user session. TDK Identity wallet not connected.");
+                return await Task.FromResult(string.Empty);
+            }
+
+            var didCreateSession = false;
+
+            // If smart wallet isn't deployed yet, create a new session to bundle the two txs
+            if (!await _wallet.IsDeployed())
+            {
+                TDKLogger.Log("Deploying smart wallet and creating session key");
+                await CreateSessionKey(project);
+                didCreateSession = true;
+            }
+
+            // Create auth token
+            TDKLogger.Log("Fetching login payload");
+            var payload = await TDK.API.GetLoginPayload(address);
+
+            TDKLogger.Log("Signing login payload");
+            var signature = await GenerateSignature(payload);
+
+            TDKLogger.Log("Logging in and fetching TDK auth token");
+            _authToken = await TDK.API.LogIn(payload, signature);
+
+            // Smart wallet was already deployed, so check for existing sessions
+            if (!didCreateSession)
+            {
+                var backendWallet = project.backendWallet;
+                var requestedCallTargets = project.requestedCallTargets;
                 var activeSigners = await _wallet.GetAllActiveSigners();
-                hasActiveSession = activeSigners.Any((signer) =>
+
+                // Check if any active signers match the requested projects' call targets
+                var hasActiveSession = activeSigners.Any((signer) =>
                 {
                     var signerCallTargets = signer.permissions.approvedCallTargets.Select(callTarget => callTarget.ToLowerInvariant());
                     return signer.signer.ToLowerInvariant() == backendWallet &&
                         requestedCallTargets.All(callTarget => signerCallTargets.Contains(callTarget));
                 });
-                if (hasActiveSession)
+
+                if (!hasActiveSession)
+                {
+                    TDKLogger.Log("Creating new session key");
+                    await CreateSessionKey(project);
+                }
+                else
                 {
                     TDKLogger.Log("Using existing session key");
                 }
             }
-            catch
-            {
-                // Call can expectedly throw if smart wallet is not deployed already
-            }
 
-            // Create session (and deploy smart wallet if undeployed)
-            if (!didCreateSession && !hasActiveSession)
-            {
-                TDKLogger.Log("Creating new session key");
-                var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
-                await _wallet.CreateSessionKey(
-                    signerAddress: project.backendWallets[0],
-                    approvedTargets: project.callTargets,
-                    nativeTokenLimitPerTransactionInWei: "0",
-                    permissionStartTimestamp: "0",
-                    permissionEndTimestamp: permissionEndTimestamp.ToString(),
-                    reqValidityStartTimestamp: "0",
-                    reqValidityEndTimestamp: permissionEndTimestamp.ToString()
-                );
-            }
+            TDKLogger.Log("User session started successfully");
 
-            // Create auth token
-            TDKLogger.Log("Generating auth payload");
-            var payload = await TDK.API.GetAuthPayload(address, chainId.ToString());
-
-            TDKLogger.Log("Generating auth signature");
-            var signature = await GenerateSignature(payload);
-
-            TDKLogger.Log("Logging in smart wallet");
-            var token = await TDK.API.LogIn(payload, signature);
-
-            _authToken = token;
-            _isAuthenticated = true;
-
-            return token;
+            return _authToken;
 #else
-            TDKLogger.LogError("Unable to authenticate. TDK Identity wallet service not implemented.");
-            return await Task.FromResult<string>(string.Empty);
+            TDKLogger.LogError("Unable to start user session. TDK Identity wallet service not implemented.");
+            return await Task.FromResult(string.Empty);
 #endif
         }
         #endregion
