@@ -43,7 +43,7 @@ namespace Treasure
         public const string PROP_AMOUNT = "amount";
         public const string PROP_CHARACTERS_ADDRESS = "characters_address";
         public const string PROP_TOKEN_IDS = "token_ids";
-        public const string PROP_CONTRACT = "contract";
+        public const string PROP_CONTRACT_ADDRESS = "contract_address";
         public const string PROP_ARGS = "args";
         public const string PROP_REQUEST_IDS= "request_ids";
         public const string PROP_ENGINE_TX = "engin_tx";

@@ -18,6 +18,12 @@ namespace Treasure
             _window.minSize = new Vector2(450, 600);
         }
 
+        [MenuItem ("Treasure/Set Dev Environment", false, 101)]
+        public static void SetDevEnvironment() { SetDevEnvironment(true); }
+
+        [MenuItem ("Treasure/Set Prod Environment", false, 102)]
+        public static void SetProdEnvironment() { SetDevEnvironment(false); }
+
         void OnGUI()
         {
             EditorGUILayout.BeginVertical();
@@ -47,6 +53,27 @@ namespace Treasure
             #endif
 
             _window.Close();
+        }
+
+        public static void SetDevEnvironment(bool devEnvironment)
+        {
+            try
+            {
+                TDKConfig config = TDKConfig.LoadFromResources();
+
+                if(config == null)
+                {
+                    Debug.LogError("TDK - Could not load configuration file");
+                }
+
+                config.Environment = devEnvironment ? TDKConfig.Env.DEV : TDKConfig.Env.PROD;
+                EditorUtility.SetDirty(config);
+            }
+            catch (System.Exception)
+            {
+                EditorUtility.DisplayDialog("Problem toggeling environment", "Please configure first.", "Ok");
+                throw;
+            }
         }
     }
 
