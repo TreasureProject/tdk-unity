@@ -23,7 +23,7 @@ namespace Treasure
         [Header("Test buttons")]
         [SerializeField] private Button switchThemeButton;
         [SerializeField] private Button switchSceneButton;
-        [SerializeField] private ScreenOrientation currentOriantation;       
+        [SerializeField] private ScreenOrientation currentOriantation;
 
         private ModalBase currentModalOpended;
 
@@ -31,13 +31,14 @@ namespace Treasure
 
         private string _address;
         private string _email;
+        private bool _isSilentLogin = false;
         private bool useSmartWallets = true;
         private ChainData _currentChainData;
 
         private void Awake()
         {
             if (Instance == null)
-                Instance = this;          
+                Instance = this;
         }
 
         private void Start()
@@ -61,6 +62,11 @@ namespace Treasure
             {
                 ShowAccountModal();
             });
+        }
+
+        public bool IsSilentLogin
+        {
+            get { return _isSilentLogin; }
         }
 
         #region test code
@@ -134,9 +140,9 @@ namespace Treasure
                 currentModalOpended.Hide();
 
             currentModalOpended = logedInHolder;
-            logedInHolder.Show();       
+            logedInHolder.Show();
 
-            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);  
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
         }
 
         public void LogOut()
@@ -157,9 +163,10 @@ namespace Treasure
         #endregion
 
         #region Connecting
-        public async Task<bool> ConnectEmail(string email)
+        public async Task<bool> ConnectEmail(string email, bool isSilentLogin = false)
         {
             _email = email;
+            _isSilentLogin = isSilentLogin;
             var wc = useSmartWallets
                 ? new WalletConnection(
                     provider: WalletProvider.SmartWallet,
