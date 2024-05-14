@@ -3,17 +3,13 @@ using Treasure;
 
 public class IdentityUI : MonoBehaviour
 {
-    public async void OnPrintWalletAddressBtn()
-    {
-        var walletAddr = await TDK.Identity.GetWalletAddress();
-
-        TDKLogger.Log("Wallet address is:" + walletAddr);
-    }
-
     public void OnTreasureConnectBtn()
     {
-#if TDK_THIRDWEB
-        TDK.Connect.Show();
-#endif
+        TDK.Connect.ShowConnectModal();
+    }
+
+    public void OnPrintWalletAddressBtn()
+    {
+        TDKLogger.Log(TDK.Connect.Address);
     }
 }

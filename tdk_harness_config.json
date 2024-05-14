@@ -1,18 +1,24 @@
 {
-    "tdk": {
-        "cartridgeTag": "app",
-        "prodTdkApiUrl": "https://tdk-api.treasure.lol",
-        "devTdkApiUrl": "https://tdk-api-dev.treasure.lol",
-        "analyticsApiUrl": "https://ingress.treasure.lol",
-        "sessionLengthDays": 3
-    },
-    "helika": {
-        "prodApiKeyWeb": "21bce555ea28fe3d2dffeacc81fe2b.kotreasure-web-obvdlv09f",
-        "prodApiKeyIos": "2f65b3abc4094571158df4f4f01534.kotreasure-ios-3yhn2dq",
-        "prodApiKeyAndroid": "807a02965c84b7ddd0e563d47cb824.kotreasure-android-q7kqo4",
-        "devApiKeyWeb": "cce688c5c9ec3a6b2435d691e876c7.kotreasure-web-obvdlv09f",
-        "devApiKeyIos": "2e516d82e129fb2f82624b5058839a.kotreasure-ios-3yhn2dq",
-        "devApiKeyAndroid": "ac340039a7b9c21059a200d173cd5f.kotreasure-android-q7kqo4"
-    },
-    "thirdweb": {}
+  "tdk": {
+    "cartridgeTag": "app",
+    "devTdkApiUrl": "https://tdk-api-dev.treasure.lol",
+    "prodTdkApiUrl": "https://tdk-api.treasure.lol",
+    "devAnalyticsApiUrl": "https://darkmatter-dev.treasure.lol/ingress",
+    "prodAnalyticsApiUrl": "https://darkmatter.treasure.lol/ingress",
+    "sessionLengthDays": 3
+  },
+  "helika": {
+    "prodApiKeyWeb": "21bce555ea28fe3d2dffeacc81fe2b.kotreasure-web-obvdlv09f",
+    "prodApiKeyIos": "2f65b3abc4094571158df4f4f01534.kotreasure-ios-3yhn2dq",
+    "prodApiKeyAndroid": "807a02965c84b7ddd0e563d47cb824.kotreasure-android-q7kqo4",
+    "devApiKeyWeb": "cce688c5c9ec3a6b2435d691e876c7.kotreasure-web-obvdlv09f",
+    "devApiKeyIos": "2e516d82e129fb2f82624b5058839a.kotreasure-ios-3yhn2dq",
+    "devApiKeyAndroid": "ac340039a7b9c21059a200d173cd5f.kotreasure-android-q7kqo4"
+  },
+  "thirdweb": {
+    "devClientId": "e521f021ac8ac00473cc1a41001dc4a8",
+    "prodClientId": "3098f205cbb932cb31d8cf63fb482a0e",
+    "devDefaultChainId": 421614,
+    "prodDefaultChainId": 42161
+  }
 }

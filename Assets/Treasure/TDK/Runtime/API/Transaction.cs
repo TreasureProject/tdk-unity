@@ -56,9 +56,9 @@ namespace Treasure
 
         public async Task<Transaction> WriteTransaction(Contract contract, string functionName, object[] args)
         {
-            var chainId = await TDK.Identity.GetChainId();
+            var contractAddress = await TDK.Common.GetContractAddress(contract);
             return await WriteTransaction(
-                address: Constants.ContractAddresses[chainId][contract],
+                address: contractAddress,
                 functionName: functionName,
                 args: args
             );

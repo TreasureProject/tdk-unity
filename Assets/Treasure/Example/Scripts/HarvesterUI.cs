@@ -23,12 +23,7 @@ public class HarvesterUI : MonoBehaviour
 
     private Harvester _harvester;
     private HarvesterCorruptionRemoval _harvesterCorruptionRemoval;
-
-#if TDK_THIRDWEB
-    private BigInteger _magicAmount = BigInteger.Parse(Utils.ToWei("1000"));
-#else
-    private BigInteger _magicAmount;
-#endif
+    private BigInteger _magicAmount = BigInteger.Parse("1000000000000000000000"); // 1000 MAGIC
 
     void Start()
     {
@@ -49,7 +44,7 @@ public class HarvesterUI : MonoBehaviour
         string smartAccountAddress = null;
         if (TDK.Identity.IsAuthenticated)
         {
-            smartAccountAddress = await TDK.Identity.GetWalletAddress();
+            smartAccountAddress = TDK.Identity.Address;
         }
 
         InfoText.text = $@"
@@ -106,7 +101,7 @@ Harvester User Details
         }
         else
         {
-            TDK.Identity.LogOut();
+            TDK.Identity.EndUserSession();
             AuthBtn.GetComponentInChildren<Text>().text = "Authenticate";
             refreshHarvester();
         }

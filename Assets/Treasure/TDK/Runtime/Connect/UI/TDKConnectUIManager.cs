@@ -1,10 +1,5 @@
-using System;
 using System.Collections;
-using System.Numerics;
-using System.Threading.Tasks;
-using Thirdweb;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -23,21 +18,14 @@ namespace Treasure
         [Header("Test buttons")]
         [SerializeField] private Button switchThemeButton;
         [SerializeField] private Button switchSceneButton;
-        [SerializeField] private ScreenOrientation currentOriantation;       
+        [SerializeField] private ScreenOrientation currentOriantation;
 
         private ModalBase currentModalOpended;
-
-        private bool _isActive = false;
-
-        private string _address;
-        private string _email;
-        private bool useSmartWallets = true;
-        private ChainData _currentChainData;
 
         private void Awake()
         {
             if (Instance == null)
-                Instance = this;          
+                Instance = this;
         }
 
         private void Start()
@@ -51,16 +39,6 @@ namespace Treasure
             {
                 Hide();
             });
-
-            if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
-                TDKLogger.LogError("[TDKConnectUIManager:Start] Service is null");
-
-            _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
-
-            TDK.Identity.OnConnected.AddListener(value =>
-            {
-                ShowAccountModal();
-            });
         }
 
         #region test code
@@ -73,39 +51,9 @@ namespace Treasure
         }
         #endregion
 
-        #region Show and Hide
-        public void Show()
-        {
-            CheckIsConnected();
-        }
-
-        private async void CheckIsConnected()
-        {
-            var isConnected = await IsConnected();
-            if (isConnected)
-                ShowAccountModal();
-            else
-                ShowLoginModal();
-        }
-
-        public void Hide()
-        {
-            if (currentModalOpended != null)
-                currentModalOpended.Hide();
-
-            currentModalOpended = null;
-
-            contentHolder.SetActive(false);
-            _isActive = false;
-        }
-        #endregion
-
         #region Changing modals
-        public void ShowLoginModal(bool disconnect = false)
+        public void ShowLoginModal()
         {
-            if (disconnect)
-                Disconnect();
-
             Activate();
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
@@ -134,9 +82,19 @@ namespace Treasure
                 currentModalOpended.Hide();
 
             currentModalOpended = logedInHolder;
-            logedInHolder.Show();       
+            logedInHolder.Show();
 
-            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);  
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
+        }
+
+        public void Hide()
+        {
+            if (currentModalOpended != null)
+                currentModalOpended.Hide();
+
+            currentModalOpended = null;
+
+            contentHolder.SetActive(false);
         }
 
         public void LogOut()
@@ -145,86 +103,11 @@ namespace Treasure
 
             loginModal.Show();
             currentModalOpended = loginModal;
-
-            Disconnect();
         }
 
         private void Activate()
         {
             contentHolder.SetActive(true);
-            _isActive = true;
-        }
-        #endregion
-
-        #region Connecting
-        public async Task<bool> ConnectEmail(string email)
-        {
-            _email = email;
-            var wc = useSmartWallets
-                ? new WalletConnection(
-                    provider: WalletProvider.SmartWallet,
-                    chainId: BigInteger.Parse(_currentChainData.chainId),
-                    email: email,
-                    authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                    personalWallet: WalletProvider.InAppWallet
-                )
-                : new WalletConnection(
-                    provider: WalletProvider.InAppWallet,
-                    chainId: BigInteger.Parse(_currentChainData.chainId),
-                    email: email,
-                    authOptions: new AuthOptions(AuthProvider.EmailOTP)
-                );
-            return await Connect(wc);
-        }
-
-        private async Task<bool> Connect(WalletConnection wc)
-        {
-            TDKLogger.Log($"[TDKConnectUIManager:Connect] Connecting to {wc.provider}...");
-
-            await new WaitForSeconds(0.5f);
-
-            try
-            {
-                _address = await ThirdwebManager.Instance.SDK.Wallet.Connect(wc);
-            }
-            catch (Exception e)
-            {
-                _address = null;
-                TDKLogger.LogError($"[TDKConnectUIManager:Connect] error: {e}");
-                TDK.Identity.OnConnectionError?.Invoke(e);
-                return false;
-            }
-
-            PostConnect(wc);
-
-            return true;
-        }
-
-        private async void PostConnect(WalletConnection wc = null)
-        {
-            TDKLogger.Log($"[TDKConnectUIManager:PostConnect] address: {_address}");
-            TDK.Identity.OnConnected?.Invoke(_address);
-
-            var chainId = await TDK.Identity.GetChainId();
-            TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
-        }
-
-        public async Task<bool> IsConnected()
-        {
-            return await ThirdwebManager.Instance.SDK.Wallet.IsConnected();
-        }
-
-        public string GetUserEmail()
-        {
-            return _email;
-        }
-
-        public async void Disconnect(bool endSession = false)
-        {
-            await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession);
-            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);
-
-            TDK.Identity.OnDisconnected?.Invoke();
         }
         #endregion
     }

@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Events;
 using System;
 
 #if TDK_THIRDWEB
@@ -21,34 +20,31 @@ namespace Treasure
         private void InitIdentity()
         {
             Identity = new Identity();
-
-#if TDK_THIRDWEB
-            TDKServiceLocator.GetService<TDKThirdwebService>();
-#endif
         }
     }
 
     public class Identity
     {
         #region private vars
+        private string _address;
         private string _authToken;
-        private ChainId _chainId = ChainId.Unknown;
         #endregion
 
-        public UnityEvent<string> OnConnected = new UnityEvent<string>();
-        public UnityEvent<Exception> OnConnectionError = new UnityEvent<Exception>();
-        public UnityEvent OnDisconnected = new UnityEvent();
-
         #region accessors / mutators
-#if TDK_THIRDWEB
-        private Wallet _wallet
+        public string Address
         {
+            // Identity service can have its own address set in the case where an existing session was used and no wallet is connected
+            // Otherwise, fall back to Connect service address
             get
             {
-                return TDKServiceLocator.GetService<TDKThirdwebService>().Wallet;
+                if (string.IsNullOrEmpty(_address))
+                {
+                    _address = TDK.Connect.Address;
+                }
+
+                return _address;
             }
         }
-#endif
 
         public string AuthToken
         {
@@ -59,32 +55,6 @@ namespace Treasure
         {
             get { return !string.IsNullOrEmpty(_authToken); }
         }
-
-        public async Task<string> GetWalletAddress()
-        {
-#if TDK_THIRDWEB
-            return await _wallet.GetAddress();
-#else
-            TDKLogger.LogError("Unable to retrieve wallet address. TDK Identity wallet service not implemented.");
-            return await Task.FromResult<string>(string.Empty);
-#endif
-        }
-
-        public async Task<ChainId> GetChainId()
-        {
-#if TDK_THIRDWEB
-            if (_chainId == ChainId.Unknown)
-            {
-                _chainId = (ChainId)(int)await _wallet.GetChainId();
-            }
-
-            return _chainId;
-#else
-            TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
-            return await Task.FromResult(ChainId.Arbitrum);
-#endif
-
-        }
         #endregion
 
         #region constructors
@@ -92,7 +62,7 @@ namespace Treasure
         #endregion
 
         #region private methods
-        private async Task<string> GenerateSignature(AuthPayload payload)
+        private async Task<string> SignLoginPayload(AuthPayload payload)
         {
 #if TDK_THIRDWEB
             var message = new SiweMessage()
@@ -109,18 +79,18 @@ namespace Treasure
                 NotBefore = payload.invalid_before,
             };
             var finalMessage = SiweMessageStringBuilder.BuildMessage(message);
-
-            return await TDKServiceLocator.GetService<TDKThirdwebService>().Sign(finalMessage);
+            return await ThirdwebManager.Instance.SDK.Wallet.Sign(finalMessage);
 #else
-            TDKLogger.LogError("Unable to generate signature. TDK Identity wallet service not implemented.");
+            TDKLogger.LogError("Unable to sign login payload. TDK Identity wallet service not implemented.");
             return await Task.FromResult<string>(string.Empty);
 #endif
         }
 
         private async Task CreateSessionKey(Project project)
         {
+#if TDK_THIRDWEB
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
-            await _wallet.CreateSessionKey(
+            await ThirdwebManager.Instance.SDK.Wallet.CreateSessionKey(
                 signerAddress: project.backendWallet,
                 approvedTargets: project.callTargets,
                 nativeTokenLimitPerTransactionInWei: "0",
@@ -129,15 +99,14 @@ namespace Treasure
                 reqValidityStartTimestamp: "0",
                 reqValidityEndTimestamp: permissionEndTimestamp.ToString()
             );
+#else
+            TDKLogger.LogError("Unable to create session key. TDK Identity wallet service not implemented.");
+            return await Task.FromResult<string>(string.Empty);
+#endif
         }
         #endregion
 
         #region public api
-        public void LogOut()
-        {
-            _authToken = null;
-        }
-
         public async Task<User?> ValidateUserSession(Project project, string authToken, ChainId chainId)
         {
             TDKLogger.Log("Validating existing user session");
@@ -168,6 +137,7 @@ namespace Treasure
                     return null;
                 }
 
+                _address = user.smartAccountAddress;
                 _authToken = authToken;
 
                 TDKLogger.Log("Existing user session is valid");
@@ -186,8 +156,7 @@ namespace Treasure
             TDKLogger.Log("Starting new user session");
 
 #if TDK_THIRDWEB
-            var address = await _wallet.GetAddress();
-            if (address == null)
+            if (!await TDK.Connect.IsConnected())
             {
                 TDKLogger.LogError("Unable to start user session. TDK Identity wallet not connected.");
                 return await Task.FromResult(string.Empty);
@@ -196,7 +165,7 @@ namespace Treasure
             var didCreateSession = false;
 
             // If smart wallet isn't deployed yet, create a new session to bundle the two txs
-            if (!await _wallet.IsDeployed())
+            if (!await ThirdwebManager.Instance.SDK.Wallet.IsDeployed())
             {
                 TDKLogger.Log("Deploying smart wallet and creating session key");
                 await CreateSessionKey(project);
@@ -205,10 +174,10 @@ namespace Treasure
 
             // Create auth token
             TDKLogger.Log("Fetching login payload");
-            var payload = await TDK.API.GetLoginPayload(address);
+            var payload = await TDK.API.GetLoginPayload(Address);
 
             TDKLogger.Log("Signing login payload");
-            var signature = await GenerateSignature(payload);
+            var signature = await SignLoginPayload(payload);
 
             TDKLogger.Log("Logging in and fetching TDK auth token");
             _authToken = await TDK.API.LogIn(payload, signature);
@@ -218,7 +187,7 @@ namespace Treasure
             {
                 var backendWallet = project.backendWallet;
                 var requestedCallTargets = project.requestedCallTargets;
-                var activeSigners = await _wallet.GetAllActiveSigners();
+                var activeSigners = await ThirdwebManager.Instance.SDK.Wallet.GetAllActiveSigners();
 
                 // Check if any active signers match the requested projects' call targets
                 var hasActiveSession = activeSigners.Any((signer) =>
@@ -246,6 +215,16 @@ namespace Treasure
             TDKLogger.LogError("Unable to start user session. TDK Identity wallet service not implemented.");
             return await Task.FromResult(string.Empty);
 #endif
+        }
+
+        public async void EndUserSession()
+        {
+            var didDisconnect = await TDK.Connect.Disconnect();
+            if (didDisconnect)
+            {
+                _address = null;
+                _authToken = null;
+            }
         }
         #endregion
     }

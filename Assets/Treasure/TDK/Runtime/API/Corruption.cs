@@ -54,8 +54,8 @@ namespace Treasure
 
         public async Task<HarvesterCorruptionRemoval> GetHarvesterCorruptionRemoval(Contract contract)
         {
-            var chainId = await TDK.Identity.GetChainId();
-            return await GetHarvesterCorruptionRemoval(Constants.ContractAddresses[chainId][contract]);
+            var contractAddress = await TDK.Common.GetContractAddress(contract);
+            return await GetHarvesterCorruptionRemoval(contractAddress);
         }
     }
 }

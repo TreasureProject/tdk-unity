@@ -5,62 +5,36 @@ namespace Treasure
 {
     public class TDKThirdwebConfig : ScriptableObject
     {
-        // [SerializeField] private string _clientId;
-        // [SerializeField] private string _factoryAddress;
-        // [SerializeField] private bool _gasless;
-        // [SerializeField] private string _bundlerUrl;
-        // [SerializeField] private string _paymasterUrl;
-        // [SerializeField] private string _entryPointAddress;
+        [SerializeField] private string _devClientId;
+        [SerializeField] private string _prodClientId;
+        [SerializeField] private int _devDefaultChainId = (int)ChainId.ArbitrumSepolia;
+        [SerializeField] private int _prodDefaultChainId = (int)ChainId.Arbitrum;
 
-        // public string ClientId
-        // {
-        //     get { return _clientId; }
-        // }
+        public string ClientId
+        {
+            get { return TDK.Instance.AppConfig.Environment == TDKConfig.Env.DEV ? _devClientId : _prodClientId; }
+        }
 
-        // public string FactoryAddress
-        // {
-        //     get { return _factoryAddress; }
-        // }
-
-        // public bool Gasless
-        // {
-        //     get { return _gasless; }
-        // }
-
-        // public string BundlerUrl
-        // {
-        //     get { return _bundlerUrl; }
-        // }
-
-        // public string PaymasterUrl
-        // {
-        //     get { return _paymasterUrl; }
-        // }
-
-        // public string EntryPointAddress
-        // {
-        //     get { return _entryPointAddress; }
-        // }
+        public int DefaultChainId
+        {
+            get { return TDK.Instance.AppConfig.Environment == TDKConfig.Env.DEV ? _devDefaultChainId : _prodDefaultChainId; }
+        }
 
         public void SetConfig(SerializedThirdwebConfig config)
         {
-            // _clientId = config.clientId;
-            // _factoryAddress = config.factoryAddress;
-            // _gasless = config.gasless;
-            // _bundlerUrl = config.bundlerUrl;
-            // _paymasterUrl = config.paymasterUrl;
-            // _entryPointAddress = config.entryPointAddress;
+            _devClientId = config.devClientId;
+            _prodClientId = config.prodClientId;
+            _devDefaultChainId = config.devDefaultChainId;
+            _prodDefaultChainId = config.prodDefaultChainId;
         }
     }
 
     [Serializable]
     public class SerializedThirdwebConfig
     {
-        // [SerializeField] public string clientId;
-        // [SerializeField] public string factoryAddress;
-        // [SerializeField] public bool gasless;
-        // [SerializeField] public string bundlerUrl;
-        // [SerializeField] public string paymasterUrl;
-        // [SerializeField] public string entryPointAddress;
+        [SerializeField] public string devClientId;
+        [SerializeField] public string prodClientId;
+        [SerializeField] public int devDefaultChainId;
+        [SerializeField] public int prodDefaultChainId;
     }
 }

@@ -9,11 +9,13 @@ namespace Treasure
 
         public enum Env { DEV, PROD }
 
-        [SerializeField] private Env _environment = Env.DEV;
+        [SerializeField] private Env _environment = Env.PROD;
         [SerializeField] private string _cartridgeTag = string.Empty;
-        [SerializeField] private string _tdkApiUrl = string.Empty;
-        [SerializeField] private string _analyticsApiUrl = string.Empty;
-        [SerializeField] private float _sessionLengthDays = 0;
+        [SerializeField] private string _devTdkApiUrl = "https://tdk-api-dev.treasure.lol";
+        [SerializeField] private string _prodTdkApiUrl = "https://tdk-api.treasure.lol";
+        [SerializeField] private string _devAnalyticsApiUrl = "https://darkmatter-dev.treasure.lol/ingress";
+        [SerializeField] private string _prodAnalyticsApiUrl = "https://darkmatter.treasure.lol/ingress";
+        [SerializeField] private int _sessionLengthDays = 3;
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
@@ -31,35 +33,15 @@ namespace Treasure
 
         public string TDKApiUrl
         {
-            get
-            {
-                if (TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD)
-                {
-                    return string.Format(_tdkApiUrl, string.Empty);
-                }
-                else
-                {
-                    return string.Format(_tdkApiUrl, "-dev");
-                }
-            }
+            get { return Environment == Env.DEV ? _devTdkApiUrl : _prodTdkApiUrl; }
         }
 
         public string AnalyticsApiUrl
         {
-            get
-            {
-                if (TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD)
-                {
-                    return string.Format(_analyticsApiUrl, string.Empty);
-                }
-                else
-                {
-                    return string.Format(_analyticsApiUrl, "-dev");
-                }
-            }
+            get { return Environment == Env.DEV ? _devAnalyticsApiUrl : _prodAnalyticsApiUrl; }
         }
 
-        public float SessionLengthDays
+        public int SessionLengthDays
         {
             get { return _sessionLengthDays; }
         }
@@ -70,7 +52,8 @@ namespace Treasure
             {
                 return (T)Convert.ChangeType(moduleConfigurations[typeof(T).Name], typeof(T));
             }
-            return default(T);
+
+            return default;
         }
 
         public void SetModuleConfig<T>(T moduleConfig)
@@ -86,8 +69,10 @@ namespace Treasure
         public void SetConfig(SerializedTDKConfig config)
         {
             _cartridgeTag = config.cartridgeTag;
-            _tdkApiUrl = config.tdkApiUrl;
-            _analyticsApiUrl = config.analyticsApiUrl;
+            _devTdkApiUrl = config.devTdkApiUrl;
+            _prodTdkApiUrl = config.prodTdkApiUrl;
+            _devAnalyticsApiUrl = config.devAnalyticsApiUrl;
+            _prodAnalyticsApiUrl = config.prodAnalyticsApiUrl;
             _sessionLengthDays = config.sessionLengthDays;
         }
     }
@@ -96,8 +81,10 @@ namespace Treasure
     public class SerializedTDKConfig
     {
         [SerializeField] public string cartridgeTag;
-        [SerializeField] public string tdkApiUrl;
-        [SerializeField] public string analyticsApiUrl;
-        [SerializeField] public float sessionLengthDays;
+        [SerializeField] public string devTdkApiUrl;
+        [SerializeField] public string prodTdkApiUrl;
+        [SerializeField] public string devAnalyticsApiUrl;
+        [SerializeField] public string prodAnalyticsApiUrl;
+        [SerializeField] public int sessionLengthDays;
     }
 }

@@ -11,13 +11,18 @@ namespace Treasure
 
     public enum Contract
     {
+        // Tokens
         Magic,
+        // Bridgeworld
         Consumables,
         Legions,
         Treasures,
         CorruptionRemoval,
         ERC1155TokenSetCorruptionHandler,
         HarvesterEmberwing,
+        // Treasure Misc
+        ManagedAccountFactory,
+        // Zeeverse
         ZeeverseZee,
         ZeeverseItems,
     }
@@ -42,6 +47,7 @@ namespace Treasure
                     { Contract.CorruptionRemoval, "0x08f3533acdf2b9c400204056f771bdd6f1f1c200" },
                     { Contract.ERC1155TokenSetCorruptionHandler, "0x3c62778d8e01ed17c1048b64edaf121d36c71a4e" },
                     { Contract.HarvesterEmberwing, "0x36882e71d11eadd9f869b0fd70d18d5045939986" },
+                    { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
                     { Contract.ZeeverseZee, "0x094fa8ae08426ab180e71e60fa253b079e13b9fe" },
                     { Contract.ZeeverseItems, "0x58318bceaa0d249b62fad57d134da7475e551b47" },
                 }
@@ -55,6 +61,7 @@ namespace Treasure
                     { Contract.CorruptionRemoval, "0xdd8b0dd8128873049b1d528262724bde600f5be2" },
                     { Contract.ERC1155TokenSetCorruptionHandler, "0x937817e7fe8e3b3543db46f14473d5f110a79ece" },
                     { Contract.HarvesterEmberwing, "0x816c0717cf263e7da4cd33d4979ad15dbb70f122" },
+                    { Contract.ManagedAccountFactory, "0xae7f7e9286f5f9ede167a19d1d605df4fdbc417b" },
                     { Contract.ZeeverseZee, "0xb1af672c7e0e8880c066ecc24930a12ff2ee8534" },
                     { Contract.ZeeverseItems, "0xfaad5aa3209ab1b25ede22ed4da5521538b649fa" },
                 }

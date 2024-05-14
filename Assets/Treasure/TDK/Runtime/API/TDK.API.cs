@@ -43,7 +43,7 @@ namespace Treasure
             }
             else
             {
-                var chainId = (int)await TDK.Identity.GetChainId();
+                var chainId = (int)await TDK.Connect.GetChainId();
                 req.SetRequestHeader("X-Chain-Id", chainId.ToString());
             }
 
@@ -89,7 +89,7 @@ namespace Treasure
             }
             else
             {
-                var chainId = (int)await TDK.Identity.GetChainId();
+                var chainId = (int)await TDK.Connect.GetChainId();
                 req.SetRequestHeader("X-Chain-Id", chainId.ToString());
             }
 

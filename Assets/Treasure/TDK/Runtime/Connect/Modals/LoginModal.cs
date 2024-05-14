@@ -88,7 +88,7 @@ namespace Treasure
             xLogin.SetActive(appSettingsData.loginSettings.hasXLogin);
 
             loginEmailHolder.SetActive(appSettingsData.loginSettings.hasEmailLogin);
-            loginWalletHolder.SetActive(appSettingsData.loginSettings.hasWalletLogin);          
+            loginWalletHolder.SetActive(appSettingsData.loginSettings.hasWalletLogin);
 
             if (landscapeRightSideHolder != null)
             {
@@ -107,11 +107,10 @@ namespace Treasure
             {
                 errorText.gameObject.SetActive(false);
                 // StartCoroutine(WaitToGoToConfirmLogin());
-                
+
                 connectButton.GetComponent<LoadingButton>().SetLoading(true);
 
-                // var result;
-                await TDKConnectUIManager.Instance.ConnectEmail(emailInputField.text);
+                await TDK.Connect.ConnectEmail(emailInputField.text);
 
                 connectButton.GetComponent<LoadingButton>().SetLoading(false);
 
