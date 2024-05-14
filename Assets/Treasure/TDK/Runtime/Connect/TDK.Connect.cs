@@ -43,16 +43,16 @@ namespace Treasure
         #region accessors / mutators
         public async Task<ChainId> GetChainId()
         {
-#if TDK_THIRDWEB
             if (_chainId == ChainId.Unknown)
             {
+#if TDK_THIRDWEB
                 _chainId = (ChainId)(int)await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetChainId();
+#else
+                _chainId = ChainId.Arbitrum;
+#endif
             }
 
             return _chainId;
-#else
-            return await Task.FromResult(ChainId.Arbitrum);
-#endif
         }
 
         public string Email
@@ -67,7 +67,13 @@ namespace Treasure
         #endregion
 
         #region constructors
-        public Connect() { }
+        public Connect()
+        {
+            OnConnected.AddListener(value =>
+            {
+                TDKConnectUIManager.Instance.Hide();
+            });
+        }
         #endregion
 
         #region private methods
@@ -94,8 +100,18 @@ namespace Treasure
 
         public async Task SetChainId(ChainId chainId)
         {
-            await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.SwitchNetwork((int)chainId);
             _chainId = chainId;
+
+#if TDK_THIRDWEB
+            // Thirdweb SDK currently doesn't allow you to switch networks while connected to a smart wallet
+            // Reinitialize it and auto-connect instead
+            var connectedEmail = _email;
+            ThirdwebManager.Instance.Initialize(Constants.ChainIdToName[chainId]);
+            if (!string.IsNullOrEmpty(connectedEmail))
+            {
+                await ConnectEmail(connectedEmail);
+            }
+#endif
         }
 
         public void ShowConnectModal()

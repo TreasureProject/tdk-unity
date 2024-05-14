@@ -116,6 +116,7 @@ namespace Treasure
                 }
                 catch (Exception e)
                 {
+                    TDKLogger.LogError($"[LoginModal:OnClickConnectwithEmail] {e.Message}");
                     errorText.text = e.Message;
                     errorText.gameObject.SetActive(true);
                 }

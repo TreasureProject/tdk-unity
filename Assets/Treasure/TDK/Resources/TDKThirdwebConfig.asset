@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _devClientId: e521f021ac8ac00473cc1a41001dc4a8
   _prodClientId: 3098f205cbb932cb31d8cf63fb482a0e
-  _devDefaultChainId: 421614
-  _prodDefaultChainId: 42161
+  _devDefaultChainIdentifier: arbitrum-sepolia
+  _prodDefaultChainIdentifier: arbitrum
+  _factoryAddress: 0x463effb51873c7720c810ac7fb2e145ec2f8cc60

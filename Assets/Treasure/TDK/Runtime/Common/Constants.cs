@@ -5,6 +5,8 @@ namespace Treasure
     public enum ChainId : int
     {
         Unknown = -1,
+        Mainnet = 1,
+        Sepolia = 11155111,
         Arbitrum = 42161,
         ArbitrumSepolia = 421614
     }
@@ -65,7 +67,25 @@ namespace Treasure
                     { Contract.ZeeverseZee, "0xb1af672c7e0e8880c066ecc24930a12ff2ee8534" },
                     { Contract.ZeeverseItems, "0xfaad5aa3209ab1b25ede22ed4da5521538b649fa" },
                 }
+            },
+            {
+                ChainId.Mainnet, new Dictionary<Contract, string> {}
+            },
+            {
+                ChainId.Sepolia, new Dictionary<Contract, string> {
+                    { Contract.Magic, "0x013cb2854daad8203c6686682f5d876e5d3de4a2" },
+                    { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
+                }
             }
+        };
+
+        public static Dictionary<ChainId, string> ChainIdToName = new Dictionary<ChainId, string>()
+        {
+            { ChainId.Unknown, "unknown" },
+            { ChainId.Mainnet, "ethereum" },
+            { ChainId.Sepolia, "sepolia" },
+            { ChainId.Arbitrum, "arbitrum" },
+            { ChainId.ArbitrumSepolia, "arbitrum-sepolia" }
         };
     }
 }

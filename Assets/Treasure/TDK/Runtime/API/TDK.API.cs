@@ -25,7 +25,7 @@ namespace Treasure
 
         public API() { }
 
-        public async Task<string> Get(string path, RequestOverrides overrides = new RequestOverrides())
+        public async Task<string> Get(string path, RequestOverrides? overrides = null)
         {
             // Create request
             var req = new UnityWebRequest
@@ -37,9 +37,9 @@ namespace Treasure
             req.SetRequestHeader("Content-Type", "application/json");
 
             // Set chain ID with override option
-            if (overrides.chainId != 0)
+            if (overrides.HasValue && overrides.Value.chainId > 0)
             {
-                req.SetRequestHeader("X-Chain-Id", overrides.chainId.ToString());
+                req.SetRequestHeader("X-Chain-Id", overrides.Value.chainId.ToString());
             }
             else
             {
@@ -48,9 +48,9 @@ namespace Treasure
             }
 
             // Set auth token with override option
-            if (!string.IsNullOrEmpty(overrides.authToken))
+            if (overrides.HasValue && !string.IsNullOrEmpty(overrides.Value.authToken))
             {
-                req.SetRequestHeader("Authorization", $"Bearer {overrides.authToken}");
+                req.SetRequestHeader("Authorization", $"Bearer {overrides.Value.authToken}");
             }
             else if (TDK.Identity.IsAuthenticated)
             {
@@ -70,7 +70,7 @@ namespace Treasure
             return rawResponse;
         }
 
-        public async Task<string> Post(string path, string body, RequestOverrides overrides = new RequestOverrides())
+        public async Task<string> Post(string path, string body, RequestOverrides? overrides = null)
         {
             // Create request
             var req = new UnityWebRequest
@@ -83,9 +83,9 @@ namespace Treasure
             req.SetRequestHeader("Content-Type", "application/json");
 
             // Set chain ID with override option
-            if (overrides.chainId != 0)
+            if (overrides.HasValue && overrides.Value.chainId > 0)
             {
-                req.SetRequestHeader("X-Chain-Id", overrides.chainId.ToString());
+                req.SetRequestHeader("X-Chain-Id", overrides.Value.chainId.ToString());
             }
             else
             {
@@ -94,9 +94,9 @@ namespace Treasure
             }
 
             // Set auth token with override option
-            if (!string.IsNullOrEmpty(overrides.authToken))
+            if (overrides.HasValue && !string.IsNullOrEmpty(overrides.Value.authToken))
             {
-                req.SetRequestHeader("Authorization", $"Bearer {overrides.authToken}");
+                req.SetRequestHeader("Authorization", $"Bearer {overrides.Value.authToken}");
             }
             else if (TDK.Identity.IsAuthenticated)
             {

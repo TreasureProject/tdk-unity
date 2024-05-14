@@ -18,7 +18,8 @@
   "thirdweb": {
     "devClientId": "e521f021ac8ac00473cc1a41001dc4a8",
     "prodClientId": "3098f205cbb932cb31d8cf63fb482a0e",
-    "devDefaultChainId": 421614,
-    "prodDefaultChainId": 42161
+    "devDefaultChainIdentifier": "arbitrum-sepolia",
+    "prodDefaultChainIdentifier": "arbitrum",
+    "factoryAddress": "0x463effb51873c7720c810ac7fb2e145ec2f8cc60"
   }
 }
