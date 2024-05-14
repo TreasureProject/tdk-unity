@@ -39,7 +39,7 @@ namespace Treasure
             // Set chain ID with override option
             if (overrides.chainId != 0)
             {
-                req.SetRequestHeader("X-Chain-Id", overrides.chainId.ToString());
+                req.SetRequestHeader("X-Chain-Id", ((int)overrides.chainId).ToString());
             }
             else
             {
@@ -85,7 +85,7 @@ namespace Treasure
             // Set chain ID with override option
             if (overrides.chainId != 0)
             {
-                req.SetRequestHeader("X-Chain-Id", overrides.chainId.ToString());
+                req.SetRequestHeader("X-Chain-Id", ((int)overrides.chainId).ToString());
             }
             else
             {
