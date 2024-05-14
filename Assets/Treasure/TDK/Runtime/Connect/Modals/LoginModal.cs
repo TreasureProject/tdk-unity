@@ -110,11 +110,17 @@ namespace Treasure
 
                 connectButton.GetComponent<LoadingButton>().SetLoading(true);
 
-                await TDK.Connect.ConnectEmail(emailInputField.text);
+                try
+                {
+                    await TDK.Connect.ConnectEmail(emailInputField.text);
+                }
+                catch (Exception e)
+                {
+                    errorText.text = e.Message;
+                    errorText.gameObject.SetActive(true);
+                }
 
                 connectButton.GetComponent<LoadingButton>().SetLoading(false);
-
-                // Debug.Log($"Result : {result}");
             }
             else
             {

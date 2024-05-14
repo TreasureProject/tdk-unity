@@ -46,7 +46,7 @@ namespace Treasure
 #if TDK_THIRDWEB
             if (_chainId == ChainId.Unknown)
             {
-                _chainId = (ChainId)(int)await ThirdwebManager.Instance.SDK.Wallet.GetChainId();
+                _chainId = (ChainId)(int)await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetChainId();
             }
 
             return _chainId;
@@ -70,11 +70,23 @@ namespace Treasure
         public Connect() { }
         #endregion
 
+        #region private methods
+        private async Task ConnectWallet(WalletConnection wc, ChainId chainId)
+        {
+            TDKLogger.Log($"[TDK.Connect:Connect] Connecting to {wc.provider}...");
+            var result = await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Connect(wc);
+            _address = result;
+            _email = wc.email;
+            OnConnected?.Invoke(_address);
+            TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
+        }
+        #endregion
+
         #region public api
-        public async Task<bool> IsConnected()
+        public async Task<bool> IsWalletConnected()
         {
 #if TDK_THIRDWEB
-            return await ThirdwebManager.Instance.SDK.Wallet.IsConnected();
+            return await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.IsConnected();
 #else
             return await Task.FromResult(false);
 #endif
@@ -82,13 +94,13 @@ namespace Treasure
 
         public async Task SetChainId(ChainId chainId)
         {
-            await ThirdwebManager.Instance.SDK.Wallet.SwitchNetwork((int)chainId);
+            await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.SwitchNetwork((int)chainId);
             _chainId = chainId;
         }
 
-        public async void ShowConnectModal()
+        public void ShowConnectModal()
         {
-            if (await IsConnected())
+            if (_address != null)
             {
                 TDKConnectUIManager.Instance.ShowAccountModal();
             }
@@ -98,10 +110,8 @@ namespace Treasure
             }
         }
 
-        public async Task<bool> ConnectEmail(string email)
+        public async Task ConnectEmail(string email)
         {
-            _email = email;
-
             var chainId = await GetChainId();
             var wc = new WalletConnection(
                     provider: WalletProvider.SmartWallet,
@@ -110,48 +120,20 @@ namespace Treasure
                     authOptions: new AuthOptions(AuthProvider.EmailOTP),
                     personalWallet: WalletProvider.InAppWallet
                 );
-            return await ConnectWallet(wc, chainId);
+            await ConnectWallet(wc, chainId);
         }
 
-        private async Task<bool> ConnectWallet(WalletConnection wc, ChainId chainId)
+        public async Task Disconnect(bool endSession = false)
         {
-            TDKLogger.Log($"[TDK.Connect:Connect] Connecting to {wc.provider}...");
-
-            try
+            if (await IsWalletConnected())
             {
-                _address = await ThirdwebManager.Instance.SDK.Wallet.Connect(wc);
-            }
-            catch (Exception e)
-            {
-                _address = null;
-                _email = null;
-                TDKLogger.LogError($"[TDK.Connect:Connect] Error occurred: {e}");
-                OnConnectError?.Invoke(e);
-                return false;
-            }
-
-            OnConnected?.Invoke(_address);
-            TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
-            return true;
-        }
-
-        public async Task<bool> Disconnect(bool endSession = false)
-        {
-            try
-            {
-                await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession);
-            }
-            catch (Exception e)
-            {
-                TDKLogger.LogError($"[TDK.Connect:Disconnect] Error occurred: {e}");
-                return false;
+                await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Disconnect(endSession);
+                OnDisconnected?.Invoke();
             }
 
             _address = null;
             _email = null;
-            OnDisconnected?.Invoke();
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);
-            return true;
         }
         #endregion
     }

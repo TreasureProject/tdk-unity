@@ -79,7 +79,7 @@ namespace Treasure
                 NotBefore = payload.invalid_before,
             };
             var finalMessage = SiweMessageStringBuilder.BuildMessage(message);
-            return await ThirdwebManager.Instance.SDK.Wallet.Sign(finalMessage);
+            return await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Sign(finalMessage);
 #else
             TDKLogger.LogError("Unable to sign login payload. TDK Identity wallet service not implemented.");
             return await Task.FromResult<string>(string.Empty);
@@ -90,7 +90,7 @@ namespace Treasure
         {
 #if TDK_THIRDWEB
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
-            await ThirdwebManager.Instance.SDK.Wallet.CreateSessionKey(
+            await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.CreateSessionKey(
                 signerAddress: project.backendWallet,
                 approvedTargets: project.callTargets,
                 nativeTokenLimitPerTransactionInWei: "0",
@@ -156,7 +156,7 @@ namespace Treasure
             TDKLogger.Log("Starting new user session");
 
 #if TDK_THIRDWEB
-            if (!await TDK.Connect.IsConnected())
+            if (!await TDK.Connect.IsWalletConnected())
             {
                 TDKLogger.LogError("Unable to start user session. TDK Identity wallet not connected.");
                 return await Task.FromResult(string.Empty);
@@ -165,7 +165,7 @@ namespace Treasure
             var didCreateSession = false;
 
             // If smart wallet isn't deployed yet, create a new session to bundle the two txs
-            if (!await ThirdwebManager.Instance.SDK.Wallet.IsDeployed())
+            if (!await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.IsDeployed())
             {
                 TDKLogger.Log("Deploying smart wallet and creating session key");
                 await CreateSessionKey(project);
@@ -187,7 +187,7 @@ namespace Treasure
             {
                 var backendWallet = project.backendWallet;
                 var requestedCallTargets = project.requestedCallTargets;
-                var activeSigners = await ThirdwebManager.Instance.SDK.Wallet.GetAllActiveSigners();
+                var activeSigners = await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetAllActiveSigners();
 
                 // Check if any active signers match the requested projects' call targets
                 var hasActiveSession = activeSigners.Any((signer) =>
@@ -219,12 +219,18 @@ namespace Treasure
 
         public async void EndUserSession()
         {
-            var didDisconnect = await TDK.Connect.Disconnect();
-            if (didDisconnect)
+            try
             {
-                _address = null;
-                _authToken = null;
+                await TDK.Connect.Disconnect(true);
             }
+            catch (Exception e)
+            {
+                TDKLogger.LogError($"Error ending user session: {e}");
+                return;
+            }
+
+            _address = null;
+            _authToken = null;
         }
         #endregion
     }

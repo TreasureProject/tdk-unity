@@ -18,6 +18,11 @@ namespace Treasure
             ThirdwebManager.Instance.gasless = true;
             ThirdwebManager.Instance.Initialize(_config.DefaultChainId.ToString());
         }
+
+        public Wallet Wallet
+        {
+            get { return ThirdwebManager.Instance.SDK.Wallet; }
+        }
     }
 }
 #endif
