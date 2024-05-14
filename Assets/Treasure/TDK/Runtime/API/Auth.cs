@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Treasure
@@ -54,9 +55,20 @@ namespace Treasure
     [Serializable]
     public struct User
     {
+        public struct Signer
+        {
+            public bool isAdmin;
+            public string signer;
+            public string[] approvedTargets;
+            public string nativeTokenLimitPerTransaction;
+            public string startTimestamp;
+            public string endTimestamp;
+        }
+
         public string id;
         public string smartAccountAddress;
         public string email;
+        public List<Signer> allActiveSigners;
     }
 
     public partial class API
@@ -88,9 +100,9 @@ namespace Treasure
             return JsonConvert.DeserializeObject<LogInResponse>(response).token;
         }
 
-        public async Task<User> GetCurrentUser()
+        public async Task<User> GetCurrentUser(RequestOverrides overrides = new RequestOverrides())
         {
-            var response = await Get("/users/me");
+            var response = await Get("/users/me", overrides);
             return JsonConvert.DeserializeObject<User>(response);
         }
     }
