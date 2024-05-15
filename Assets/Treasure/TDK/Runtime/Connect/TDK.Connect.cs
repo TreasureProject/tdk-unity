@@ -84,7 +84,7 @@ namespace Treasure
         {
             OnConnected.AddListener(value =>
             {
-                TDKConnectUIManager.Instance.Hide();
+                HideConnectModal();
             });
         }
         #endregion
@@ -145,6 +145,11 @@ namespace Treasure
             {
                 TDKConnectUIManager.Instance.ShowLoginModal();
             }
+        }
+
+        public void HideConnectModal()
+        {
+            TDKConnectUIManager.Instance.Hide();
         }
 
         public async Task ConnectEmail(string email, Options? options = null)
