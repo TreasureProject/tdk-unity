@@ -8,7 +8,8 @@ namespace Treasure
         Mainnet = 1,
         Sepolia = 11155111,
         Arbitrum = 42161,
-        ArbitrumSepolia = 421614
+        ArbitrumSepolia = 421614,
+        Ruby = 978657
     }
 
     public enum Contract
