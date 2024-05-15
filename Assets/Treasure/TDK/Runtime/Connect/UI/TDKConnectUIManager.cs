@@ -12,7 +12,7 @@ namespace Treasure
         [SerializeField] private GameObject contentHolder;
         [Header("Modals")]
         [SerializeField] private ModalBase loginModal;
-        [SerializeField] private ModalBase confirmLoginModal;
+        [SerializeField] private ConfirmLoginModal confirmLoginModal;
         [SerializeField] private ModalBase logedInHolder;
         [SerializeField] private Button backGroundButton;
         [Header("Test buttons")]
@@ -64,11 +64,12 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_LOGIN);
         }
 
-        public void ShowConfirmLoginModal()
+        public void ShowConfirmLoginModal(string email)
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
 
+            confirmLoginModal.SetEmail(email);
             confirmLoginModal.Show();
             currentModalOpended = confirmLoginModal;
 

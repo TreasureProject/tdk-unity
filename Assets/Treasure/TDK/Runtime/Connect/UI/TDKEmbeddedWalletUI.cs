@@ -40,7 +40,7 @@ namespace Treasure
             });
 
             await OnSendOTP();
-            TDKConnectUIManager.Instance.ShowConfirmLoginModal();
+            TDKConnectUIManager.Instance.ShowConfirmLoginModal(_email);
         }
 
         public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions)

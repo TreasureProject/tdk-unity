@@ -18,6 +18,7 @@ namespace Treasure
         [SerializeField] private TMP_Text errorText;
         [SerializeField] private LayoutElement keyBoardSpace;
 
+        private string _email;
         private string _enteredCode = "aaaaaa";
 
         private void Start()
@@ -39,7 +40,7 @@ namespace Treasure
             confirmCode.GetComponent<LoadingButton>().SetLoading(false);
 
             infoText.text = appSettingsData.hasCodeToConfirmEmail ?
-                $"We have sent a code to {TDK.Connect.Email}, please enter it below to confirm  your login" :
+                $"We have sent a code to {_email}, please enter it below to confirm  your login" :
                 "Please click the link in the email to verify your login";
         }
 
@@ -55,6 +56,11 @@ namespace Treasure
 
             errorText.gameObject.SetActive(false);
             return true;
+        }
+
+        public void SetEmail(string email)
+        {
+            _email = email;
         }
 
         public void SetErrorText(string text)
