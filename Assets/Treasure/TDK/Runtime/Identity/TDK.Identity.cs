@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -26,6 +27,7 @@ namespace Treasure
     public class Identity
     {
         #region private vars
+        private Dictionary<ChainId, Project> _chainIdToProject = new Dictionary<ChainId, Project>();
         private string _address;
         private string _authToken;
         #endregion
@@ -62,6 +64,18 @@ namespace Treasure
         #endregion
 
         #region private methods
+        private async Task<Project> GetProjectByChainId(ChainId chainId)
+        {
+            if (_chainIdToProject.ContainsKey(chainId))
+            {
+                return _chainIdToProject[chainId];
+            }
+
+            var project = await TDK.API.GetProjectBySlug(TDK.Instance.AppConfig.CartridgeTag, new API.RequestOverrides { chainId = chainId });
+            _chainIdToProject[chainId] = project;
+            return project;
+        }
+
         private async Task<string> SignLoginPayload(AuthPayload payload)
         {
 #if TDK_THIRDWEB
@@ -107,10 +121,10 @@ namespace Treasure
         #endregion
 
         #region public api
-        public async Task<User?> ValidateUserSession(Project project, string authToken, ChainId chainId)
+        public async Task<User?> ValidateUserSession(ChainId chainId, string authToken)
         {
             TDKLogger.Log("Validating existing user session");
-
+            var project = await GetProjectByChainId(chainId);
             var backendWallet = project.backendWallet;
             var requestedCallTargets = project.requestedCallTargets;
 
@@ -151,17 +165,38 @@ namespace Treasure
             }
         }
 
-        public async Task<string> StartUserSession(Project project)
+        public async Task<string> StartUserSession(ChainId sessionChainId = ChainId.Unknown, string sessionAuthToken = null)
         {
-            TDKLogger.Log("Starting new user session");
+            // Check if user already has a valid session for the specified chain
+            var currentChainId = await TDK.Connect.GetChainId();
+            var chainId = sessionChainId == ChainId.Unknown ? currentChainId : sessionChainId;
+            var authToken = !string.IsNullOrEmpty(sessionAuthToken) ? sessionAuthToken : _authToken;
+            if (!string.IsNullOrEmpty(authToken))
+            {
+                var user = await ValidateUserSession(chainId, authToken);
+                if (user.HasValue)
+                {
+                    TDKLogger.Log("User already has a valid session");
+                    return authToken;
+                }
+            }
 
 #if TDK_THIRDWEB
+            // The rest of this flow requires a wallet to be connected
             if (!await TDK.Connect.IsWalletConnected())
             {
                 TDKLogger.LogError("Unable to start user session. TDK Identity wallet not connected.");
                 return await Task.FromResult(string.Empty);
             }
 
+            // Switch chains if not on the correct one already
+            if (chainId != currentChainId)
+            {
+                TDKLogger.Log($"Switching chain to {chainId}");
+                await TDK.Connect.SetChainId(chainId);
+            }
+
+            var project = await GetProjectByChainId(chainId);
             var didCreateSession = false;
 
             // If smart wallet isn't deployed yet, create a new session to bundle the two txs
