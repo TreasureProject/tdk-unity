@@ -647,6 +647,7 @@ GameObject:
   - component: {fileID: 78719044}
   - component: {fileID: 78719046}
   - component: {fileID: 78719045}
+  - component: {fileID: 78719047}
   m_Layer: 5
   m_Name: Core_Container
   m_TagString: Untagged
@@ -708,6 +709,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 78719043}
   m_CullTransparentMesh: 0
+--- !u!114 &78719047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78719043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbf656a7b613bda4bb88fc1c7542372d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputPopUpPrefab: {fileID: 7314083574893757123, guid: 913abf433d631d146afa871d345e8cc1, type: 3}
+  dropDownPopUpPrefab: {fileID: 3793558193243429674, guid: 5d64c9eae83be994eacd6780a6a8902d, type: 3}
 --- !u!1 &82636272
 GameObject:
   m_ObjectHideFlags: 0
@@ -859,7 +874,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Log Device Info
+  m_Text: Input Popup
 --- !u!222 &106308882
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6673,7 +6688,7 @@ GameObject:
   - component: {fileID: 1496792652}
   - component: {fileID: 1496792651}
   m_Layer: 5
-  m_Name: Btn_ShowYesNoPopUp
+  m_Name: Btn_ShowDropDownPopUp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6738,14 +6753,14 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 1496792652}
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: OnPrintDeviceInfoBtn
+      - m_Target: {fileID: 78719047}
+        m_TargetAssemblyTypeName: CoreUI, Assembly-CSharp
+        m_MethodName: ShowDropDownPopUp
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -7891,7 +7906,7 @@ GameObject:
   - component: {fileID: 1829848011}
   - component: {fileID: 1829848010}
   m_Layer: 5
-  m_Name: Btn_ShowSimplePopUp
+  m_Name: Btn_ShowInputPopUp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7956,14 +7971,14 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 1829848011}
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: OnPrintDeviceInfoBtn
+      - m_Target: {fileID: 78719047}
+        m_TargetAssemblyTypeName: CoreUI, Assembly-CSharp
+        m_MethodName: ShowInputPopUp
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8160,7 +8175,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Log Device Info
+  m_Text: Dropdown Popup
 --- !u!222 &1915284014
 CanvasRenderer:
   m_ObjectHideFlags: 0

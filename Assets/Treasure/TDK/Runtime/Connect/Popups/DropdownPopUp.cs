@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -17,14 +16,13 @@ namespace Treasure
         [SerializeField] private Button okButton;
         [SerializeField] private Button cancelButton;
 
-        private Action OnOkAction;
+        private Action<int> OnOkAction;
 
         private void Start()
         {
             okButton.onClick.AddListener(() =>
             {
-                OnOkAction?.Invoke();
-                Debug.Log(dropdown.value);
+                OnOkAction?.Invoke(dropdown.value);
                 Hide();
             });
             cancelButton.onClick.AddListener(() =>
@@ -33,14 +31,14 @@ namespace Treasure
             });
         }
 
-        public void Show(string title, string description, Action onOkAction, string[] dropDownOptions)
+        public void Show(string title, string description, Action<int> onOkAction, List<string> dropDownOptions)
         {
             titleText.text = title;
             descriptionText.text = description;
             OnOkAction = onOkAction;
 
             dropdown.ClearOptions();
-            for (int i = 0; i < dropDownOptions.Length; i++)
+            for (int i = 0; i < dropDownOptions.Count; i++)
             {
                 var option = new TMP_Dropdown.OptionData();
                 option.text = dropDownOptions[i];
@@ -50,7 +48,7 @@ namespace Treasure
 
         public void Hide()
         {
-            gameObject.SetActive(false);
+            Destroy(this.gameObject);
         }
     }
 }

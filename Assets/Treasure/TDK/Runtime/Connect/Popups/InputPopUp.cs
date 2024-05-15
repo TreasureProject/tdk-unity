@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 using System;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Treasure
 {
@@ -17,14 +15,13 @@ namespace Treasure
         [SerializeField] private Button okButton;
         [SerializeField] private Button cancelButton;
 
-        private Action OnOkAction;
+        private Action<string> OnOkAction;
 
         private void Start()
         {
             okButton.onClick.AddListener(() =>
             {
-                OnOkAction?.Invoke();
-                Debug.Log(inputField.text);
+                OnOkAction?.Invoke(inputField.text);
                 Hide();
             });
             cancelButton.onClick.AddListener(() =>
@@ -33,7 +30,7 @@ namespace Treasure
             });
         }
 
-        public void Show(string title, string description, Action onOkAction)
+        public void Show(string title, string description, Action<string> onOkAction)
         {
             titleText.text = title;
             descriptionText.text = description;
@@ -42,7 +39,7 @@ namespace Treasure
 
         public void Hide()
         {
-            gameObject.SetActive(false);
+            Destroy(this.gameObject);
         }
     }
 }
