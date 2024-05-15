@@ -113,6 +113,12 @@ namespace Treasure
 
         public async Task SetChainId(ChainId chainId)
         {
+            if (_chainId == chainId)
+            {
+                TDKLogger.Log($"Chain is already set to {chainId}");
+                return;
+            }
+
             _chainId = chainId;
 
 #if TDK_THIRDWEB
@@ -125,6 +131,8 @@ namespace Treasure
                 await ConnectEmail(connectedEmail, new Options { isSilent = true });
             }
 #endif
+
+            TDKLogger.Log($"Switched chain to {chainId}");
         }
 
         public void ShowConnectModal()

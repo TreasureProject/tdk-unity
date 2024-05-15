@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class TDKRunner : MonoBehaviour
 {
-    private List<string> _navOptions = new List<string> { "Connect", "Identity", "Analytics", "Bridgeworld", "Core" };
+    private List<string> _navOptions = new List<string> { "Connect", "Identity", "Analytics", "Bridgeworld" };
     private Text _debugTxt;
     private Text _versionTxt;
 

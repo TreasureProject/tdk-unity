@@ -1,23 +1,27 @@
 using UnityEngine;
 using Treasure;
+using System.Collections.Generic;
 
 public class ConnectUI : MonoBehaviour
 {
+    [SerializeField] private DropDownPopUp dropdownDialogPrefab;
+
+    private List<string> _chainIdentifiers = new List<string> { "arbitrum", "arbitrum-sepolia", "ethereum", "sepolia" };
+    private List<ChainId> _chainIds = new List<ChainId> { ChainId.Arbitrum, ChainId.ArbitrumSepolia, ChainId.Mainnet, ChainId.Sepolia };
+
     public void OnConnectWalletBtn()
     {
         TDK.Connect.ShowConnectModal();
     }
 
-    public async void OnSetChainBtn()
+    public void OnSetChainBtn()
     {
-        // TODO: Use a dropdown to select chain
-        if (await TDK.Connect.GetChainId() == ChainId.ArbitrumSepolia)
-        {
-            await TDK.Connect.SetChainId(ChainId.Sepolia);
-        }
-        else
-        {
-            await TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
-        }
+        Instantiate(dropdownDialogPrefab, transform.GetComponentInParent<Canvas>().transform)
+            .Show("Set Chain", "Select an option from one of the chains below:", OnChainDropdownSubmit, _chainIdentifiers);
+    }
+
+    public async void OnChainDropdownSubmit(int value)
+    {
+        await TDK.Connect.SetChainId(_chainIds[value]);
     }
 }
