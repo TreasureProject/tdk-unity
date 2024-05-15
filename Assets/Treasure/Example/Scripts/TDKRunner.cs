@@ -25,7 +25,7 @@ public class TDKRunner : MonoBehaviour
     void Start()
     {
         // enable core nav at start
-        OnNavBtn("Identity");
+        OnNavBtn("Connect");
 
         // Application.logMessageReceived += HandleLog;
     }

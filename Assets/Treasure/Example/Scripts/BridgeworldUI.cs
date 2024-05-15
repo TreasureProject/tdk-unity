@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -13,8 +12,6 @@ using UnityEngine.UI;
 
 public class HarvesterUI : MonoBehaviour
 {
-
-    public Button AuthBtn;
     public Button DepositBtn;
     public Button WithdrawBtn;
     public Button StakeCharactersBtn;
@@ -79,31 +76,6 @@ Harvester User Details
         WithdrawBtn.interactable = _harvester.userMagicStaked >= _magicAmount;
         StakeCharactersBtn.interactable = _harvester.userInventoryCharacters != null && _harvester.userInventoryCharacters.Count > 0;
         UnstakeCharactersBtn.interactable = _harvester.userCharactersStaked > 0;
-    }
-
-    public async void OnAuthBtn()
-    {
-        if (!TDK.Identity.IsAuthenticated)
-        {
-            try
-            {
-                var token = await TDK.Identity.StartUserSession();
-                TDKLogger.Log($"Received auth token: {token}");
-                AuthBtn.GetComponentInChildren<Text>().text = "Log Out";
-                refreshHarvester();
-            }
-            catch (Exception e)
-            {
-                TDKLogger.LogError($"Error authenticating: {e}");
-                return;
-            }
-        }
-        else
-        {
-            TDK.Identity.EndUserSession();
-            AuthBtn.GetComponentInChildren<Text>().text = "Authenticate";
-            refreshHarvester();
-        }
     }
 
     public async void OnDepositBtn()

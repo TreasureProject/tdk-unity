@@ -1,15 +1,15 @@
-using UnityEngine;
 using Treasure;
+using UnityEngine;
 
 public class IdentityUI : MonoBehaviour
 {
-    public void OnTreasureConnectBtn()
+    public void OnStartUserSessionBtn()
     {
-        TDK.Connect.ShowConnectModal();
+        _ = TDK.Identity.StartUserSession();
     }
 
-    public void OnPrintWalletAddressBtn()
+    public void OnEndUserSessionBtn()
     {
-        TDKLogger.Log(TDK.Connect.Address);
+        TDK.Identity.EndUserSession();
     }
 }
