@@ -10,6 +10,8 @@ using UnityEngine.Events;
 
 namespace Treasure
 {
+    public class TDKSilentLoginException : Exception { }
+
     public class TDKEmbeddedWalletUI : InAppWalletUI
     {
         [Space]
@@ -79,6 +81,12 @@ namespace Treasure
             }
             catch (Exception e)
             {
+                if (TDKConnectUIManager.Instance.IsSilentLogin)
+                {
+                    ThirdwebDebug.Log($"Could not recreate user automatically, skipping silent login");
+                    throw new TDKSilentLoginException();
+                }
+
                 ThirdwebDebug.Log($"Could not recreate user automatically, proceeding with auth: {e.Message}");
             }
 
