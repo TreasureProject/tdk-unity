@@ -9,6 +9,8 @@ using Thirdweb;
 
 namespace Treasure
 {
+    public class TDKSilentLoginException : Exception { }
+
     public partial class TDK : MonoBehaviour
     {
         public static Connect Connect { get; private set; }
@@ -28,7 +30,13 @@ namespace Treasure
 
     public class Connect
     {
+        public struct Options
+        {
+            public bool isSilent;
+        }
+
         #region private vars
+        private Options? _options;
         private ChainId _chainId = ChainId.Unknown;
         private string _email;
         private string _address;
@@ -41,6 +49,11 @@ namespace Treasure
         #endregion
 
         #region accessors / mutators
+        public bool IsSilent
+        {
+            get { return _options.HasValue && _options.Value.isSilent; }
+        }
+
         public async Task<ChainId> GetChainId()
         {
             if (_chainId == ChainId.Unknown)
@@ -109,7 +122,7 @@ namespace Treasure
             ThirdwebManager.Instance.Initialize(Constants.ChainIdToName[chainId]);
             if (!string.IsNullOrEmpty(connectedEmail))
             {
-                await ConnectEmail(connectedEmail);
+                await ConnectEmail(connectedEmail, new Options { isSilent = true });
             }
 #endif
         }
@@ -126,8 +139,9 @@ namespace Treasure
             }
         }
 
-        public async Task ConnectEmail(string email)
+        public async Task ConnectEmail(string email, Options? options = null)
         {
+            _options = options;
             var chainId = await GetChainId();
             var wc = new WalletConnection(
                     provider: WalletProvider.SmartWallet,

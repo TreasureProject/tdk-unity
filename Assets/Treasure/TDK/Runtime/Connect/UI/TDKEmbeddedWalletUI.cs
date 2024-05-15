@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Thirdweb;
 using Thirdweb.EWS;
@@ -79,6 +77,12 @@ namespace Treasure
             }
             catch (Exception e)
             {
+                if (TDK.Connect.IsSilent)
+                {
+                    ThirdwebDebug.Log($"Could not recreate user automatically, skipping silent login");
+                    throw new TDKSilentLoginException();
+                }
+
                 ThirdwebDebug.Log($"Could not recreate user automatically, proceeding with auth: {e.Message}");
             }
 
