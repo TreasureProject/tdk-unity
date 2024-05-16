@@ -9,7 +9,7 @@ namespace Treasure
         Sepolia = 11155111,
         Arbitrum = 42161,
         ArbitrumSepolia = 421614,
-        Ruby = 978657
+        TreasureRuby = 978657
     }
 
     public enum Contract
@@ -77,6 +77,11 @@ namespace Treasure
                     { Contract.Magic, "0x013cb2854daad8203c6686682f5d876e5d3de4a2" },
                     { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
                 }
+            },
+            {
+                ChainId.TreasureRuby, new Dictionary<Contract, string> {
+                    { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
+                }
             }
         };
 
@@ -86,7 +91,8 @@ namespace Treasure
             { ChainId.Mainnet, "ethereum" },
             { ChainId.Sepolia, "sepolia" },
             { ChainId.Arbitrum, "arbitrum" },
-            { ChainId.ArbitrumSepolia, "arbitrum-sepolia" }
+            { ChainId.ArbitrumSepolia, "arbitrum-sepolia" },
+            { ChainId.TreasureRuby, "treasure-ruby" },
         };
     }
 }

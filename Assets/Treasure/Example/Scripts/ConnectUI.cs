@@ -6,8 +6,20 @@ public class ConnectUI : MonoBehaviour
 {
     [SerializeField] private DropDownPopUp dropdownDialogPrefab;
 
-    private List<string> _chainIdentifiers = new List<string> { "arbitrum", "arbitrum-sepolia", "ethereum", "sepolia" };
-    private List<ChainId> _chainIds = new List<ChainId> { ChainId.Arbitrum, ChainId.ArbitrumSepolia, ChainId.Mainnet, ChainId.Sepolia };
+    private List<string> _chainIdentifiers = new List<string> {
+        "arbitrum",
+        "arbitrum-sepolia",
+        "ethereum",
+        "sepolia",
+        "treasure-ruby"
+    };
+    private List<ChainId> _chainIds = new List<ChainId> {
+        ChainId.Arbitrum,
+        ChainId.ArbitrumSepolia,
+        ChainId.Mainnet,
+        ChainId.Sepolia,
+        ChainId.TreasureRuby
+    };
 
     public void OnConnectWalletBtn()
     {
