@@ -9,7 +9,7 @@ namespace Treasure
 
         public enum Env { DEV, PROD }
 
-        [SerializeField] private Env _environment = Env.PROD;
+        [SerializeField] private Env _environment = Env.DEV;
         [SerializeField] private string _cartridgeTag = string.Empty;
         [SerializeField] private string _devTdkApiUrl = "https://tdk-api-dev.treasure.lol";
         [SerializeField] private string _prodTdkApiUrl = "https://tdk-api.treasure.lol";
