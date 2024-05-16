@@ -1,19 +1,29 @@
-using UnityEngine;
 using Treasure;
+using UnityEngine;
 
 public class IdentityUI : MonoBehaviour
 {
-    public async void OnPrintWalletAddressBtn()
-    {
-        var walletAddr = await TDK.Identity.GetWalletAddress();
+    [SerializeField] private InputPopUp promptDialogPrefab;
 
-        TDKLogger.Log("Wallet address is:" + walletAddr);
+    public void OnStartUserSessionBtn()
+    {
+        _ = TDK.Identity.StartUserSession();
     }
 
-    public void OnTreasureConnectBtn()
+    public void OnEndUserSessionBtn()
     {
-#if TDK_THIRDWEB
-        TDK.Connect.Show();
-#endif
+        TDK.Identity.EndUserSession();
+    }
+
+    public void OnValidateUserSessionBtn()
+    {
+        Instantiate(promptDialogPrefab, transform.GetComponentInParent<Canvas>().transform)
+            .Show("Validate User Session", "Enter an auth token below to validate:", OnAuthTokenSubmit);
+    }
+
+    public async void OnAuthTokenSubmit(string value)
+    {
+        var chainId = await TDK.Connect.GetChainId();
+        await TDK.Identity.ValidateUserSession(chainId, value);
     }
 }

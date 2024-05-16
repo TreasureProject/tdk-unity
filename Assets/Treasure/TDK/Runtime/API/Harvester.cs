@@ -74,8 +74,8 @@ namespace Treasure
 
         public async Task<Harvester> GetHarvester(Contract contract)
         {
-            var chainId = await TDK.Identity.GetChainId();
-            return await GetHarvesterById(Constants.ContractAddresses[chainId][contract]);
+            var contractAddress = await TDK.Common.GetContractAddress(contract);
+            return await GetHarvesterById(contractAddress);
         }
     }
 }

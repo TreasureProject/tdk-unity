@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Text.RegularExpressions;
-using UnityEngine.Windows;
 
 namespace Treasure
 {
@@ -21,6 +18,7 @@ namespace Treasure
         [SerializeField] private TMP_Text errorText;
         [SerializeField] private LayoutElement keyBoardSpace;
 
+        private string _email;
         private string _enteredCode = "aaaaaa";
 
         private void Start()
@@ -32,7 +30,8 @@ namespace Treasure
 
             didntReceiveEmailButton.onClick.AddListener(() =>
             {
-                TDKConnectUIManager.Instance.ShowLoginModal(true);
+                _ = TDK.Connect.Disconnect();
+                TDKConnectUIManager.Instance.ShowLoginModal();
             });
         }
 
@@ -41,7 +40,7 @@ namespace Treasure
             confirmCode.GetComponent<LoadingButton>().SetLoading(false);
 
             infoText.text = appSettingsData.hasCodeToConfirmEmail ?
-                $"We have sent a code to {TDKConnectUIManager.Instance.GetUserEmail()}, please enter it below to confirm  your login" :
+                $"We have sent a code to {_email}, please enter it below to confirm  your login" :
                 "Please click the link in the email to verify your login";
         }
 
@@ -59,7 +58,12 @@ namespace Treasure
             return true;
         }
 
-        public  void SetErrorText(string text)
+        public void SetEmail(string email)
+        {
+            _email = email;
+        }
+
+        public void SetErrorText(string text)
         {
             errorText.text = text;
             errorText.gameObject.SetActive(true);
@@ -71,13 +75,13 @@ namespace Treasure
         }
 
         // test code
-       /* IEnumerator WaitToConfirmLogin()
-        {
-            confirmCode.GetComponent<LoadingButton>().SetLoading(true);
-            yield return new WaitForSeconds(2.5f);
-            confirmCode.GetComponent<LoadingButton>().SetLoading(false);
-            UIManager.Instance.ShowLoggedInView();
-        }*/
+        /* IEnumerator WaitToConfirmLogin()
+         {
+             confirmCode.GetComponent<LoadingButton>().SetLoading(true);
+             yield return new WaitForSeconds(2.5f);
+             confirmCode.GetComponent<LoadingButton>().SetLoading(false);
+             UIManager.Instance.ShowLoggedInView();
+         }*/
 
         private void SetKeyboardSpace(bool value)
         {

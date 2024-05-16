@@ -1,11 +1,11 @@
 using UnityEngine;
-
 using UnityEngine.UI;
-
 using Treasure;
+using System.Collections.Generic;
 
 public class TDKRunner : MonoBehaviour
 {
+    private List<string> _navOptions = new List<string> { "Connect", "Identity", "Analytics", "Bridgeworld" };
     private Text _debugTxt;
     private Text _versionTxt;
 
@@ -24,10 +24,7 @@ public class TDKRunner : MonoBehaviour
 
     void Start()
     {
-        // enable core nav at start
-        OnNavBtn("Identity");
-
-        // Application.logMessageReceived += HandleLog;
+        OnNavBtn(_navOptions[0]);
     }
     #endregion
 
@@ -37,35 +34,18 @@ public class TDKRunner : MonoBehaviour
         _debugTxt.text += "\n" + message;
     }
 
-    private void ResetNav()
-    {
-        GameObject.Find("Canvas/UI/UI_Containers/Identity_Container").SetActive(false);
-        GameObject.Find("Canvas/UI/UI_Containers/Analytics_Container").SetActive(false);
-        GameObject.Find("Canvas/UI/UI_Containers/Harvester_Container").SetActive(false);
-        GameObject.Find("Canvas/UI/UI_Containers/Core_Container").SetActive(false);
-
-        GameObject.Find("Canvas/UI/Nav/Identity_Btn").GetComponent<Button>().interactable = true;
-        GameObject.Find("Canvas/UI/Nav/Analytics_Btn").GetComponent<Button>().interactable = true;
-        GameObject.Find("Canvas/UI/Nav/Harvester_Btn").GetComponent<Button>().interactable = true;
-        GameObject.Find("Canvas/UI/Nav/Core_Btn").GetComponent<Button>().interactable = true;
-    }
-
     private void OnNavBtn(string navName)
     {
-        ResetNav();
-
-        GameObject.Find("Canvas/UI/UI_Containers/" + navName + "_Container").SetActive(true);
-        GameObject.Find("Canvas/UI/Nav/" + navName + "_Btn").GetComponent<Button>().interactable = false;
+        _navOptions.ForEach((navOption) =>
+        {
+            GameObject.Find("Canvas/UI/UI_Containers/" + navOption + "_Container").SetActive(navName == navOption);
+            GameObject.Find("Canvas/UI/Nav/" + navOption + "_Btn").GetComponent<Button>().interactable = navName != navOption;
+        });
     }
 
     public void OnClearDebugPanelBtn()
     {
         _debugTxt.text = "";
-    }
-
-    void HandleLog(string logString, string stackTrace, LogType type)
-    {
-        DebugPanelLog(logString);
     }
     #endregion
 }

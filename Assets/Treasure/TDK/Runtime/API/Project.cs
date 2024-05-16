@@ -36,9 +36,9 @@ namespace Treasure
 
     public partial class API
     {
-        public async Task<Project> GetProjectBySlug(string slug)
+        public async Task<Project> GetProjectBySlug(string slug, RequestOverrides? overrides = null)
         {
-            var response = await Get($"/projects/{slug}");
+            var response = await Get($"/projects/{slug}", overrides);
             return JsonConvert.DeserializeObject<Project>(response);
         }
     }

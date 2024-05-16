@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Thirdweb;
 using Thirdweb.EWS;
@@ -10,8 +8,6 @@ using UnityEngine.Events;
 
 namespace Treasure
 {
-    public class TDKSilentLoginException : Exception { }
-
     public class TDKEmbeddedWalletUI : InAppWalletUI
     {
         [Space]
@@ -44,7 +40,7 @@ namespace Treasure
             });
 
             await OnSendOTP();
-            TDKConnectUIManager.Instance.ShowConfirmLoginModal();
+            TDKConnectUIManager.Instance.ShowConfirmLoginModal(_email);
         }
 
         public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions)
@@ -81,7 +77,7 @@ namespace Treasure
             }
             catch (Exception e)
             {
-                if (TDKConnectUIManager.Instance.IsSilentLogin)
+                if (TDK.Connect.IsSilent)
                 {
                     ThirdwebDebug.Log($"Could not recreate user automatically, skipping silent login");
                     throw new TDKSilentLoginException();

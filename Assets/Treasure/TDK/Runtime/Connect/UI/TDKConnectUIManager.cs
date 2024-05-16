@@ -1,10 +1,5 @@
-using System;
 using System.Collections;
-using System.Numerics;
-using System.Threading.Tasks;
-using Thirdweb;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -17,7 +12,7 @@ namespace Treasure
         [SerializeField] private GameObject contentHolder;
         [Header("Modals")]
         [SerializeField] private ModalBase loginModal;
-        [SerializeField] private ModalBase confirmLoginModal;
+        [SerializeField] private ConfirmLoginModal confirmLoginModal;
         [SerializeField] private ModalBase logedInHolder;
         [SerializeField] private Button backGroundButton;
         [Header("Test buttons")]
@@ -26,14 +21,6 @@ namespace Treasure
         [SerializeField] private ScreenOrientation currentOriantation;
 
         private ModalBase currentModalOpended;
-
-        private bool _isActive = false;
-
-        private string _address;
-        private string _email;
-        private bool _isSilentLogin = false;
-        private bool useSmartWallets = true;
-        private ChainData _currentChainData;
 
         private void Awake()
         {
@@ -52,21 +39,6 @@ namespace Treasure
             {
                 Hide();
             });
-
-            if (TDKServiceLocator.GetService<TDKThirdwebService>() == null)
-                TDKLogger.LogError("[TDKConnectUIManager:Start] Service is null");
-
-            _currentChainData = ThirdwebManager.Instance.supportedChains.Find(x => x.identifier == ThirdwebManager.Instance.activeChain);
-
-            TDK.Identity.OnConnected.AddListener(value =>
-            {
-                ShowAccountModal();
-            });
-        }
-
-        public bool IsSilentLogin
-        {
-            get { return _isSilentLogin; }
         }
 
         #region test code
@@ -79,39 +51,9 @@ namespace Treasure
         }
         #endregion
 
-        #region Show and Hide
-        public void Show()
-        {
-            CheckIsConnected();
-        }
-
-        private async void CheckIsConnected()
-        {
-            var isConnected = await IsConnected();
-            if (isConnected)
-                ShowAccountModal();
-            else
-                ShowLoginModal();
-        }
-
-        public void Hide()
-        {
-            if (currentModalOpended != null)
-                currentModalOpended.Hide();
-
-            currentModalOpended = null;
-
-            contentHolder.SetActive(false);
-            _isActive = false;
-        }
-        #endregion
-
         #region Changing modals
-        public void ShowLoginModal(bool disconnect = false)
+        public void ShowLoginModal()
         {
-            if (disconnect)
-                Disconnect();
-
             Activate();
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
@@ -122,11 +64,12 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_LOGIN);
         }
 
-        public void ShowConfirmLoginModal()
+        public void ShowConfirmLoginModal(string email)
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
 
+            confirmLoginModal.SetEmail(email);
             confirmLoginModal.Show();
             currentModalOpended = confirmLoginModal;
 
@@ -145,93 +88,27 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
         }
 
+        public void Hide()
+        {
+            if (currentModalOpended != null)
+                currentModalOpended.Hide();
+
+            currentModalOpended = null;
+
+            contentHolder.SetActive(false);
+        }
+
         public void LogOut()
         {
             logedInHolder.Hide();
 
             loginModal.Show();
             currentModalOpended = loginModal;
-
-            Disconnect();
         }
 
         private void Activate()
         {
             contentHolder.SetActive(true);
-            _isActive = true;
-        }
-        #endregion
-
-        #region Connecting
-        public async Task<bool> ConnectEmail(string email, bool isSilentLogin = false)
-        {
-            _email = email;
-            _isSilentLogin = isSilentLogin;
-            var wc = useSmartWallets
-                ? new WalletConnection(
-                    provider: WalletProvider.SmartWallet,
-                    chainId: BigInteger.Parse(_currentChainData.chainId),
-                    email: email,
-                    authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                    personalWallet: WalletProvider.InAppWallet
-                )
-                : new WalletConnection(
-                    provider: WalletProvider.InAppWallet,
-                    chainId: BigInteger.Parse(_currentChainData.chainId),
-                    email: email,
-                    authOptions: new AuthOptions(AuthProvider.EmailOTP)
-                );
-            return await Connect(wc);
-        }
-
-        private async Task<bool> Connect(WalletConnection wc)
-        {
-            TDKLogger.Log($"[TDKConnectUIManager:Connect] Connecting to {wc.provider}...");
-
-            await new WaitForSeconds(0.5f);
-
-            try
-            {
-                _address = await ThirdwebManager.Instance.SDK.Wallet.Connect(wc);
-            }
-            catch (Exception e)
-            {
-                _address = null;
-                TDKLogger.LogError($"[TDKConnectUIManager:Connect] error: {e}");
-                TDK.Identity.OnConnectionError?.Invoke(e);
-                return false;
-            }
-
-            PostConnect(wc);
-
-            return true;
-        }
-
-        private async void PostConnect(WalletConnection wc = null)
-        {
-            TDKLogger.Log($"[TDKConnectUIManager:PostConnect] address: {_address}");
-            TDK.Identity.OnConnected?.Invoke(_address);
-
-            var chainId = await TDK.Identity.GetChainId();
-            TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
-        }
-
-        public async Task<bool> IsConnected()
-        {
-            return await ThirdwebManager.Instance.SDK.Wallet.IsConnected();
-        }
-
-        public string GetUserEmail()
-        {
-            return _email;
-        }
-
-        public async void Disconnect(bool endSession = false)
-        {
-            await ThirdwebManager.Instance.SDK.Wallet.Disconnect(endSession);
-            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);
-
-            TDK.Identity.OnDisconnected?.Invoke();
         }
         #endregion
     }

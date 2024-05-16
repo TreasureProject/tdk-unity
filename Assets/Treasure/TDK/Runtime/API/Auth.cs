@@ -100,7 +100,7 @@ namespace Treasure
             return JsonConvert.DeserializeObject<LogInResponse>(response).token;
         }
 
-        public async Task<User> GetCurrentUser(RequestOverrides overrides = new RequestOverrides())
+        public async Task<User> GetCurrentUser(RequestOverrides? overrides = null)
         {
             var response = await Get("/users/me", overrides);
             return JsonConvert.DeserializeObject<User>(response);
