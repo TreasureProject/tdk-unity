@@ -1041,7 +1041,7 @@ MonoBehaviour:
   socialLoginHolder: {fileID: 4417870823505645840}
   googleLogin: {fileID: 1575454034695727671}
   appleLogin: {fileID: 7075941236449079899}
-  xLogin: {fileID: 6744354428734700962}
+  facebookLogin: {fileID: 6744354428734700962}
   loginEmailHolder: {fileID: 7040809040414209068}
   orSeparatorObject: {fileID: 3509074055764820260}
   loginWalletHolder: {fileID: 4942803082375933052}
@@ -1050,7 +1050,7 @@ MonoBehaviour:
   walletLoginButtons: {fileID: 2412001253763574621}
   loginGoogleButton: {fileID: 1507139352171644247}
   loginAppleButton: {fileID: 7135257932423191867}
-  loginXButton: {fileID: 6678713758515909314}
+  loginFacebookButton: {fileID: 6678713758515909314}
   emailInputField: {fileID: 7865467718503614030}
   errorText: {fileID: 1231587350348382669}
   keyBoardSpace: {fileID: 2807171859977507462}
@@ -3527,12 +3527,12 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 610180244558559124, guid: 4e7c0302891142447963a9cbf2387089, type: 3}
       propertyPath: m_Name
-      value: ButtonFrameIcon(X)
+      value: ButtonFrameIcon(Facebook)
       objectReference: {fileID: 0}
     - target: {fileID: 7951619584195015455, guid: 4e7c0302891142447963a9cbf2387089, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 6bb7247de27ade94da94ce333a9787c0, type: 3}
+      objectReference: {fileID: 21300000, guid: a33bd6e7663d5ff489707061e3f49312, type: 3}
     - target: {fileID: 8409584267291874497, guid: 4e7c0302891142447963a9cbf2387089, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
