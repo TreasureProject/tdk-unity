@@ -205,7 +205,8 @@ namespace Treasure
 
             // Create auth token
             TDKLogger.Log("Fetching login payload");
-            var payload = await TDK.API.GetLoginPayload(address);
+            var chainId = (int)await GetChainId();
+            var payload = await TDK.API.GetAuthPayload(address, chainId.ToString());
 
             TDKLogger.Log("Signing login payload");
             var signature = await GenerateSignature(payload);

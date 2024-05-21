@@ -42,8 +42,13 @@ namespace Treasure
     [Serializable]
     public struct LogInBody
     {
-        public AuthPayload payload;
-        public string signature;
+        public struct Payload
+        {
+            public AuthPayload payload;
+            public string signature;
+        }
+
+        public Payload payload;
     }
 
     [Serializable]
@@ -73,7 +78,6 @@ namespace Treasure
 
     public partial class API
     {
-        [Obsolete("GetAuthPayload is deprecated. Use GetLoginPayload.")]
         public async Task<AuthPayload> GetAuthPayload(string address, string chainId)
         {
             var response = await Post("/auth/payload", JsonConvert.SerializeObject(new GetAuthPayloadBody()
@@ -84,18 +88,15 @@ namespace Treasure
             return JsonConvert.DeserializeObject<GetAuthPayloadResponse>(response).payload;
         }
 
-        public async Task<AuthPayload> GetLoginPayload(string address)
-        {
-            var response = await Get($"/login/payload?address={address}");
-            return JsonConvert.DeserializeObject<AuthPayload>(response);
-        }
-
         public async Task<string> LogIn(AuthPayload payload, string signature)
         {
-            var response = await Post("/login", JsonConvert.SerializeObject(new LogInBody()
+            var response = await Post("/auth/login", JsonConvert.SerializeObject(new LogInBody()
             {
-                payload = payload,
-                signature = signature,
+                payload = new LogInBody.Payload()
+                {
+                    payload = payload,
+                    signature = signature,
+                }
             }));
             return JsonConvert.DeserializeObject<LogInResponse>(response).token;
         }
