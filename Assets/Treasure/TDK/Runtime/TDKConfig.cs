@@ -11,7 +11,7 @@ namespace Treasure
 
         [SerializeField] private Env _environment = Env.DEV;
         [SerializeField] private string _cartridgeTag = string.Empty;
-        [SerializeField] private string _devTdkApiUrl = "https://tdk-api-dev.treasure.lol";
+        [SerializeField] private string _devTdkApiUrl = "https://tdk-api.spellcaster.lol";
         [SerializeField] private string _prodTdkApiUrl = "https://tdk-api.treasure.lol";
         [SerializeField] private string _devAnalyticsApiUrl = "https://darkmatter-dev.treasure.lol/ingress";
         [SerializeField] private string _prodAnalyticsApiUrl = "https://darkmatter.treasure.lol/ingress";

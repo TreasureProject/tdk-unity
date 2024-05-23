@@ -1,7 +1,7 @@
 {
   "tdk": {
-    "cartridgeTag": "app",
-    "devTdkApiUrl": "https://tdk-api-dev.treasure.lol",
+    "cartridgeTag": "harness",
+    "devTdkApiUrl": "https://tdk-api.spellcaster.lol",
     "prodTdkApiUrl": "https://tdk-api.treasure.lol",
     "devAnalyticsApiUrl": "https://darkmatter-dev.treasure.lol/ingress",
     "prodAnalyticsApiUrl": "https://darkmatter.treasure.lol/ingress",
