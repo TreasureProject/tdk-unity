@@ -23,8 +23,6 @@ namespace Treasure
 
         private void Start()
         {
-            SetupFromSettings();
-
             codeInput.onSelect.AddListener(value => SetKeyboardSpace(true));
             codeInput.onDeselect.AddListener(value => SetKeyboardSpace(false));
 
@@ -38,10 +36,7 @@ namespace Treasure
         private void OnEnable()
         {
             confirmCode.GetComponent<LoadingButton>().SetLoading(false);
-
-            infoText.text = appSettingsData.hasCodeToConfirmEmail ?
-                $"We have sent a code to {_email}, please enter it below to confirm  your login" :
-                "Please click the link in the email to verify your login";
+            infoText.text = $"We have sent a code to {_email}, please enter it below to confirm  your login";
         }
 
         public bool CheckConfirmationCodeIsValid()
@@ -67,11 +62,6 @@ namespace Treasure
         {
             errorText.text = text;
             errorText.gameObject.SetActive(true);
-        }
-
-        private void SetupFromSettings()
-        {
-            confirmationInputCodeHolder.SetActive(appSettingsData.hasCodeToConfirmEmail);
         }
 
         // test code

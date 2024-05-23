@@ -9,7 +9,5 @@ namespace Treasure
         public string title;
         [Space]
         public LoginSettings loginSettings;
-        [Header("Confirmation settings")]
-        public bool hasCodeToConfirmEmail = true;
     }
 }

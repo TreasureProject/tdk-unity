@@ -13,7 +13,7 @@ namespace Treasure
         [SerializeField] private GameObject socialLoginHolder;
         [SerializeField] private GameObject googleLogin;
         [SerializeField] private GameObject appleLogin;
-        [SerializeField] private GameObject xLogin;
+        [SerializeField] private GameObject facebookLogin;
         [Space]
         [SerializeField] private GameObject loginEmailHolder;
         [SerializeField] private GameObject orSeparatorObject;
@@ -26,7 +26,7 @@ namespace Treasure
         [Header("Inputs")]
         [SerializeField] private Button loginGoogleButton;
         [SerializeField] private Button loginAppleButton;
-        [SerializeField] private Button loginXButton;
+        [SerializeField] private Button loginFacebookButton;
         [Space]
         [SerializeField] private TMP_InputField emailInputField;
         [SerializeField] private TMP_Text errorText;
@@ -72,6 +72,10 @@ namespace Treasure
                     });
                 });
             }
+
+            loginGoogleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Google); });
+            loginAppleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Apple); });
+            loginFacebookButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Facebook); });
         }
 
         private void OnEnable()
@@ -80,20 +84,32 @@ namespace Treasure
             connectButton.GetComponent<LoadingButton>().SetLoading(false);
         }
 
+        private async void ConnectSocial(SocialAuthProvider provider)
+        {
+            try
+            {
+                await TDK.Connect.ConnectSocial(provider);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message);
+            }          
+        }
+
         private void SetupFromSettings()
         {
-            socialLoginHolder.SetActive(appSettingsData.loginSettings.hasSocialLogin);
+            socialLoginHolder.SetActive(appSettingsData.loginSettings.HasSocialLogin());
             googleLogin.SetActive(appSettingsData.loginSettings.hasGoogleLogin);
             appleLogin.SetActive(appSettingsData.loginSettings.hasAppleLogin);
-            xLogin.SetActive(appSettingsData.loginSettings.hasXLogin);
+            facebookLogin.SetActive(appSettingsData.loginSettings.hasFacebookLogin);
 
             loginEmailHolder.SetActive(appSettingsData.loginSettings.hasEmailLogin);
             loginWalletHolder.SetActive(appSettingsData.loginSettings.hasWalletLogin);
 
             if (landscapeRightSideHolder != null)
             {
-                landscapeRightSideHolder.SetActive(appSettingsData.loginSettings.hasSocialLogin || appSettingsData.loginSettings.hasEmailLogin);
-                orSeparatorObject.SetActive(appSettingsData.loginSettings.hasSocialLogin && appSettingsData.loginSettings.hasEmailLogin);
+                landscapeRightSideHolder.SetActive(appSettingsData.loginSettings.HasSocialLogin() || appSettingsData.loginSettings.hasEmailLogin);
+                orSeparatorObject.SetActive(appSettingsData.loginSettings.HasSocialLogin() && appSettingsData.loginSettings.hasEmailLogin);
             }
             else
             {

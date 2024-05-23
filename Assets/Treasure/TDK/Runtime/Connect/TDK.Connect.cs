@@ -11,6 +11,14 @@ namespace Treasure
 {
     public class TDKSilentLoginException : Exception { }
 
+    // Subset of Thirdweb AuthProvider
+    public enum SocialAuthProvider
+    {
+        Google = 1,
+        Apple = 2,
+        Facebook = 3
+    }
+
     public partial class TDK : MonoBehaviour
     {
         public static Connect Connect { get; private set; }
@@ -92,12 +100,16 @@ namespace Treasure
         #region private methods
         private async Task ConnectWallet(WalletConnection wc, ChainId chainId)
         {
+#if TDK_THIRDWEB
             TDKLogger.Log($"[TDK.Connect:Connect] Connecting to {wc.provider}...");
             var result = await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Connect(wc);
             _address = result;
             _email = wc.email;
             OnConnected?.Invoke(_address);
             TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
+#else
+            TDKLogger.LogError("Unable to connect wallet. TDK Connect wallet service not implemented.");
+#endif
         }
         #endregion
 
@@ -154,6 +166,7 @@ namespace Treasure
 
         public async Task ConnectEmail(string email, Options? options = null)
         {
+#if TDK_THIRDWEB
             _options = options;
             var chainId = await GetChainId();
             var wc = new WalletConnection(
@@ -164,15 +177,36 @@ namespace Treasure
                     personalWallet: WalletProvider.InAppWallet
                 );
             await ConnectWallet(wc, chainId);
+#else
+            TDKLogger.LogError("Unable to connect email. TDK Connect wallet service not implemented.");
+#endif
+        }
+
+        public async Task ConnectSocial(SocialAuthProvider provider)
+        {
+#if TDK_THIRDWEB
+            var chainId = await GetChainId();
+            var wc = new WalletConnection(
+                provider: WalletProvider.SmartWallet,
+                chainId: (int)chainId,
+                authOptions: new AuthOptions((AuthProvider)provider),
+                personalWallet: WalletProvider.InAppWallet
+            );
+            await ConnectWallet(wc, chainId);
+#else
+            TDKLogger.LogError("Unable to connect social. TDK Connect wallet service not implemented.");
+#endif
         }
 
         public async Task Disconnect(bool endSession = false)
         {
+#if TDK_THIRDWEB
             if (await IsWalletConnected())
             {
                 await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Disconnect(endSession);
                 OnDisconnected?.Invoke();
             }
+#endif
 
             _address = null;
             _email = null;
