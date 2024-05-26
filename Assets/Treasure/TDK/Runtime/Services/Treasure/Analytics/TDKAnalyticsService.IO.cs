@@ -4,6 +4,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System;
+using System.Text;
 
 namespace Treasure
 {
@@ -78,29 +82,39 @@ namespace Treasure
             TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
 
             // send the payload to the analytics backend via HTTP POST request
-            UnityWebRequest request = UnityWebRequest.PostWwwForm($"{TDK.Instance.AppConfig.AnalyticsApiUrl}/events", payload);
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            // send the request asynchronously
-            await request.SendWebRequest();
-
-            bool success = true;
-
-            // Check if the request was successful
-            if (request.result != UnityWebRequest.Result.Success)
+            using (HttpClient client = new HttpClient())
             {
-                TDKLogger.LogWarning("[TDKAnalyticsService.IO:SendEvents] Failed to send events: " + request.error);
-                success = false;
-            }
-            else
-            {
-                TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
-            }
+                try {
+                    // Set the base address ensuring trailing slash
+                    string baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl;
+                    if (!TDK.Instance.AppConfig.AnalyticsApiUrl.EndsWith("/"))
+                    {
+                        baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl + "/";
+                    }
+                    client.BaseAddress = new Uri(baseAddress);
 
-            // dispose the request
-            request.Dispose();
+                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "events")
+                    {
+                        Content = new StringContent(payload, Encoding.UTF8, "application/json"),
+                        Headers = { { "Accept", "application/json" } }
+                    };
 
-            return success;
+                    HttpResponseMessage response = await client.SendAsync(request);
+                    
+                    // Ensure the request was successful
+                    response.EnsureSuccessStatusCode();
+
+                    // Read the response content
+                    TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
+
+                    return true;
+                }
+                catch (HttpRequestException e)
+                {
+                    TDKLogger.LogWarning("[TDKAnalyticsService.IO:SendEvents] Failed to send events: " + e.Message);
+                    return false;
+                }
+            }
         }
     }
 }
