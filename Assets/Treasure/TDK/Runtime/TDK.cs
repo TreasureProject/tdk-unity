@@ -14,6 +14,8 @@ namespace Treasure
 
         public TDKConfig AppConfig { get; private set; }
 
+        public string PersistentDataPath { get; set; }
+
         void OnApplicationPause(bool isPaused)
         {
             TDK.Analytics.OnApplicationPause_Analytics(isPaused);

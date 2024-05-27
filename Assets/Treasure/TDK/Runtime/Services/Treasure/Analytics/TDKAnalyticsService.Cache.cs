@@ -1,66 +1,171 @@
-using UnityEngine;
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
-#if UNITY_IOS
-using UnityEngine.iOS;
-#endif
+using System.Linq;
 
 namespace Treasure
 {
     public partial class TDKAnalyticsService : TDKBaseService
     {
-        private string persistentFolderPath;
-        private CancellationTokenSource cancellationTokenSource;
+        private List<string> _memoryCache;
+        private string _persistentFolderPath;
 
-        private void InitPersistentCache()
+        // Memory cache flushing
+        private Thread _memoryFlushingThread;
+        private bool _memoryFlushingThreadIsRunning;
+
+        private void InitEventCaching()
         {
-            // build directory
-            this.persistentFolderPath = Path.Combine(Application.persistentDataPath, AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
-            TDKLogger.Log("[TDKAnalyticsService.Cache:InitPersistentCache] persistentFolderPath: " + persistentFolderPath);
+            // Initialize memory cache
+            _memoryCache = new List<string>();
+
+            // Memory cache flushing
+            _memoryFlushingThreadIsRunning = true;
+            _memoryFlushingThread = new Thread(StartPeriodicMemoryFlush);
+            _memoryFlushingThread.Start();
+
+            // Setup disk cache
+            _persistentFolderPath = Path.Combine(TDK.Instance.PersistentDataPath, AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
             
-            // ensure directory exists
-            if (!Directory.Exists(persistentFolderPath))
+            if (!Directory.Exists(_persistentFolderPath))
             {
-                Directory.CreateDirectory(persistentFolderPath);
+                Directory.CreateDirectory(_persistentFolderPath);
+            }
+            TDKLogger.Log("[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: " + _persistentFolderPath);
+        }
+
+        private void StartPeriodicMemoryFlush()
+        {
+            while (_memoryFlushingThreadIsRunning)
+            {
+                Thread.Sleep(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS * 1000);
+                FlushMemoryCache().Wait();
+            }
+        }
+
+        private async Task StopPeriodicMemoryFlush()
+        {
+            _memoryFlushingThreadIsRunning = false;
+            
+            // Wait for the flushing thread to finish
+            _memoryFlushingThread.Join();
+
+            // Ensure any remaining cache data is flushed to disk
+            await FlushMemoryCache();
+        }
+
+        private async void TermintateCacheMemoryFlush()
+        {
+            await StopPeriodicMemoryFlush();
+            _memoryFlushingThread.Abort();
+        }
+
+        private async Task FlushMemoryCache()
+        {
+            List<string> memoryCacheCopy;
+            lock (_memoryCache)
+            {
+                memoryCacheCopy = new List<string>(_memoryCache);
+                _memoryCache.Clear();
             }
 
-#if UNITY_IOS
-            // set no [icloud] backup 
-            Device.SetNoBackupFlag(persistentFolderPath);
-#endif
-            // init threadpool 
-            cancellationTokenSource = new CancellationTokenSource();
-            CancellationToken cancellationToken = cancellationTokenSource.Token;
-
-            // start a new thread for periodic file checking
-            ThreadPool.QueueUserWorkItem((state) =>
+            if(memoryCacheCopy.Count > 0)
             {
-                while (!cancellationToken.IsCancellationRequested)
+                // Send the batch of events for io
+                var success = await SendEventBatch(memoryCacheCopy);
+
+                // If the request failed, persist the payload to disk in a separate task
+                if(!success)
                 {
-                    ProcessFiles();
-                    Thread.Sleep((int)(AnalyticsConstants.PERSISTENT_CHECK_INTERVAL_SECONDS * 1000)); // Convert seconds to milliseconds
+                    PersistEventBatch(memoryCacheCopy);
+                }
+            }
+
+            await FlushDiskCache();
+        }
+
+        private Task FlushDiskCache()
+        {
+            return Task.Run(async () =>
+            {
+                var localSettings = LocalSettings.Load();
+
+                string[] files = Directory.GetFiles(_persistentFolderPath, "*.eventbatch");
+
+                foreach (string filePath in files)
+                {
+                    TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing: " + filePath);
+                    string content = File.ReadAllText(filePath);
+                    string fileName = Path.GetFileName(filePath);
+                    string localSettingsKey = fileName + "_sendattemps";
+
+                    int numSendAttempts = 0;
+                    try {
+                        numSendAttempts = (int) localSettings.Settings[localSettingsKey];
+                    }
+                    catch(Exception e) {
+                        TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key not found: " + e.Message);
+                    }
+
+                    // If max send attempts have been reached, delete the file and stop processing
+                    if(numSendAttempts > AnalyticsConstants.PERSISTENT_MAX_RETRIES) {
+                        File.Delete(filePath);
+                        break;
+                    }
+
+                    // Send the disk events for io
+                    var success = await SendEventBatch(content);
+
+                    if(success) {
+                        // Delete the file if the send was successful
+                        File.Delete(filePath);
+                        
+                        // Clear the localSettings key
+                        try {
+                            localSettings.Settings.Remove(localSettingsKey);
+                            localSettings.Save();
+                        }
+                        catch(Exception e) {
+                            TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key removal failed: " + e.Message);
+                        }   
+                        TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] removing cache file: " + filePath);
+                    }
+                    else {
+                        // Increment the localSettings send attempt if send failed
+                        localSettings.Settings[localSettingsKey] = numSendAttempts + 1;
+                        localSettings.Save();
+                    }
                 }
             });
         }
 
-        private void ProcessFiles()
+        public async void CacheEvent(string evtJsonStr)
         {
-            string[] files = Directory.GetFiles(persistentFolderPath, "*.eventbatch"); // Get all txt files in directory
+            TDKLogger.Log("[TDKAnalyticsService.Cache:CacheEvent] caching event: " + evtJsonStr);
 
-            foreach (string filePath in files)
+            if(_memoryCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT ||
+                CalculateMemoryCacheSizeInBytes() + evtJsonStr.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB * 1024)
             {
-                TDKLogger.Log("[TDKAnalyticsService.Cache:ProcessFiles] processing: " + filePath);
-                string content = File.ReadAllText(filePath); // Read file content
-                
-                TDKMainThreadDispatcher.Instance.Enqueue(SendPersistedEventBatchRoutine(content, filePath));
+                // Flush the cache if limits are exceeded
+                TDKLogger.Log("[TDKAnalyticsService.Cache:CacheEvent] Cache size exceeded, flushing cache");
+                await FlushMemoryCache();
+            }
+
+            lock (_memoryCache)
+            {
+                _memoryCache.Add(evtJsonStr);
             }
         }
 
-        private async void PersistEventBatchAsync(List<string> events)
+        private int CalculateMemoryCacheSizeInBytes()
+        {
+            // calculate the total size of the cached events in bytes
+            return _memoryCache.Sum(e => e.Length);
+        }
+
+        private async void PersistEventBatch(List<string> events)
         {
             await Task.Run(() =>
             {
@@ -68,7 +173,7 @@ namespace Treasure
 
                 // write the payload to disk
                 var fileGuid = Guid.NewGuid().ToString("N");
-                string filePath = Path.Combine(persistentFolderPath, $"tdk_{fileGuid}.eventbatch");
+                string filePath = Path.Combine(_persistentFolderPath, $"tdk_{fileGuid}.eventbatch");
                 File.WriteAllText(filePath, payload);
                 TDKLogger.Log("[TDKAnalyticsService.Cache:PersistPayloadToDiskAsync] Payload persisted to disk: " + filePath);
             });

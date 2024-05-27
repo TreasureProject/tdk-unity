@@ -1,8 +1,6 @@
 using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Treasure
 {
@@ -11,7 +9,6 @@ namespace Treasure
         private Dictionary<string, object> _deviceInfo;
         private Dictionary<string, object> _appInfo;
         private string _sessionId;
-        private List<string> _eventCache = new List<string>();
         private string _smartAccountAddress;
         private int _chainId = -1;
 
@@ -23,64 +20,17 @@ namespace Treasure
             StartNewSession();
             BuildDeviceInfo();
             BuildAppInfo();
-        }
 
-        public void Start()
-        {
-            InitPersistentCache();
-
-            // start coroutine for event flushing
-            StartCoroutine(FlushTimer());
-        }
-
-        private void OnDestroy()
-        {
-            // stop and dispose of the timer when the service is destroyed
-            StopCoroutine(FlushTimer());
-
-            cancellationTokenSource.Cancel(); // Cancel the thread when the object is destroyed
-            cancellationTokenSource.Dispose();
+            InitEventCaching();
         }
 
         void OnApplicationQuit()
         {
-            FlushCache();
+            TermintateCacheMemoryFlush();
         }
 #endregion
 
 #region internal
-        private IEnumerator FlushTimer() {
-            while (true) {
-                yield return new WaitForSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS);
-                FlushCache();
-            }
-        }
-
-        private async void FlushCache()
-        {
-            if(_eventCache.Count > 0) {
-                // copy the cache to avoid modifying it while iterating
-                List<string> eventsToFlush = new List<string>(_eventCache);
-
-                // clear the cache
-                _eventCache.Clear();
-
-                // send the batch of events for io
-                var success = await SendEventBatch(eventsToFlush);
-                
-                // if the request failed, persist the payload to disk in a separate task
-                if(!success) {
-                    PersistEventBatchAsync(eventsToFlush);
-                }
-            }
-        }
-
-        private int CalculateCacheSizeInBytes()
-        {
-            // calculate the total size of the cached events in bytes
-            return _eventCache.Sum(e => e.Length);
-        }
-
         private void BuildDeviceInfo()
         {
             _deviceInfo = new Dictionary<string, object>

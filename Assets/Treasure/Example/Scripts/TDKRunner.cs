@@ -3,6 +3,10 @@ using UnityEngine.UI;
 using Treasure;
 using System.Collections.Generic;
 
+#if UNITY_IOS
+using UnityEngine.iOS;
+#endif
+
 public class TDKRunner : MonoBehaviour
 {
     private List<string> _navOptions = new List<string> { "Connect", "Identity", "Analytics", "Bridgeworld" };
@@ -18,6 +22,13 @@ public class TDKRunner : MonoBehaviour
 
         // set version
         _versionTxt.text = "v" + TDKVersion.version;
+
+        TDK.Instance.PersistentDataPath = Application.persistentDataPath;
+
+        #if UNITY_IOS
+        // Disable iCloud backup for the persistent folder
+        Device.SetNoBackupFlag(TDK.Instance.PersistentDataPath);
+        #endif
 
         TDKLogger.ExternalLogCallback += DebugPanelLog;
     }
