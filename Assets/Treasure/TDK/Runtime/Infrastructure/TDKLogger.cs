@@ -15,7 +15,7 @@ namespace Treasure
         {
             #if UNITY_EDITOR
             UnityEngine.Debug.Log(message);
-            ExternalLogCallback?.Invoke(message);
+            TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
             #else
             if(logOnMainThread)
             {
