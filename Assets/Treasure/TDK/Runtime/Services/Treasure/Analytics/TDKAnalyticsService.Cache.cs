@@ -10,11 +10,11 @@ namespace Treasure
     public partial class TDKAnalyticsService : TDKBaseService
     {
         private List<string> _memoryCache;
-        private string _persistentFolderPath;
+        private string _diskCachePath;
 
         // Memory cache flushing
-        private Thread _memoryFlushingThread;
-        private bool _memoryFlushingThreadIsRunning;
+        private Thread _flushThread;
+        private bool _flushThreadIsRunning;
 
         private void InitEventCaching()
         {
@@ -22,23 +22,23 @@ namespace Treasure
             _memoryCache = new List<string>();
 
             // Memory cache flushing
-            _memoryFlushingThreadIsRunning = true;
-            _memoryFlushingThread = new Thread(StartPeriodicMemoryFlush);
-            _memoryFlushingThread.Start();
+            _flushThreadIsRunning = true;
+            _flushThread = new Thread(StartPeriodicMemoryFlush);
+            _flushThread.Start();
 
             // Setup disk cache
-            _persistentFolderPath = Path.Combine(TDK.Instance.PersistentDataPath, AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
+            _diskCachePath = Path.Combine(TDK.Instance.PersistentDataPath, AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
             
-            if (!Directory.Exists(_persistentFolderPath))
+            if (!Directory.Exists(_diskCachePath))
             {
-                Directory.CreateDirectory(_persistentFolderPath);
+                Directory.CreateDirectory(_diskCachePath);
             }
-            TDKLogger.Log("[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: " + _persistentFolderPath);
+            TDKLogger.Log("[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: " + _diskCachePath);
         }
 
         private void StartPeriodicMemoryFlush()
         {
-            while (_memoryFlushingThreadIsRunning)
+            while (_flushThreadIsRunning)
             {
                 Thread.Sleep(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS * 1000);
                 FlushMemoryCache().Wait();
@@ -47,10 +47,10 @@ namespace Treasure
 
         private async Task StopPeriodicMemoryFlush()
         {
-            _memoryFlushingThreadIsRunning = false;
+            _flushThreadIsRunning = false;
             
             // Wait for the flushing thread to finish
-            _memoryFlushingThread.Join();
+            _flushThread.Join();
 
             // Ensure any remaining cache data is flushed to disk
             await FlushMemoryCache();
@@ -59,7 +59,7 @@ namespace Treasure
         private async void TermintateCacheMemoryFlush()
         {
             await StopPeriodicMemoryFlush();
-            _memoryFlushingThread.Abort();
+            _flushThread.Abort();
         }
 
         private async Task FlushMemoryCache()
@@ -92,7 +92,7 @@ namespace Treasure
             {
                 var localSettings = LocalSettings.Load();
 
-                string[] files = Directory.GetFiles(_persistentFolderPath, "*.eventbatch");
+                string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
 
                 foreach (string filePath in files)
                 {
@@ -173,7 +173,7 @@ namespace Treasure
 
                 // write the payload to disk
                 var fileGuid = Guid.NewGuid().ToString("N");
-                string filePath = Path.Combine(_persistentFolderPath, $"tdk_{fileGuid}.eventbatch");
+                string filePath = Path.Combine(_diskCachePath, $"tdk_{fileGuid}.eventbatch");
                 File.WriteAllText(filePath, payload);
                 TDKLogger.Log("[TDKAnalyticsService.Cache:PersistPayloadToDiskAsync] Payload persisted to disk: " + filePath);
             });
