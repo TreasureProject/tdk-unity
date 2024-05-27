@@ -23,11 +23,9 @@ public class TDKRunner : MonoBehaviour
         // set version
         _versionTxt.text = "v" + TDKVersion.version;
 
-        TDK.Instance.PersistentDataPath = Application.persistentDataPath;
-
         #if UNITY_IOS
         // Disable iCloud backup for the persistent folder
-        Device.SetNoBackupFlag(TDK.Instance.PersistentDataPath);
+        Device.SetNoBackupFlag(TDK.Instance.TDKEngineConfig.ApplicationPersistentDataPath());
         #endif
 
         TDKLogger.ExternalLogCallback += DebugPanelLog;

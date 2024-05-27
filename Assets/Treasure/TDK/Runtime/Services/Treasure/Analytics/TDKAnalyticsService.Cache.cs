@@ -27,7 +27,7 @@ namespace Treasure
             _flushThread.Start();
 
             // Setup disk cache
-            _diskCachePath = Path.Combine(TDK.Instance.PersistentDataPath, AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
+            _diskCachePath = Path.Combine(TDK.Instance.TDKEngineConfig.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
             
             if (!Directory.Exists(_diskCachePath))
             {
@@ -143,8 +143,6 @@ namespace Treasure
 
         public async void CacheEvent(string evtJsonStr)
         {
-            TDKLogger.Log("[TDKAnalyticsService.Cache:CacheEvent] caching event: " + evtJsonStr);
-
             if(_memoryCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT ||
                 CalculateMemoryCacheSizeInBytes() + evtJsonStr.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB * 1024)
             {

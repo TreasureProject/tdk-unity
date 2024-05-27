@@ -14,11 +14,11 @@ namespace Treasure
 
         public TDKConfig AppConfig { get; private set; }
 
-        public string PersistentDataPath { get; set; }
+        public ITDKEngineApi _tdkEngineApi;
 
         void OnApplicationPause(bool isPaused)
         {
-            TDK.Analytics.OnApplicationPause_Analytics(isPaused);
+            Analytics.OnApplicationPause_Analytics(isPaused);
         }
 
         public static TDK Instance
@@ -48,8 +48,15 @@ namespace Treasure
                     // no-op; don't add TDKLogger calls here
                 });
 
+                _instance._tdkEngineApi = new TDKEngineApi();
+
                 return _instance;
             }
+        }
+
+        public ITDKEngineApi TDKEngineConfig
+        {
+            get { return _tdkEngineApi; }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
