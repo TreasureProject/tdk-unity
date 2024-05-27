@@ -27,7 +27,10 @@ namespace Treasure
             _flushThread.Start();
 
             // Setup disk cache
-            _diskCachePath = Path.Combine(TDK.Instance.TDKEngineConfig.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
+            _diskCachePath = Path.Combine(
+                TDK.Instance.TDKEngineConfig.ApplicationPersistentDataPath(),
+                AnalyticsConstants.PERSISTENT_DIRECTORY_NAME
+            );
             
             if (!Directory.Exists(_diskCachePath))
             {
