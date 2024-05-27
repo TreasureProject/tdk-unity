@@ -56,7 +56,7 @@ namespace Treasure
             await FlushMemoryCache();
         }
 
-        private async void TermintateCacheMemoryFlush()
+        private async void TermintateCacheFlushing()
         {
             await StopPeriodicMemoryFlush();
             _flushThread.Abort();
