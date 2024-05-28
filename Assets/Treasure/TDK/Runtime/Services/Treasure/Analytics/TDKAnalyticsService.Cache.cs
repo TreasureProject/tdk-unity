@@ -28,7 +28,7 @@ namespace Treasure
 
             // Setup disk cache
             _diskCachePath = Path.Combine(
-                TDK.Instance.TDKEngineConfig.ApplicationPersistentDataPath(),
+                TDK.Instance.AbstractedEngineApi.ApplicationPersistentDataPath(),
                 AnalyticsConstants.PERSISTENT_DIRECTORY_NAME
             );
             

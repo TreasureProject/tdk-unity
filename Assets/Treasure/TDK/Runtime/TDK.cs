@@ -12,9 +12,9 @@ namespace Treasure
 
         public static bool Initialized { get; private set; }
 
-        public TDKConfig AppConfig { get; private set; }
+        private IAbstractedEngineApi _tdkEngineApi = new TDKAbstractedEngineApi();
 
-        public ITDKEngineApi _tdkEngineApi;
+        public TDKConfig AppConfig { get; private set; }
 
         void OnApplicationPause(bool isPaused)
         {
@@ -40,7 +40,6 @@ namespace Treasure
 
                         DontDestroyOnLoad(_instance.gameObject);
                     }
-
                 }
 
                 TDKMainThreadDispatcher.Instance.Enqueue(() =>
@@ -48,21 +47,21 @@ namespace Treasure
                     // no-op; don't add TDKLogger calls here
                 });
 
-                _instance._tdkEngineApi = new TDKEngineApi();
-
                 return _instance;
             }
         }
 
-        public ITDKEngineApi TDKEngineConfig
+        public IAbstractedEngineApi AbstractedEngineApi
         {
-            get { return _tdkEngineApi; }
+            get { return Instance._tdkEngineApi; }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void AutoInitialize()
         {
             Instance.AppConfig = TDKConfig.LoadFromResources();
+
+            Instance.AbstractedEngineApi.Init();
 
             // initialize subsystems
             Instance.InitCommon();
