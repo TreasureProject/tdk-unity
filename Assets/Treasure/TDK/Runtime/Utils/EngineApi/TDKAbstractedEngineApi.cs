@@ -9,7 +9,7 @@ namespace Treasure
     {
         private string _persistentDataPath;
 
-        public void Init()
+        public TDKAbstractedEngineApi()
         {
             _persistentDataPath = Application.persistentDataPath;
         }
@@ -17,6 +17,29 @@ namespace Treasure
         public string ApplicationPersistentDataPath()
         {
             return _persistentDataPath;
+        }
+
+        public T GetPersistedValue<T>(string key)
+        {
+            if (PlayerPrefs.HasKey(key))
+            {
+                string value = PlayerPrefs.GetString(key);
+                return JsonUtility.FromJson<T>(value);
+            }
+            return default(T);
+        }
+
+        public void SetPersistedValue<T>(string key, T value)
+        {
+            string json = JsonUtility.ToJson(value);
+            PlayerPrefs.SetString(key, json);
+            PlayerPrefs.Save();
+        }
+
+        public void DeletePersistedValue(string key)
+        {
+            PlayerPrefs.DeleteKey(key);
+            PlayerPrefs.Save();
         }
     }
 }
