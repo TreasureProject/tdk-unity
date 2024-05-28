@@ -34,5 +34,13 @@ namespace Treasure
             // If event is not highPriority or if highPriority send fails, the event enters into event batch cache
             CacheEvent(jsonEvtStr);
         }
+
+        /// <summary>
+        /// Flush all pending events to the analytics backend
+        /// </summary>
+        public async void FlushCache()
+        {
+            await FlushMemoryCache();
+        }
     }
 }
