@@ -100,5 +100,15 @@ namespace Treasure
             { ChainId.ArbitrumSepolia, "arbitrum-sepolia" },
             { ChainId.TreasureRuby, "treasure-ruby" },
         };
+
+        public static Dictionary<string, ChainId> NameToChainId = new Dictionary<string, ChainId>()
+        {
+            { "unknown", ChainId.Unknown },
+            { "ethereum", ChainId.Mainnet },
+            { "sepolia", ChainId.Sepolia },
+            { "arbitrum", ChainId.Arbitrum },
+            { "arbitrum-sepolia", ChainId.ArbitrumSepolia },
+            { "treasure-ruby", ChainId.TreasureRuby },
+        };
     }
 }

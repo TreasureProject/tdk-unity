@@ -67,7 +67,7 @@ namespace Treasure
             if (_chainId == ChainId.Unknown)
             {
 #if TDK_THIRDWEB
-                _chainId = (ChainId)(int)await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetChainId();
+                _chainId = await TDKServiceLocator.GetService<TDKThirdwebService>().GetChainId();
 #else
                 _chainId = ChainId.Arbitrum;
 #endif
