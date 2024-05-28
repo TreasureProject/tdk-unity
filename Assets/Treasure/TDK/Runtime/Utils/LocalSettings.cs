@@ -9,22 +9,57 @@ namespace Treasure
     {
         public Dictionary<string, object> Settings { get; set; }
         
-        private static readonly string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MyGameSettings.json");
+        private static string _filePath;
+
+        public LocalSettings(string settingsDirectory)
+        {
+            _filePath = Path.Combine(settingsDirectory, "local_settings.json");
+
+            if (!File.Exists(_filePath))
+            {
+                Settings = new Dictionary<string, object>();
+                Save();
+            }
+
+            string json = File.ReadAllText(_filePath);
+            Settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+        }
 
         public void Save()
         {
-            string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-            File.WriteAllText(filePath, json);
+            string json = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+            File.WriteAllText(_filePath, json);
         }
 
-        public static LocalSettings Load()
+        public T Get<T>(string key)
         {
-            if (File.Exists(filePath))
+            if (Settings.ContainsKey(key))
             {
-                string json = File.ReadAllText(filePath);
-                return JsonConvert.DeserializeObject<LocalSettings>(json);
+                return (T)Settings[key];
             }
-            return new LocalSettings();
+            return default(T);
+        }
+        
+        public void Set<T>(string key, T value)
+        {
+            if (Settings.ContainsKey(key))
+            {
+                Settings[key] = value;
+            }
+            else
+            {
+                Settings.Add(key, value);
+            }
+            Save();
+        }
+
+        public void Delete(string key)
+        {
+            if (Settings.ContainsKey(key))
+            {
+                Settings.Remove(key);
+                Save();
+            }
         }
     }
 }

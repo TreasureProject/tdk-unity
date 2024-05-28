@@ -9,10 +9,10 @@ namespace Treasure
         /// Singleton to access all Treasure TDK functionality through
         /// </summary>
         private static TDK _instance = null;
-
         public static bool Initialized { get; private set; }
 
-        private IAbstractedEngineApi _tdkEngineApi = new TDKAbstractedEngineApi();
+        private IAbstractedEngineApi _abstractedEngineApi;
+        private LocalSettings _localsettings;
 
         public TDKConfig AppConfig { get; private set; }
 
@@ -53,7 +53,12 @@ namespace Treasure
 
         public IAbstractedEngineApi AbstractedEngineApi
         {
-            get { return Instance._tdkEngineApi; }
+            get { return Instance._abstractedEngineApi; }
+        }
+
+        public LocalSettings LocalSettings
+        {
+            get { return Instance._localsettings; }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -61,7 +66,8 @@ namespace Treasure
         {
             Instance.AppConfig = TDKConfig.LoadFromResources();
 
-            Instance.AbstractedEngineApi.Init();
+            Instance._abstractedEngineApi = new TDKAbstractedEngineApi();
+            Instance._localsettings = new LocalSettings(Application.persistentDataPath);
 
             // initialize subsystems
             Instance.InitCommon();

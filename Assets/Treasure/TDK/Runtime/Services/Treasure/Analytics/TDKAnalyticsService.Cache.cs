@@ -93,20 +93,18 @@ namespace Treasure
         {
             return Task.Run(async () =>
             {
-                var localSettings = LocalSettings.Load();
-
                 string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
+                TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing " + files.Length + " persisted batches");
 
                 foreach (string filePath in files)
                 {
-                    TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing: " + filePath);
                     string content = File.ReadAllText(filePath);
                     string fileName = Path.GetFileName(filePath);
                     string localSettingsKey = fileName + "_sendattemps";
 
                     int numSendAttempts = 0;
                     try {
-                        numSendAttempts = (int) localSettings.Settings[localSettingsKey];
+                        numSendAttempts = TDK.Instance.LocalSettings.Get<int>(localSettingsKey);
                     }
                     catch(Exception e) {
                         TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key not found: " + e.Message);
@@ -115,6 +113,7 @@ namespace Treasure
                     // If max send attempts have been reached, delete the file and stop processing
                     if(numSendAttempts > AnalyticsConstants.PERSISTENT_MAX_RETRIES) {
                         File.Delete(filePath);
+                        TDK.Instance.LocalSettings.Delete(localSettingsKey);
                         break;
                     }
 
@@ -127,8 +126,7 @@ namespace Treasure
                         
                         // Clear the localSettings key
                         try {
-                            localSettings.Settings.Remove(localSettingsKey);
-                            localSettings.Save();
+                            TDK.Instance.LocalSettings.Delete(localSettingsKey);
                         }
                         catch(Exception e) {
                             TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key removal failed: " + e.Message);
@@ -137,8 +135,7 @@ namespace Treasure
                     }
                     else {
                         // Increment the localSettings send attempt if send failed
-                        localSettings.Settings[localSettingsKey] = numSendAttempts + 1;
-                        localSettings.Save();
+                        TDK.Instance.LocalSettings.Set<int>(localSettingsKey, numSendAttempts + 1);
                     }
                 }
             });

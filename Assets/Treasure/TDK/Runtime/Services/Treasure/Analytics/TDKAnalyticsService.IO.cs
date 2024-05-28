@@ -25,7 +25,7 @@ namespace Treasure
             {
                 payload = "[" + payload + "]";
             }
-            TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
+            // TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
 
             // send the payload to the analytics backend via HTTP POST request
             using (HttpClient client = new HttpClient())
@@ -57,7 +57,7 @@ namespace Treasure
                 }
                 catch (HttpRequestException e)
                 {
-                    TDKLogger.LogWarning("[TDKAnalyticsService.IO:SendEvents] Failed to send events: " + e.Message);
+                    TDKLogger.LogWarning("[TDKAnalyticsService.IO:SendEvents] " + e.Message);
                     return false;
                 }
             }
