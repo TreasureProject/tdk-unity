@@ -31,7 +31,7 @@ namespace Treasure
                 }
             }
 
-            // ...if highPriority send fails, the event enters into event batch cache
+            // If event is not highPriority or if highPriority send fails, the event enters into event batch cache
             CacheEvent(jsonEvtStr);
         }
     }
