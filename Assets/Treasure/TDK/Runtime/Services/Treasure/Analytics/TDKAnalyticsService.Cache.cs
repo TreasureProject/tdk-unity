@@ -94,7 +94,10 @@ namespace Treasure
             return Task.Run(async () =>
             {
                 string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
-                TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing " + files.Length + " persisted batches");
+                if(files.Length > 0)
+                {
+                    TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing " + files.Length + " persisted batches");
+                }
 
                 foreach (string filePath in files)
                 {
