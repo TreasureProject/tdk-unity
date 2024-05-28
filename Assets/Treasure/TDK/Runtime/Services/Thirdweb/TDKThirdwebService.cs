@@ -1,5 +1,4 @@
 #if TDK_THIRDWEB
-using System.Threading.Tasks;
 using Thirdweb;
 using UnityEngine;
 
