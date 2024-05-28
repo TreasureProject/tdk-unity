@@ -93,6 +93,8 @@ namespace Treasure
         {
             return Task.Run(async () =>
             {
+                // DeleteOldBatches();
+
                 string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
                 if(files.Length > 0)
                 {
@@ -143,8 +145,31 @@ namespace Treasure
                 }
             });
         }
+        /// <dev>
+        /// Delete old batches from disk cache that are older than 30 days
+        /// </dev>
+        private void DeleteOldBatches()
+        {
+            try
+            {
+                var directoryInfo = new DirectoryInfo(_diskCachePath);
 
-        public async void CacheEvent(string evtJsonStr)
+                var files = directoryInfo.GetFiles()
+                    .Where(file => file.LastWriteTime < DateTime.Now.AddDays(-30))
+                    .ToList();
+
+                foreach (var file in files)
+                {
+                    file.Delete();
+                }
+            }
+            catch (Exception ex)
+            {
+                TDKLogger.Log("[TDKAnalyticsService.Cache:DeleteOldBatches] Error deleting old batch: " + ex.Message);
+            }
+        }
+
+        private async void CacheEvent(string evtJsonStr)
         {
             if(_memoryCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT ||
                 CalculateMemoryCacheSizeInBytes() + evtJsonStr.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB * 1024)
