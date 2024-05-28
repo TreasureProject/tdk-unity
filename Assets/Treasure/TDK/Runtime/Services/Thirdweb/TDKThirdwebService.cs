@@ -29,21 +29,6 @@ namespace Treasure
         {
             get { return ThirdwebManager.Instance.SDK.Wallet; }
         }
-
-        public async Task<ChainId> GetChainId()
-        {
-            if (Utils.IsWebGLBuild())
-            {
-                // WebGL version of the Thirdweb SDK requires a wallet to be connected to call GetChainId()
-                var isConnected = await Wallet.IsConnected();
-                if (!isConnected)
-                {
-                    return Constants.NameToChainId[_config.DefaultChainIdentifier];
-                }
-            }
-
-            return (ChainId)(int)await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetChainId();
-        }
     }
 }
 #endif
