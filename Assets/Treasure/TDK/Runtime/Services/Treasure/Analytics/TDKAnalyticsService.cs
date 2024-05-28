@@ -26,7 +26,7 @@ namespace Treasure
 
         void OnApplicationQuit()
         {
-            TermintateCacheFlushing();
+            TerminateCacheFlushing();
         }
 #endregion
 
