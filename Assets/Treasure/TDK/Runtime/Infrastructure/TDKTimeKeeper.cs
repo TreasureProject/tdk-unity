@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System;
 using System.Collections;
-using Newtonsoft.Json;
 
 namespace Treasure
 {
@@ -42,12 +41,12 @@ namespace Treasure
                     {
                         long server = long.Parse(webRequest.downloadHandler.text);
                         TDKLogger.Log("[TDKTimeKeeper.GetServerTime] Got server epoch time: " + server);
-                        
+
                         _epochTimeDiff = server - LocalEpochTime;
-                        
-                        PlayerPrefs.SetString(Constants.PPREFS_EPOCH_DIFF, _epochTimeDiff.ToString()); 
+
+                        PlayerPrefs.SetString(Constants.PPREFS_EPOCH_DIFF, _epochTimeDiff.ToString());
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         TDKLogger.LogWarning("[TDKTimeKeeper.GetServerTime] was unable to parse UTC time" + e.ToString());
                     }
