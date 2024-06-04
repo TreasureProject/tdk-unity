@@ -43,7 +43,7 @@ namespace Treasure
             TDKConnectUIManager.Instance.ShowConfirmLoginModal(_email);
         }
 
-        public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions)
+        public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions, string clientId)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;

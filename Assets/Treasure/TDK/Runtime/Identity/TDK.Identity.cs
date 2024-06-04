@@ -7,7 +7,6 @@ using System.Numerics;
 
 #if TDK_THIRDWEB
 using Thirdweb;
-using Nethereum.Siwe.Core;
 #endif
 
 namespace Treasure
@@ -80,21 +79,18 @@ namespace Treasure
         private async Task<string> SignLoginPayload(AuthPayload payload)
         {
 #if TDK_THIRDWEB
-            var message = new SiweMessage()
-            {
-                Uri = payload.uri,
-                Statement = payload.statement,
-                Address = payload.address,
-                Domain = payload.domain,
-                ChainId = payload.chain_id,
-                Version = payload.version,
-                Nonce = payload.nonce,
-                IssuedAt = payload.issued_at,
-                ExpirationTime = payload.expiration_time,
-                NotBefore = payload.invalid_before,
-            };
-            var finalMessage = SiweMessageStringBuilder.BuildMessage(message);
-            return await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Sign(finalMessage);
+            var payloadToSign =
+                $"{payload.domain} wants you to sign in with your Ethereum account:"
+                + $"\n{payload.address}\n\n"
+                + $"{(string.IsNullOrEmpty(payload.statement) ? "" : $"{payload.statement}\n")}"
+                + $"{(string.IsNullOrEmpty(payload.uri) ? "" : $"\nURI: {payload.uri}")}"
+                + $"\nVersion: {payload.version}"
+                + $"\nChain ID: {payload.chain_id}"
+                + $"\nNonce: {payload.nonce}"
+                + $"\nIssued At: {payload.issued_at}"
+                + $"{(string.IsNullOrEmpty(payload.expiration_time) ? "" : $"\nExpiration Time: {payload.expiration_time}")}"
+                + $"{(string.IsNullOrEmpty(payload.invalid_before) ? "" : $"\nNot Before: {payload.invalid_before}")}";
+            return await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Sign(payloadToSign);
 #else
             TDKLogger.LogError("Unable to sign login payload. TDK Identity wallet service not implemented.");
             return await Task.FromResult<string>(string.Empty);

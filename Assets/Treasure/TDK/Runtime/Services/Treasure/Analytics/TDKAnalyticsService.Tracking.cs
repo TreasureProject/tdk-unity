@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using System;
+using Unity.Plastic.Newtonsoft.Json;
 
 namespace Treasure
 {
@@ -22,11 +22,13 @@ namespace Treasure
             string jsonEvtStr = JsonConvert.SerializeObject(BuildBaseEvent(eventName, eventProps));
 
             // if the event has been flagged as high priority, attempt sending immediately
-            if(highPriority) {
+            if (highPriority)
+            {
                 var result = await SendEvent(jsonEvtStr);
-                
+
                 // if sending was successful we exit execution...
-                if(result) {
+                if (result)
+                {
                     return;
                 }
             }
@@ -34,11 +36,11 @@ namespace Treasure
             // ...if highPriority send fails, the event enters into event batch cache
 
             // check if adding the event exceeds the cache limits
-            if(_eventCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT || CalculateCacheSizeInBytes() + jsonEvtStr.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB * 1024)
+            if (_eventCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT || CalculateCacheSizeInBytes() + jsonEvtStr.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB * 1024)
             {
                 // flush the cache if limits are exceeded
-                FlushCache(); 
-                
+                FlushCache();
+
                 // restart flush coroutine
                 StopCoroutine(FlushTimer());
                 StartCoroutine(FlushTimer());

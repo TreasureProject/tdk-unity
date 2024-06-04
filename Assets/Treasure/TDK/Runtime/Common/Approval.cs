@@ -1,5 +1,5 @@
 using System;
-using Newtonsoft.Json;
+using Unity.Plastic.Newtonsoft.Json;
 
 namespace Treasure
 {
