@@ -13,11 +13,10 @@ MonoBehaviour:
   m_Name: TDKConnectSettings
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: 5d3487bda3f0b514fb818469b85a752c, type: 3}
-  title: Zeeverse
+  title: Game Name
   loginSettings:
     hasGoogleLogin: 1
     hasAppleLogin: 1
     hasFacebookLogin: 1
     hasEmailLogin: 1
     hasWalletLogin: 0
-  hasCodeToConfirmEmail: 1
