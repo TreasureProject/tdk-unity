@@ -8,25 +8,53 @@ namespace Treasure
     {
         private TDKThirdwebConfig _config;
 
-        public override async void Awake()
+        private ThirdwebSDK _thirdwebSDK;
+
+        public ThirdwebSDK ThirdwebSDK
+        {
+            get { return _thirdwebSDK; }
+        }
+
+        public override void Awake()
         {
             base.Awake();
 
             _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>();
 
-            // Wait for the ThirdwebManager Awake method to run and instantiate the shared instance
-            await new WaitUntil(() => ThirdwebManager.Instance != null);
+            InitializeThirdwebSDK(_config.DefaultChainIdentifier);
+        }
 
-            TDKLogger.Log($"Initializing ThirdwebManager with config");
-            ThirdwebManager.Instance.clientId = _config.ClientId;
-            ThirdwebManager.Instance.factoryAddress = _config.FactoryAddress;
-            ThirdwebManager.Instance.gasless = true;
-            ThirdwebManager.Instance.Initialize(_config.DefaultChainIdentifier);
+        public void InitializeThirdwebSDK(string chainIdentifier)
+        {
+            var _smartWalletConfig = new ThirdwebSDK.SmartWalletConfig
+            {
+                factoryAddress = _config.FactoryAddress,
+                gasless = true
+            };
+
+            var _options = new ThirdwebSDK.Options
+            {
+                smartWalletConfig = _smartWalletConfig,
+                clientId = _config.ClientId,
+                supportedChains = new ThirdwebChainData[] {
+                    new ThirdwebChainData { chainName = "arbitrum"},
+                    new ThirdwebChainData { chainName = "arbitrum-sepolia"},
+                    new ThirdwebChainData { chainName = "ethereum"},
+                    new ThirdwebChainData { chainName = "sepolia"},
+                    new ThirdwebChainData { chainName = "treasure-ruby"}
+                }
+            };
+
+            _thirdwebSDK = new ThirdwebSDK(
+                chainIdentifier,
+                (int) Constants.NameToChainId[chainIdentifier],
+                _options
+            );
         }
 
         public Wallet Wallet
         {
-            get { return ThirdwebManager.Instance.SDK.Wallet; }
+            get { return _thirdwebSDK.Wallet; }
         }
     }
 }
