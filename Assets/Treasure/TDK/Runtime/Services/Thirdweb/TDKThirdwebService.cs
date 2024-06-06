@@ -32,17 +32,19 @@ namespace Treasure
                 gasless = true
             };
 
+            var _supportedChains = new ThirdwebChainData[] {
+                new ThirdwebChainData { chainName = "arbitrum"},
+                new ThirdwebChainData { chainName = "arbitrum-sepolia"},
+                new ThirdwebChainData { chainName = "ethereum"},
+                new ThirdwebChainData { chainName = "sepolia"},
+                new ThirdwebChainData { chainName = "treasure-ruby"}
+            };
+
             var _options = new ThirdwebSDK.Options
             {
                 smartWalletConfig = _smartWalletConfig,
                 clientId = _config.ClientId,
-                supportedChains = new ThirdwebChainData[] {
-                    new ThirdwebChainData { chainName = "arbitrum"},
-                    new ThirdwebChainData { chainName = "arbitrum-sepolia"},
-                    new ThirdwebChainData { chainName = "ethereum"},
-                    new ThirdwebChainData { chainName = "sepolia"},
-                    new ThirdwebChainData { chainName = "treasure-ruby"}
-                }
+                supportedChains = _supportedChains
             };
 
             _thirdwebSDK = new ThirdwebSDK(
