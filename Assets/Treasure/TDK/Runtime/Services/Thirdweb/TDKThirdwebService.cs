@@ -1,18 +1,23 @@
 #if TDK_THIRDWEB
+using System;
+using System.Linq;
 using Thirdweb;
-using UnityEngine;
 
 namespace Treasure
 {
     public class TDKThirdwebService : TDKBaseService
     {
         private TDKThirdwebConfig _config;
+        private ThirdwebSDK _sdk;
 
-        private ThirdwebSDK _thirdwebSDK;
-
-        public ThirdwebSDK ThirdwebSDK
+        public ThirdwebSDK SDK
         {
-            get { return _thirdwebSDK; }
+            get { return _sdk; }
+        }
+
+        public Wallet Wallet
+        {
+            get { return _sdk.Wallet; }
         }
 
         public override void Awake()
@@ -21,42 +26,34 @@ namespace Treasure
 
             _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>();
 
-            InitializeThirdwebSDK(_config.DefaultChainIdentifier);
+            InitializeSDK(_config.DefaultChainIdentifier);
         }
 
-        public void InitializeThirdwebSDK(string chainIdentifier)
+        public void InitializeSDK(string chainIdentifier)
         {
-            var _smartWalletConfig = new ThirdwebSDK.SmartWalletConfig
+            var supportedChains = ((ChainId[])Enum.GetValues(typeof(ChainId)))
+                .Where(chainId => chainId != ChainId.Unknown)
+                .Select(chainId => new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] })
+                .ToArray();
+
+            var smartWalletConfig = new ThirdwebSDK.SmartWalletConfig
             {
                 factoryAddress = _config.FactoryAddress,
                 gasless = true
             };
 
-            var _supportedChains = new ThirdwebChainData[] {
-                new ThirdwebChainData { chainName = "arbitrum"},
-                new ThirdwebChainData { chainName = "arbitrum-sepolia"},
-                new ThirdwebChainData { chainName = "ethereum"},
-                new ThirdwebChainData { chainName = "sepolia"},
-                new ThirdwebChainData { chainName = "treasure-ruby"}
-            };
-
-            var _options = new ThirdwebSDK.Options
+            var options = new ThirdwebSDK.Options
             {
-                smartWalletConfig = _smartWalletConfig,
+                smartWalletConfig = smartWalletConfig,
                 clientId = _config.ClientId,
-                supportedChains = _supportedChains
+                supportedChains = supportedChains
             };
 
-            _thirdwebSDK = new ThirdwebSDK(
+            _sdk = new ThirdwebSDK(
                 chainIdentifier,
-                (int) Constants.NameToChainId[chainIdentifier],
-                _options
+                (int)Constants.NameToChainId[chainIdentifier],
+                options
             );
-        }
-
-        public Wallet Wallet
-        {
-            get { return _thirdwebSDK.Wallet; }
         }
     }
 }
