@@ -147,7 +147,7 @@ namespace Treasure
             // Thirdweb SDK currently doesn't allow you to switch networks while connected to a smart wallet
             // Reinitialize it and auto-connect instead
             var connectedEmail = _email;
-            ThirdwebManager.Instance.Initialize(Constants.ChainIdToName[chainId]);
+            TDKServiceLocator.GetService<TDKThirdwebService>().InitializeSDK(Constants.ChainIdToName[chainId]);
             if (!string.IsNullOrEmpty(connectedEmail))
             {
                 await ConnectEmail(connectedEmail, new Options { isSilent = true });
