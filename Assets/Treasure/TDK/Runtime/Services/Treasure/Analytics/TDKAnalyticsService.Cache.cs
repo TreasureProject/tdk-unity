@@ -14,7 +14,7 @@ namespace Treasure
 
         private Timer _flushCacheTimer;
 
-        private void InitEventCaching()
+        private async void InitEventCaching()
         {
             // Initialize memory cache
             _memoryCache = new List<string>();
@@ -33,6 +33,9 @@ namespace Treasure
                 Directory.CreateDirectory(_diskCachePath);
             }
             TDKLogger.Log("[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: " + _diskCachePath);
+
+            // Flush disk cache on startup
+            await FlushDiskCache();
         }
 
         private void StartPeriodicMemoryFlush()
