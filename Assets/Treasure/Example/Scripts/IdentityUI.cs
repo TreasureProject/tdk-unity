@@ -1,3 +1,4 @@
+using System;
 using Treasure;
 using UnityEngine;
 
@@ -5,9 +6,16 @@ public class IdentityUI : MonoBehaviour
 {
     [SerializeField] private InputPopUp promptDialogPrefab;
 
-    public void OnStartUserSessionBtn()
+    public async void OnStartUserSessionBtn()
     {
-        _ = TDK.Identity.StartUserSession();
+        try
+        {
+            _ = await TDK.Identity.StartUserSession();
+        }
+        catch (Exception e)
+        {
+            TDKLogger.LogError($"Error starting user session: {e.Message}");
+        }
     }
 
     public void OnEndUserSessionBtn()
@@ -23,7 +31,14 @@ public class IdentityUI : MonoBehaviour
 
     public async void OnAuthTokenSubmit(string value)
     {
-        var chainId = await TDK.Connect.GetChainId();
-        await TDK.Identity.ValidateUserSession(chainId, value);
+        try
+        {
+            var chainId = await TDK.Connect.GetChainId();
+            await TDK.Identity.ValidateUserSession(chainId, value);
+        }
+        catch (Exception e)
+        {
+            TDKLogger.LogError($"Error validating user session: {e.Message}");
+        }
     }
 }

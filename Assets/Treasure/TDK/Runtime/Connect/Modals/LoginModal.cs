@@ -93,7 +93,7 @@ namespace Treasure
             catch (Exception ex)
             {
                 Debug.LogError(ex.Message);
-            }          
+            }
         }
 
         private void SetupFromSettings()
@@ -133,8 +133,13 @@ namespace Treasure
                 catch (Exception e)
                 {
                     TDKLogger.LogError($"[LoginModal:OnClickConnectwithEmail] {e.Message}");
-                    errorText.text = e.Message;
-                    errorText.gameObject.SetActive(true);
+
+                    // Ignore error display if user purposely closed the verification modal
+                    if (e.Message != "User closed modal")
+                    {
+                        errorText.text = e.Message;
+                        errorText.gameObject.SetActive(true);
+                    }
                 }
 
                 connectButton.GetComponent<LoadingButton>().SetLoading(false);

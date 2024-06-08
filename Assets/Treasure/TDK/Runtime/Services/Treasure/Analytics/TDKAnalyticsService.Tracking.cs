@@ -1,7 +1,7 @@
 #if !UNITY_WEBGL
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 
 namespace Treasure
 {
@@ -23,11 +23,13 @@ namespace Treasure
             string jsonEvtStr = JsonConvert.SerializeObject(BuildBaseEvent(eventName, eventProps));
 
             // if the event has been flagged as high priority, attempt sending immediately
-            if(highPriority) {
+            if (highPriority)
+            {
                 var result = await SendEvent(jsonEvtStr);
-                
+
                 // if sending was successful we exit execution...
-                if(result) {
+                if (result)
+                {
                     return;
                 }
             }

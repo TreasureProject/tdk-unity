@@ -1,32 +1,59 @@
 #if TDK_THIRDWEB
+using System;
+using System.Linq;
 using Thirdweb;
-using UnityEngine;
 
 namespace Treasure
 {
     public class TDKThirdwebService : TDKBaseService
     {
         private TDKThirdwebConfig _config;
+        private ThirdwebSDK _sdk;
 
-        public override async void Awake()
+        public ThirdwebSDK SDK
+        {
+            get { return _sdk; }
+        }
+
+        public Wallet Wallet
+        {
+            get { return _sdk.Wallet; }
+        }
+
+        public override void Awake()
         {
             base.Awake();
 
             _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>();
 
-            // Wait for the ThirdwebManager Awake method to run and instantiate the shared instance
-            await new WaitUntil(() => ThirdwebManager.Instance != null);
-
-            TDKLogger.Log($"Initializing ThirdwebManager with config");
-            ThirdwebManager.Instance.clientId = _config.ClientId;
-            ThirdwebManager.Instance.factoryAddress = _config.FactoryAddress;
-            ThirdwebManager.Instance.gasless = true;
-            ThirdwebManager.Instance.Initialize(_config.DefaultChainIdentifier);
+            InitializeSDK(_config.DefaultChainIdentifier);
         }
 
-        public Wallet Wallet
+        public void InitializeSDK(string chainIdentifier)
         {
-            get { return ThirdwebManager.Instance.SDK.Wallet; }
+            var supportedChains = ((ChainId[])Enum.GetValues(typeof(ChainId)))
+                .Where(chainId => chainId != ChainId.Unknown)
+                .Select(chainId => new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] })
+                .ToArray();
+
+            var smartWalletConfig = new ThirdwebSDK.SmartWalletConfig
+            {
+                factoryAddress = _config.FactoryAddress,
+                gasless = true
+            };
+
+            var options = new ThirdwebSDK.Options
+            {
+                smartWalletConfig = smartWalletConfig,
+                clientId = _config.ClientId,
+                supportedChains = supportedChains
+            };
+
+            _sdk = new ThirdwebSDK(
+                chainIdentifier,
+                (int)Constants.NameToChainId[chainIdentifier],
+                options
+            );
         }
     }
 }

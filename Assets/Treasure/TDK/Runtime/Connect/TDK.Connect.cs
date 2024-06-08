@@ -67,7 +67,17 @@ namespace Treasure
             if (_chainId == ChainId.Unknown)
             {
 #if TDK_THIRDWEB
-                _chainId = (ChainId)(int)await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetChainId();
+                // WebGL version of the Thirdweb SDK requires a wallet to be connected to call GetChainId()
+                var isConnected = await IsWalletConnected();
+                if (Utils.IsWebGLBuild() && !isConnected)
+                {
+                    var defaultChainIdentifier = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>().DefaultChainIdentifier;
+                    _chainId = Constants.NameToChainId[defaultChainIdentifier];
+                }
+                else
+                {
+                    _chainId = (ChainId)(int)await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetChainId();
+                }
 #else
                 _chainId = ChainId.Arbitrum;
 #endif
@@ -137,7 +147,7 @@ namespace Treasure
             // Thirdweb SDK currently doesn't allow you to switch networks while connected to a smart wallet
             // Reinitialize it and auto-connect instead
             var connectedEmail = _email;
-            ThirdwebManager.Instance.Initialize(Constants.ChainIdToName[chainId]);
+            TDKServiceLocator.GetService<TDKThirdwebService>().InitializeSDK(Constants.ChainIdToName[chainId]);
             if (!string.IsNullOrEmpty(connectedEmail))
             {
                 await ConnectEmail(connectedEmail, new Options { isSilent = true });

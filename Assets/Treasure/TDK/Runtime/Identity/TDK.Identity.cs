@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 #if TDK_THIRDWEB
 using Thirdweb;
-using Nethereum.Siwe.Core;
 #endif
 
 namespace Treasure
@@ -79,21 +79,18 @@ namespace Treasure
         private async Task<string> SignLoginPayload(AuthPayload payload)
         {
 #if TDK_THIRDWEB
-            var message = new SiweMessage()
-            {
-                Uri = payload.uri,
-                Statement = payload.statement,
-                Address = payload.address,
-                Domain = payload.domain,
-                ChainId = payload.chain_id,
-                Version = payload.version,
-                Nonce = payload.nonce,
-                IssuedAt = payload.issued_at,
-                ExpirationTime = payload.expiration_time,
-                NotBefore = payload.invalid_before,
-            };
-            var finalMessage = SiweMessageStringBuilder.BuildMessage(message);
-            return await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Sign(finalMessage);
+            var payloadToSign =
+                $"{payload.domain} wants you to sign in with your Ethereum account:"
+                + $"\n{payload.address}\n\n"
+                + $"{(string.IsNullOrEmpty(payload.statement) ? "" : $"{payload.statement}\n")}"
+                + $"{(string.IsNullOrEmpty(payload.uri) ? "" : $"\nURI: {payload.uri}")}"
+                + $"\nVersion: {payload.version}"
+                + $"\nChain ID: {payload.chain_id}"
+                + $"\nNonce: {payload.nonce}"
+                + $"\nIssued At: {payload.issued_at}"
+                + $"{(string.IsNullOrEmpty(payload.expiration_time) ? "" : $"\nExpiration Time: {payload.expiration_time}")}"
+                + $"{(string.IsNullOrEmpty(payload.invalid_before) ? "" : $"\nNot Before: {payload.invalid_before}")}";
+            return await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Sign(payloadToSign);
 #else
             TDKLogger.LogError("Unable to sign login payload. TDK Identity wallet service not implemented.");
             return await Task.FromResult<string>(string.Empty);
@@ -103,20 +100,36 @@ namespace Treasure
         private async Task CreateSessionKey(Project project)
         {
 #if TDK_THIRDWEB
+            var permissionStartTimestamp = (decimal)Utils.GetUnixTimeStampNow() - 60 * 60;
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
             await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.CreateSessionKey(
                 signerAddress: project.backendWallet,
                 approvedTargets: project.callTargets,
                 nativeTokenLimitPerTransactionInWei: "0",
-                permissionStartTimestamp: "0",
+                permissionStartTimestamp: permissionStartTimestamp.ToString(),
                 permissionEndTimestamp: permissionEndTimestamp.ToString(),
-                reqValidityStartTimestamp: "0",
+                reqValidityStartTimestamp: permissionStartTimestamp.ToString(),
                 reqValidityEndTimestamp: permissionEndTimestamp.ToString()
             );
 #else
             TDKLogger.LogError("Unable to create session key. TDK Identity wallet service not implemented.");
             return await Task.FromResult<string>(string.Empty);
 #endif
+        }
+
+        private bool ValidateActiveSigner(Project project, string signer, IEnumerable<string> approvedTargets, string endTimestamp)
+        {
+            var signerCallTargets = approvedTargets.Select(callTarget => callTarget.ToLowerInvariant());
+            var expirationDate = BigInteger.Parse(endTimestamp);
+            return
+                // Expiration date is at least 1 hour in the future
+                expirationDate > Utils.GetUnixTimeStampNow() + 60 * 60 &&
+                // Expiration date is not too far in the future
+                expirationDate <= Utils.GetUnixTimeStampIn10Years() &&
+                // Expected backend wallet is signer
+                signer.ToLowerInvariant() == project.backendWallet &&
+                // All requested call targets are approved
+                project.requestedCallTargets.All(callTarget => signerCallTargets.Contains(callTarget));
         }
         #endregion
 
@@ -125,8 +138,6 @@ namespace Treasure
         {
             TDKLogger.Log("Validating existing user session");
             var project = await GetProjectByChainId(chainId);
-            var backendWallet = project.backendWallet;
-            var requestedCallTargets = project.requestedCallTargets;
 
             try
             {
@@ -141,8 +152,7 @@ namespace Treasure
                 // Check if any active signers match the requested projects' call targets
                 var hasActiveSession = user.allActiveSigners.Any((signer) =>
                 {
-                    return signer.signer.ToLowerInvariant() == backendWallet &&
-                        requestedCallTargets.All(callTarget => signer.approvedTargets.Contains(callTarget));
+                    return ValidateActiveSigner(project, signer.signer, signer.approvedTargets, signer.endTimestamp);
                 });
 
                 if (!hasActiveSession)
@@ -220,17 +230,27 @@ namespace Treasure
             // Smart wallet was already deployed, so check for existing sessions
             if (!didCreateSession)
             {
-                var backendWallet = project.backendWallet;
-                var requestedCallTargets = project.requestedCallTargets;
-                var activeSigners = await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetAllActiveSigners();
-
-                // Check if any active signers match the requested projects' call targets
-                var hasActiveSession = activeSigners.Any((signer) =>
+                var hasActiveSession = false;
+                List<SignerWithPermissions> activeSigners = null;
+                try
                 {
-                    var signerCallTargets = signer.permissions.approvedCallTargets.Select(callTarget => callTarget.ToLowerInvariant());
-                    return signer.signer.ToLowerInvariant() == backendWallet &&
-                        requestedCallTargets.All(callTarget => signerCallTargets.Contains(callTarget));
-                });
+                    activeSigners = await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetAllActiveSigners();
+                }
+                catch (Exception e)
+                {
+                    // GetAllActiveSigners can error if the expirationDate is invalid
+                    // In this case, we will ignore the session and override it by creating a new one
+                    TDKLogger.LogError($"Error fetching active signers: {e}");
+                }
+
+                if (activeSigners != null && activeSigners.Count > 0)
+                {
+                    // Check if any active signers match the requested projects' call targets
+                    hasActiveSession = activeSigners.Any((signer) =>
+                    {
+                        return ValidateActiveSigner(project, signer.signer, signer.permissions.approvedCallTargets, signer.permissions.expirationDate);
+                    });
+                }
 
                 if (!hasActiveSession)
                 {
