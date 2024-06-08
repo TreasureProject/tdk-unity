@@ -20,14 +20,18 @@ namespace Treasure
             StartNewSession();
             BuildDeviceInfo();
             BuildAppInfo();
-
+#if !UNITY_WEBGL
             InitEventCaching();
+#endif
         }
 
+#if !UNITY_WEBGL
         void OnApplicationQuit()
         {
             TerminateCacheFlushing();
         }
+#endif
+
 #endregion
 
 #region internal

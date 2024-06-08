@@ -1,3 +1,4 @@
+#if !UNITY_WEBGL
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -199,3 +200,4 @@ namespace Treasure
         }
     }
 }
+#endif

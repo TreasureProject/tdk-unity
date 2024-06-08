@@ -1,3 +1,4 @@
+#if !UNITY_WEBGL
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net.Http;
@@ -64,3 +65,4 @@ namespace Treasure
         }
     }
 }
+#endif
