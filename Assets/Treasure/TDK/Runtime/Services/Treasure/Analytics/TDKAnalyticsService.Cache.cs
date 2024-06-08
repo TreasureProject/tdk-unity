@@ -12,19 +12,15 @@ namespace Treasure
         private List<string> _memoryCache;
         private string _diskCachePath;
 
-        // Memory cache flushing
-        private Thread _flushThread;
-        private bool _flushThreadIsRunning;
+        private Timer _flushCacheTimer;
 
         private void InitEventCaching()
         {
             // Initialize memory cache
             _memoryCache = new List<string>();
-
+            
             // Memory cache flushing
-            _flushThreadIsRunning = true;
-            _flushThread = new Thread(StartPeriodicMemoryFlush);
-            _flushThread.Start();
+            StartPeriodicMemoryFlush();
 
             // Setup disk cache
             _diskCachePath = Path.Combine(
@@ -41,29 +37,23 @@ namespace Treasure
 
         private void StartPeriodicMemoryFlush()
         {
-            while (_flushThreadIsRunning)
-            {
-                Thread.Sleep(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS * 1000);
-                FlushMemoryCache().Wait();
-            }
-        }
-
-        private async Task StopPeriodicMemoryFlush()
-        {
-            _flushThreadIsRunning = false;
-            
-            // Wait for the flushing thread to finish
-            _flushThread.Join();
-
-            // Ensure any remaining cache data is flushed to disk
-            await FlushMemoryCache();
+            _flushCacheTimer = new Timer(async _ => await FlushMemoryCache()); // TODO check what happens if FlushCache throws
+            ResetFlushTimer();
         }
 
         private async void TerminateCacheFlushing()
         {
-            await StopPeriodicMemoryFlush();
-            _flushThread.Abort();
+            _flushCacheTimer?.Dispose();
+            await FlushMemoryCache();
         }
+
+        private void ResetFlushTimer()
+        {
+            _flushCacheTimer.Change(
+                TimeSpan.FromSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS),
+                TimeSpan.FromSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS)
+            );
+		}
 
         private async Task FlushMemoryCache()
         {
