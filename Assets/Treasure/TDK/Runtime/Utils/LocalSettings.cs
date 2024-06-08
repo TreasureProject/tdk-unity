@@ -48,9 +48,9 @@ namespace Treasure
 
         public void Delete(string key)
         {
-            if (Settings.ContainsKey(key))
+            bool didRemove = Settings.Remove(key);
+            if (didRemove)
             {
-                Settings.Remove(key);
                 Save();
             }
         }
