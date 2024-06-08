@@ -42,14 +42,7 @@ namespace Treasure
         
         public void Set<T>(string key, T value)
         {
-            if (Settings.ContainsKey(key))
-            {
-                Settings[key] = value;
-            }
-            else
-            {
-                Settings.Add(key, value);
-            }
+            Settings[key] = value;
             Save();
         }
 
