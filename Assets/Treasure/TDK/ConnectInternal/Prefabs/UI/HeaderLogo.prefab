@@ -707,6 +707,7 @@ MonoBehaviour:
   iconAspectRatioFitter: {fileID: 3156155903227567916}
   logoLayoutElement: {fileID: 419646912027493356}
   nameText: {fileID: 7318988387895393834}
+  UseCache: 1
 --- !u!114 &5192489063457559239
 MonoBehaviour:
   m_ObjectHideFlags: 0
