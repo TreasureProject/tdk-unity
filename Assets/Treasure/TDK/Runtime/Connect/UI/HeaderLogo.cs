@@ -20,7 +20,7 @@ namespace Treasure
         public bool UseCache = false;
 
         private async void Start()
-        {           
+        {
             var project = await TDK.Identity.GetProject();
 
             StartCoroutine(DownloadImage(project.icon));
@@ -40,12 +40,12 @@ namespace Treasure
         {
             if (string.IsNullOrEmpty(url))
                 yield break;
-
-            var fileName = Path.GetFileName(url);
-            if (UseCache && PlayerPrefs.GetInt(fileName, 0) == 1)
+         
+            if (UseCache)
             {
+                var fileName = Path.GetFileName(url);
                 string filePath = Path.Combine(Application.persistentDataPath, fileName);
-                Debug.Log(filePath);
+               
                 if (File.Exists(filePath))
                 {
                     byte[] textureBytes = File.ReadAllBytes(filePath);
@@ -94,7 +94,6 @@ namespace Treasure
             byte[] textureBytes = textureToSave.EncodeToPNG();
             string filePath = Path.Combine(Application.persistentDataPath, fileName);
             File.WriteAllBytes(filePath, textureBytes);
-            PlayerPrefs.SetInt(fileName, 1);
         }
     }
 }
