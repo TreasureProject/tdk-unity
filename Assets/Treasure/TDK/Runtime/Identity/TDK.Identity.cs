@@ -134,6 +134,12 @@ namespace Treasure
         #endregion
 
         #region public api
+        public async Task<Project> GetProject()
+        {
+            var chainId = await TDK.Connect.GetChainId();
+            return await GetProjectByChainId(chainId);
+        }
+
         public async Task<User?> ValidateUserSession(ChainId chainId, string authToken)
         {
             TDKLogger.Log("Validating existing user session");
