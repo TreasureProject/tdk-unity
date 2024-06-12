@@ -41,19 +41,23 @@ namespace Treasure
 
         private void StartPeriodicMemoryFlush()
         {
-            _flushCacheTimer = new Timer(async _ => await FlushMemoryCache()); // TODO check what happens if FlushCache throws
+            _flushCacheTimer = new Timer(async _ => {
+                // TODO currently if FlushMemoryCache throws it will silently fail, add `catch` here for better handling
+                await FlushMemoryCache();
+            });
             ResetFlushTimer();
         }
 
         private async void TerminateCacheFlushing()
         {
             _flushCacheTimer?.Dispose();
+            _flushCacheTimer = null;
             await FlushMemoryCache();
         }
 
         private void ResetFlushTimer()
         {
-            _flushCacheTimer.Change(
+            _flushCacheTimer?.Change(
                 TimeSpan.FromSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS),
                 TimeSpan.FromSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS)
             );
@@ -170,6 +174,7 @@ namespace Treasure
             {
                 // Flush the cache if limits are exceeded
                 TDKLogger.Log("[TDKAnalyticsService.Cache:CacheEvent] Cache size exceeded, flushing cache");
+                ResetFlushTimer(); // set flush timer back to 0 since we are triggering the flush manually
                 await FlushMemoryCache();
             }
 

@@ -10,7 +10,7 @@ namespace Treasure
         /// <summary>
         /// Initialize the Analytics module
         /// </summary>
-        private void InitAnalytics()
+        public void InitAnalytics() // TODO is it ok to be public?
         {
             Analytics = new Analytics();
 
@@ -53,6 +53,7 @@ namespace Treasure
 
             // send events to helika
 #if TDK_HELIKA
+            Debug.Log("helika " + eventName);
             TDKServiceLocator.GetService<TDKHelikaService>().TrackEvent(eventName, eventProps);
 #endif
         }

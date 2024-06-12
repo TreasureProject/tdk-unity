@@ -55,12 +55,14 @@ namespace Treasure
                     TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
 
                     return true;
+                } catch (OperationCanceledException ex) when (ex.InnerException is TimeoutException tex) {
+                    TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events (timed out): {ex.Message}, {tex.Message}");
+                } catch (HttpRequestException ex) {
+                    TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events (http error): {ex.Message}");
+                } catch (Exception ex) {
+                    TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events: {ex.Message}");
                 }
-                catch (HttpRequestException e)
-                {
-                    TDKLogger.LogWarning("[TDKAnalyticsService.IO:SendEvents] " + e.Message);
-                    return false;
-                }
+                return false;
             }
         }
     }
