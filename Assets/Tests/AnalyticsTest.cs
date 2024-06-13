@@ -5,6 +5,12 @@ using UnityEngine.TestTools;
 using Treasure;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Text;
+using System;
 
 // For running these tests you need to modify scripting defines: remove TDK_HELIKA and add TREASURE_ANALYTICS
 // It needs to be done manually for now, we might want a better way, perhaps something like this:
@@ -13,30 +19,99 @@ using System.IO;
 
 public class AnalyticsTest
 {
-    // TODO do this in MySetUp, providing an AbstractedEngineApi that uses a test-only folder,
-    // as to not affect the actual persisted files generated so far. MySetUp needs to ensure the folder exists
-    void DeletePersistedEventBatches()
+    public class TestTDKAbstractedEngineApi : TDKAbstractedEngineApi
     {
-        // needs to be after TDK.Instance.InitProperties for `path` to be defined properly
-        var path = Path.Combine(
-            TDK.Instance.AbstractedEngineApi.ApplicationPersistentDataPath(),
-            AnalyticsConstants.PERSISTENT_DIRECTORY_NAME
-        );
-        var directoryInfo = new DirectoryInfo(path);
+        const string keyPrefix = "[unitTesting] ";
 
-        var files = directoryInfo.GetFiles();
-
-        foreach (var file in files)
+        public override string ApplicationPersistentDataPath()
         {
-            file.Delete();
+            return Path.Combine(base.ApplicationPersistentDataPath(), "Testing");
+        }
+
+        public override T GetPersistedValue<T>(string key)
+        {
+            return base.GetPersistedValue<T>(keyPrefix + key);
+        }
+
+        public override void SetPersistedValue<T>(string key, T value)
+        {
+            base.SetPersistedValue(keyPrefix + key, value);
+        }
+
+        public override void DeletePersistedValue(string key)
+        {
+            base.DeletePersistedValue(keyPrefix + key);
         }
     }
+
+    public class MockHttpMessageHandler : HttpMessageHandler
+    {
+        public HttpStatusCode statusCode;
+        public string jsonResponse;
+        
+        public MockHttpMessageHandler(HttpStatusCode statusCode, string jsonResponse)
+        {
+            this.statusCode = statusCode;
+            this.jsonResponse = jsonResponse;
+        }
+        
+        sealed protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken
+        ) {
+            Debug.Log($"Intercepted request to the following route: {request.RequestUri}");
+            var httpResponse = new HttpResponseMessage() {
+                StatusCode = statusCode,
+                Content = new StringContent(jsonResponse, Encoding.UTF8, "application/json"),
+            };
+            await Task.Delay(TimeSpan.FromSeconds(1));
+
+            return httpResponse;
+        }
+    }
+
+    void ClearPersistedEventBatches()
+    {
+        var path = Path.Combine(
+            testTDKAbstractedEngineApi.ApplicationPersistentDataPath(),
+            AnalyticsConstants.PERSISTENT_DIRECTORY_NAME
+        );
+        if (Directory.Exists(path))
+        {
+            var directoryInfo = new DirectoryInfo(path);
+
+            var files = directoryInfo.GetFiles();
+
+            foreach (var file in files)
+            {
+                file.Delete();
+            }
+        } else {
+            Directory.CreateDirectory(path);
+        }
+    }
+
+    TDKConfig testTDKConfig;
+    TestTDKAbstractedEngineApi testTDKAbstractedEngineApi;
 
     [UnitySetUp]
     public IEnumerator MySetUp()
     {
         // skip initialization to avoid any noise from automatic requests + object creation
         TDK.skipAutoInitialize = true;
+        
+        testTDKConfig = ScriptableObject.CreateInstance<TDKConfig>();
+        testTDKConfig.SetConfig(new SerializedTDKConfig {
+            cartridgeTag = "Unit Testing",
+            devTdkApiUrl = "https://localhost:5000/devTdkApiUrl",
+            prodTdkApiUrl = "https://localhost:5000/prodTdkApiUrl",
+            devAnalyticsApiUrl = "https://localhost:5000/devAnalyticsApiUrl",
+            prodAnalyticsApiUrl = "https://localhost:5000/prodAnalyticsApiUrl",
+            sessionLengthDays = 123
+        });
+        testTDKAbstractedEngineApi = new TestTDKAbstractedEngineApi();
+
+        ClearPersistedEventBatches();
         yield return null;
     }
 
@@ -52,22 +127,25 @@ public class AnalyticsTest
     public IEnumerator AnalyticsTestInit()
     {
         yield return new WaitUntil(() => TDK.Initialized);
+        // Debug.Log(testTDKAbstractedEngineApi.ApplicationPersistentDataPath());
         TDK.Instance.InitProperties(
-            TDKConfig.LoadFromResources(), // TODO replace
-            new TDKAbstractedEngineApi(),
-            new LocalSettings(Application.persistentDataPath)
+            testTDKConfig,
+            testTDKAbstractedEngineApi,
+            new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );
-        DeletePersistedEventBatches();
         TDK.Instance.InitAnalytics();
-        LogAssert.Expect(LogType.Log, new Regex($"{Regex.Escape("[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath:")} .+"));
-        yield return null; // wait for next frame in case gameObjects need to be created
+        LogAssert.Expect(
+            LogType.Log, 
+            "[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: " +
+                Path.Combine(testTDKAbstractedEngineApi.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME)
+        );
+        TDKServiceLocator.GetService<TDKAnalyticsService>().SetHttpMssageHandler(
+            new MockHttpMessageHandler(HttpStatusCode.OK, "{}")
+        );
         TDK.Analytics.TrackCustomEvent("test event", null, highPriority: true);
-        // TODO mock http client (optionally, having integration tests would be nice too)
-        LogAssert.Expect(LogType.Warning, "[TDKAnalyticsService.IO:SendEvents] Failed to send events: Invalid URI: The hostname could not be parsed.");
+        LogAssert.Expect(LogType.Log, $"Intercepted request to the following route: https://localhost:5000/devAnalyticsApiUrl/events");
+        LogAssert.Expect(LogType.Log, "[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
         yield return new WaitForSeconds(2);
-        // TODO expect 0 events in queue
-        // Assert.AreEqual(TDKServiceLocator.GetService<TDKAnalyticsService>()._memoryCache.Count, 0);
-        // LogAssert.Expect(LogType.Log, new Regex("AAA"));
     }
 
     // [UnityTest]

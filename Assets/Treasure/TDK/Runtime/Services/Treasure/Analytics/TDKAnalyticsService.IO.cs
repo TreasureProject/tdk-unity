@@ -9,6 +9,9 @@ namespace Treasure
 {
     public partial class TDKAnalyticsService : TDKBaseService
     {
+        private HttpMessageHandler _httpMessageHandler = null;
+        public void SetHttpMssageHandler(HttpMessageHandler h) => _httpMessageHandler = h;
+        
         private async Task<bool> SendEvent(string eventStr)
         {
             return await SendEventBatch(new List<string>() { eventStr });
@@ -29,41 +32,39 @@ namespace Treasure
             // TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
 
             // send the payload to the analytics backend via HTTP POST request
-            using (HttpClient client = new HttpClient())
-            {
-                try {
-                    // Set the base address ensuring trailing slash
-                    string baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl;
-                    if (!TDK.Instance.AppConfig.AnalyticsApiUrl.EndsWith("/"))
-                    {
-                        baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl + "/";
-                    }
-                    client.BaseAddress = new Uri(baseAddress);
-
-                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "events")
-                    {
-                        Content = new StringContent(payload, Encoding.UTF8, "application/json"),
-                        Headers = { { "Accept", "application/json" } }
-                    };
-
-                    HttpResponseMessage response = await client.SendAsync(request);
-                    
-                    // Ensure the request was successful
-                    response.EnsureSuccessStatusCode();
-
-                    // Read the response content
-                    TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
-
-                    return true;
-                } catch (OperationCanceledException ex) when (ex.InnerException is TimeoutException tex) {
-                    TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events (timed out): {ex.Message}, {tex.Message}");
-                } catch (HttpRequestException ex) {
-                    TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events (http error): {ex.Message}");
-                } catch (Exception ex) {
-                    TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events: {ex.Message}");
+            using HttpClient client = new HttpClient(_httpMessageHandler);
+            try {
+                // Set the base address ensuring trailing slash
+                string baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl;
+                if (!TDK.Instance.AppConfig.AnalyticsApiUrl.EndsWith("/"))
+                {
+                    baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl + "/";
                 }
-                return false;
+                client.BaseAddress = new Uri(baseAddress);
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "events")
+                {
+                    Content = new StringContent(payload, Encoding.UTF8, "application/json"),
+                    Headers = { { "Accept", "application/json" } }
+                };
+
+                HttpResponseMessage response = await client.SendAsync(request);
+
+                // Ensure the request was successful
+                response.EnsureSuccessStatusCode();
+
+                // Read the response content
+                TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
+
+                return true;
+            } catch (OperationCanceledException ex) when (ex.InnerException is TimeoutException tex) {
+                TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events (timed out): {ex.Message}, {tex.Message}");
+            } catch (HttpRequestException ex) {
+                TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events (http error): {ex.Message}");
+            } catch (Exception ex) {
+                TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events: {ex.Message}");
             }
+            return false;
         }
     }
 }
