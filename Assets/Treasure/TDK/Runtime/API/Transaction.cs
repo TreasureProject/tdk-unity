@@ -25,6 +25,7 @@ namespace Treasure
         }
 
         public string address;
+        public object[] abi;
         public string functionName;
         public object[] args;
         public TransactionOverrides txOverrides;
