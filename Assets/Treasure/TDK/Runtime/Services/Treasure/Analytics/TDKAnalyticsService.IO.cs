@@ -25,17 +25,16 @@ namespace Treasure
         
         private async Task<bool> SendEventBatch(string payload)
         {
-            if(payload.StartsWith("{"))
-            {
-                payload = "[" + payload + "]";
-            }
-            // TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
-
             bool success = false;
 
-            // send the payload to the analytics backend via HTTP POST request
-            using HttpClient client = new HttpClient(_httpMessageHandler);
             try {
+                using HttpClient client = _httpMessageHandler != null ? new HttpClient(_httpMessageHandler) : new HttpClient();
+                if(payload.StartsWith("{"))
+                {
+                    payload = "[" + payload + "]";
+                }
+                // TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
+
                 // Set the base address ensuring trailing slash
                 string baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl;
                 if (!TDK.Instance.AppConfig.AnalyticsApiUrl.EndsWith("/"))
@@ -45,6 +44,7 @@ namespace Treasure
                 client.BaseAddress = new Uri(baseAddress);
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
 
+                // send the payload to the analytics backend via HTTP POST request
                 HttpResponseMessage response = await client.PostAsync(
                     "events",
                     new StringContent(payload, Encoding.UTF8, "application/json")
@@ -58,7 +58,7 @@ namespace Treasure
             } catch (HttpRequestException ex) {
                 TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events (http error): {ex.Message}");
             } catch (Exception ex) {
-                TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events: {ex.Message}");
+                TDKLogger.LogError($"[TDKAnalyticsService.IO:SendEvents] Failed to send events: {ex.Message}");
             }
             return success;
         }

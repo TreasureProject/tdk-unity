@@ -46,7 +46,7 @@ namespace Treasure
                     await FlushMemoryCache();
                 }
                 catch (Exception e) {
-                    TDKLogger.Log("[TDKAnalyticsService.Cache:PeriodicMemoryFlush] uncaught error flushing cache: " + e.Message);
+                    TDKLogger.LogError("[TDKAnalyticsService.Cache:PeriodicMemoryFlush] uncaught error flushing cache: " + e.Message);
                 }
                 
             });
