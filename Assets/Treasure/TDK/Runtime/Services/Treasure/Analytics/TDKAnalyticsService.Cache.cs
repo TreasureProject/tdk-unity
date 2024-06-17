@@ -41,19 +41,28 @@ namespace Treasure
 
         private void StartPeriodicMemoryFlush()
         {
-            _flushCacheTimer = new Timer(async _ => await FlushMemoryCache()); // TODO check what happens if FlushCache throws
+            _flushCacheTimer = new Timer(async _ => {
+                try {
+                    await FlushMemoryCache();
+                }
+                catch (Exception e) {
+                    TDKLogger.LogError("[TDKAnalyticsService.Cache:PeriodicMemoryFlush] uncaught error flushing cache: " + e.Message);
+                }
+                
+            });
             ResetFlushTimer();
         }
 
         private async void TerminateCacheFlushing()
         {
             _flushCacheTimer?.Dispose();
+            _flushCacheTimer = null;
             await FlushMemoryCache();
         }
 
         private void ResetFlushTimer()
         {
-            _flushCacheTimer.Change(
+            _flushCacheTimer?.Change(
                 TimeSpan.FromSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS),
                 TimeSpan.FromSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS)
             );
@@ -107,6 +116,8 @@ namespace Treasure
                     }
                     catch(Exception e) {
                         TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key not found: " + e.Message);
+                        // set key to 0 in case the error is due to the value not being a valid int
+                        TDK.Instance.LocalSettings.Set<int>(localSettingsKey, 0);
                     }
 
                     // If max send attempts have been reached, delete the file and stop processing
@@ -170,6 +181,7 @@ namespace Treasure
             {
                 // Flush the cache if limits are exceeded
                 TDKLogger.Log("[TDKAnalyticsService.Cache:CacheEvent] Cache size exceeded, flushing cache");
+                ResetFlushTimer(); // set flush timer back to 0 since we are triggering the flush manually
                 await FlushMemoryCache();
             }
 

@@ -14,12 +14,12 @@ namespace Treasure
             _persistentDataPath = Application.persistentDataPath;
         }
 
-        public string ApplicationPersistentDataPath()
+        public virtual string ApplicationPersistentDataPath()
         {
             return _persistentDataPath;
         }
 
-        public T GetPersistedValue<T>(string key)
+        public virtual T GetPersistedValue<T>(string key)
         {
             if (PlayerPrefs.HasKey(key))
             {
@@ -29,14 +29,14 @@ namespace Treasure
             return default(T);
         }
 
-        public void SetPersistedValue<T>(string key, T value)
+        public virtual void SetPersistedValue<T>(string key, T value)
         {
             string json = JsonUtility.ToJson(value);
             PlayerPrefs.SetString(key, json);
             PlayerPrefs.Save();
         }
 
-        public void DeletePersistedValue(string key)
+        public virtual void DeletePersistedValue(string key)
         {
             PlayerPrefs.DeleteKey(key);
             PlayerPrefs.Save();

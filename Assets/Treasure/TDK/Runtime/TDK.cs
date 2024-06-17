@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 namespace Treasure
 {
@@ -18,7 +19,7 @@ namespace Treasure
 
         void OnApplicationPause(bool isPaused)
         {
-            Analytics.OnApplicationPause_Analytics(isPaused);
+            Analytics?.OnApplicationPause_Analytics(isPaused);
         }
 
         public static TDK Instance
@@ -34,8 +35,7 @@ namespace Treasure
                     {
                         // create a new instance
                         _instance = new GameObject("TDK", new Type[] {
-                            typeof(TDK),
-                            typeof(TDKTimeKeeper)
+                            typeof(TDK)
                         }).GetComponent<TDK>();
 
                         DontDestroyOnLoad(_instance.gameObject);
@@ -64,26 +64,43 @@ namespace Treasure
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void AutoInitialize()
         {
-            Instance.AppConfig = TDKConfig.LoadFromResources();
+#if !TDK_SKIP_AUTO_INITIALIZE // this flag is for unit tests, where we want to initialize manually
+            AutoInitializeInternal();
+#endif
+        }
 
-            Instance._abstractedEngineApi = new TDKAbstractedEngineApi();
-            Instance._localsettings = new LocalSettings(Application.persistentDataPath);
-
-            // initialize subsystems
-            Instance.InitCommon();
-            Instance.InitAnalytics();
-            Instance.InitAPI();
-            Instance.InitIdentity();
-            Instance.InitConnect();
-            Instance.InitBridgeworld();
+        private static void AutoInitializeInternal()
+        {
+            Instance.gameObject.AddComponent<TDKTimeKeeper>();
+            Instance.InitializeProperties(
+                tdkConfig: TDKConfig.LoadFromResources(),
+                abstractedEngineApi: new TDKAbstractedEngineApi(),
+                localSettings: new LocalSettings(Application.persistentDataPath)
+            );
+            Instance.InitializeSubsystems();
 
             // track app start event
 #if TREASURE_ANALYTICS
             TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(AnalyticsConstants.EVT_APP_START);
 #endif
-
             // set as initialized
             Initialized = true;
+        }
+
+        public void InitializeProperties(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings) {
+            Instance.AppConfig = tdkConfig;
+
+            Instance._abstractedEngineApi = abstractedEngineApi;
+            Instance._localsettings = localSettings;
+        }
+
+        public void InitializeSubsystems() {
+            InitCommon();
+            InitAnalytics();
+            InitAPI();
+            InitIdentity();
+            InitConnect();
+            InitBridgeworld();
         }
     }
 }
