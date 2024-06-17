@@ -31,6 +31,8 @@ namespace Treasure
             }
             // TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
 
+            bool success = false;
+
             // send the payload to the analytics backend via HTTP POST request
             using HttpClient client = new HttpClient(_httpMessageHandler);
             try {
@@ -41,22 +43,16 @@ namespace Treasure
                     baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl + "/";
                 }
                 client.BaseAddress = new Uri(baseAddress);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
 
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "events")
-                {
-                    Content = new StringContent(payload, Encoding.UTF8, "application/json"),
-                    Headers = { { "Accept", "application/json" } }
-                };
-
-                HttpResponseMessage response = await client.SendAsync(request);
-
+                HttpResponseMessage response = await client.PostAsync(
+                    "events",
+                    new StringContent(payload, Encoding.UTF8, "application/json")
+                );
                 // Ensure the request was successful
                 response.EnsureSuccessStatusCode();
-
-                // Read the response content
                 TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
-
-                return true;
+                success = true;
             } catch (OperationCanceledException ex) when (ex.InnerException is TimeoutException tex) {
                 TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events (timed out): {ex.Message}, {tex.Message}");
             } catch (HttpRequestException ex) {
@@ -64,7 +60,7 @@ namespace Treasure
             } catch (Exception ex) {
                 TDKLogger.LogWarning($"[TDKAnalyticsService.IO:SendEvents] Failed to send events: {ex.Message}");
             }
-            return false;
+            return success;
         }
     }
 }
