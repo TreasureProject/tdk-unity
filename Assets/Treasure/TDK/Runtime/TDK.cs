@@ -11,7 +11,6 @@ namespace Treasure
         /// </summary>
         private static TDK _instance = null;
         public static bool Initialized { get; private set; }
-        public static bool skipAutoInitialize = false;
 
         private IAbstractedEngineApi _abstractedEngineApi;
         private LocalSettings _localsettings;
@@ -65,32 +64,20 @@ namespace Treasure
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void AutoInitialize()
         {
-            Instance.StartCoroutine(AutoInitializeCoroutine());
+#if !TDK_SKIP_AUTO_INITIALIZE // this flag is for unit tests, where we want to initialize manually
+            AutoInitializeInternal();
+#endif
         }
 
-        private static IEnumerator AutoInitializeCoroutine()
+        private static void AutoInitializeInternal()
         {
-            // TODO check if waiting is okay:
-            // we wait to allow other code to set skipAutoInitialize (eg: tests) before requests are triggered
-            yield return new WaitForSeconds(1f);
-            if (skipAutoInitialize) {
-                Initialized = true;
-                yield break;
-            }
-
             Instance.gameObject.AddComponent<TDKTimeKeeper>();
-            Instance.InitProperties(
+            Instance.InitializeProperties(
                 tdkConfig: TDKConfig.LoadFromResources(),
                 abstractedEngineApi: new TDKAbstractedEngineApi(),
                 localSettings: new LocalSettings(Application.persistentDataPath)
             );
-            // initialize subsystems
-            Instance.InitCommon();
-            Instance.InitAnalytics();
-            Instance.InitAPI();
-            Instance.InitIdentity();
-            Instance.InitConnect();
-            Instance.InitBridgeworld();
+            Instance.InitializeSubsystems();
 
             // track app start event
 #if TREASURE_ANALYTICS
@@ -100,11 +87,20 @@ namespace Treasure
             Initialized = true;
         }
 
-        public void InitProperties(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings) {
+        public void InitializeProperties(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings) {
             Instance.AppConfig = tdkConfig;
 
             Instance._abstractedEngineApi = abstractedEngineApi;
             Instance._localsettings = localSettings;
+        }
+
+        public void InitializeSubsystems() {
+            InitCommon();
+            InitAnalytics();
+            InitAPI();
+            InitIdentity();
+            InitConnect();
+            InitBridgeworld();
         }
     }
 }

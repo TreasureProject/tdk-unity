@@ -42,8 +42,13 @@ namespace Treasure
         private void StartPeriodicMemoryFlush()
         {
             _flushCacheTimer = new Timer(async _ => {
-                // TODO currently if FlushMemoryCache throws it will silently fail, add `catch` here for better handling
-                await FlushMemoryCache();
+                try {
+                    await FlushMemoryCache();
+                }
+                catch (Exception e) {
+                    TDKLogger.Log("[TDKAnalyticsService.Cache:PeriodicMemoryFlush] uncaught error flushing cache: " + e.Message);
+                }
+                
             });
             ResetFlushTimer();
         }

@@ -10,7 +10,7 @@ namespace Treasure
         /// <summary>
         /// Initialize the Analytics module
         /// </summary>
-        public void InitAnalytics() // TODO is it ok to be public?
+        private void InitAnalytics()
         {
             Analytics = new Analytics();
 

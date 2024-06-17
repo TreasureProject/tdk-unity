@@ -158,8 +158,6 @@ public class AnalyticsTest
     {
         Application.logMessageReceivedThreaded += HandleLog;
         logs.Clear();
-        // skip initialization to avoid any noise from automatic requests + object creation
-        TDK.skipAutoInitialize = true;
         
         testTDKConfig = ScriptableObject.CreateInstance<TDKConfig>();
         testTDKConfig.SetConfig(new SerializedTDKConfig {
@@ -186,14 +184,12 @@ public class AnalyticsTest
     [UnityTest]
     public IEnumerator AnalyticsTestComplex1()
     {
-        Assert.That(TDK.Initialized, Is.False, "TDK should not be initialized at the start of the test, make sure tests are run one by one");
-        yield return new WaitUntil(() => TDK.Initialized);
-        TDK.Instance.InitProperties(
+        TDK.Instance.InitializeProperties(
             testTDKConfig,
             testTDKAbstractedEngineApi,
             new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );
-        TDK.Instance.InitAnalytics();
+        TDK.Instance.InitializeSubsystems();
 
         yield return TestHighPrioEvent();
         yield return TestBatchEvents();
@@ -231,16 +227,6 @@ public class AnalyticsTest
             $"rgx:{Regex.Escape("Intercepted request to the following route: " + expectedRoute)} - payload: {expectedPayload}"
         );
         ValidateNextLog("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
-    }
-
-    [UnityTest]
-    public IEnumerator AnalyticsTestQueueCustomEvent()
-    {
-        Assert.That(TDK.Initialized, Is.False, "TDK should not be initialized at the start of the test, make sure tests are run one by one");
-        yield return new WaitUntil(() => TDK.Initialized);
-        ValidateLogs(new string[] {
-            
-        });
     }
     
     // TODO test harness scene and pressing buttons
