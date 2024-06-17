@@ -111,6 +111,8 @@ namespace Treasure
                     }
                     catch(Exception e) {
                         TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key not found: " + e.Message);
+                        // set key to 0 in case the error is due to the value not being a valid int
+                        TDK.Instance.LocalSettings.Set<int>(localSettingsKey, 0);
                     }
 
                     // If max send attempts have been reached, delete the file and stop processing
