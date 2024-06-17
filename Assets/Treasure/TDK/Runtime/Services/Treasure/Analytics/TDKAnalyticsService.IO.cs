@@ -10,7 +10,7 @@ namespace Treasure
     public partial class TDKAnalyticsService : TDKBaseService
     {
         private HttpMessageHandler _httpMessageHandler = null;
-        public void SetHttpMssageHandler(HttpMessageHandler h) => _httpMessageHandler = h;
+        public void SetHttpMessageHandler(HttpMessageHandler h) => _httpMessageHandler = h;
         
         private async Task<bool> SendEvent(string eventStr)
         {

@@ -53,7 +53,6 @@ namespace Treasure
 
             // send events to helika
 #if TDK_HELIKA
-            Debug.Log("helika " + eventName);
             TDKServiceLocator.GetService<TDKHelikaService>().TrackEvent(eventName, eventProps);
 #endif
         }

@@ -11,12 +11,17 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text;
 using System;
+using System.Linq;
 
 // For running these tests you need to modify scripting defines: remove TDK_HELIKA and add TREASURE_ANALYTICS
 // It needs to be done manually for now, we might want a better way, perhaps something like this:
 // https://forum.unity.com/threads/info-on-unity_include_tests-define.890095/#post-7495937
 // to remove/add scripting defines programatically, perhaps a custom editor button can do that + run the tests
 
+// Pending:
+// - integration tests (with actual api calls)
+// - mock unityrequest for webgl
+// - figure out how to make test run consecutively. for now they must be run one by one
 public class AnalyticsTest
 {
     public class TestTDKAbstractedEngineApi : TDKAbstractedEngineApi
@@ -48,6 +53,7 @@ public class AnalyticsTest
     {
         public HttpStatusCode statusCode;
         public string jsonResponse;
+        public bool used = false;
         
         public MockHttpMessageHandler(HttpStatusCode statusCode, string jsonResponse)
         {
@@ -59,7 +65,12 @@ public class AnalyticsTest
             HttpRequestMessage request,
             CancellationToken cancellationToken
         ) {
-            Debug.Log($"Intercepted request to the following route: {request.RequestUri}");
+            if (used) {
+                throw new Exception("MockHttpMessageHandler already used. Set a new one.");
+            }
+            used = true;
+            var payload = await request.Content.ReadAsStringAsync();
+            Debug.Log($"Intercepted request to the following route: {request.RequestUri} - payload: {payload}");
             var httpResponse = new HttpResponseMessage() {
                 StatusCode = statusCode,
                 Content = new StringContent(jsonResponse, Encoding.UTF8, "application/json"),
@@ -91,12 +102,62 @@ public class AnalyticsTest
         }
     }
 
+    void MockAnalyticsRequest(HttpStatusCode statusCode, string jsonResponse) {
+        TDKServiceLocator.GetService<TDKAnalyticsService>().SetHttpMessageHandler(
+            new MockHttpMessageHandler(statusCode, jsonResponse)
+        );
+    }
+
+    System.Collections.Generic.List<string> logs = new();
+    int validatedLogIndex = 0;
+    string noValidatePrefix = "debugTestLog: ";
+
+    void HandleLog(string logString, string stackTrace, LogType type)
+    {
+        if (logString.StartsWith(noValidatePrefix)) return;
+        DebugTestLog("adding test log");
+        logs.Add(logString);
+    }
+
+    // use this for printing stuff in tests but not fail the tests
+    void DebugTestLog(object message) {
+        Debug.Log($"{noValidatePrefix}{message}");
+    }
+
+    void ValidateLogs(string[] logList) {
+        for (int i = 0; i < logList.Length; i++)
+        {
+            var expectedLog = logList[i];
+            ValidateNextLog(expectedLog);
+        }
+    }
+
+    void ValidateNextLog(string expectedLog) {
+        Assert.That(logs, Is.Not.Empty, "Not enough logs to validate");
+        
+        var logIndex = validatedLogIndex;
+        var actualLog = logs[logIndex];
+        
+        if (expectedLog.StartsWith("rgx:")) {
+            Assert.That(actualLog, Does.Match(expectedLog[4..]), $"Log does not match (index={logIndex})");
+        } else {
+            Assert.That(actualLog, Is.EqualTo(expectedLog), $"Log does not match (index={logIndex})");
+        }
+        validatedLogIndex += 1;
+    }
+
+    void EnsureAllLogsWereValidated() {
+        Assert.That(logs.Count, Is.EqualTo(validatedLogIndex));
+    }
+
     TDKConfig testTDKConfig;
     TestTDKAbstractedEngineApi testTDKAbstractedEngineApi;
 
     [UnitySetUp]
     public IEnumerator MySetUp()
     {
+        Application.logMessageReceivedThreaded += HandleLog;
+        logs.Clear();
         // skip initialization to avoid any noise from automatic requests + object creation
         TDK.skipAutoInitialize = true;
         
@@ -118,41 +179,69 @@ public class AnalyticsTest
     [TearDown]
     public void MyTearDown()
     {
-
+        Application.logMessageReceivedThreaded -= HandleLog;
+        EnsureAllLogsWereValidated();
     }
 
-    // TODO figure out how to make this test pass again if repeated
     [UnityTest]
-    [TestMustExpectAllLogs]
-    public IEnumerator AnalyticsTestInit()
+    public IEnumerator AnalyticsTestComplex1()
     {
+        Assert.That(TDK.Initialized, Is.False, "TDK should not be initialized at the start of the test, make sure tests are run one by one");
         yield return new WaitUntil(() => TDK.Initialized);
-        // Debug.Log(testTDKAbstractedEngineApi.ApplicationPersistentDataPath());
         TDK.Instance.InitProperties(
             testTDKConfig,
             testTDKAbstractedEngineApi,
             new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );
         TDK.Instance.InitAnalytics();
-        LogAssert.Expect(
-            LogType.Log, 
-            "[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: " +
-                Path.Combine(testTDKAbstractedEngineApi.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME)
-        );
-        TDKServiceLocator.GetService<TDKAnalyticsService>().SetHttpMssageHandler(
-            new MockHttpMessageHandler(HttpStatusCode.OK, "{}")
-        );
-        TDK.Analytics.TrackCustomEvent("test event", null, highPriority: true);
-        LogAssert.Expect(LogType.Log, $"Intercepted request to the following route: https://localhost:5000/devAnalyticsApiUrl/events");
-        LogAssert.Expect(LogType.Log, "[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
-        yield return new WaitForSeconds(2);
+
+        yield return TestHighPrioEvent();
+        yield return TestBatchEvents();
     }
 
-    // [UnityTest]
-    // public IEnumerator AnalyticsTestThatFails()
-    // {
-    //     Assert.True(true);
-    //     yield return null;
-    //     Assert.True(false);
-    // }
+    IEnumerator TestHighPrioEvent() {
+        MockAnalyticsRequest(HttpStatusCode.OK, "{}");
+        
+        string testEventName = "test event";
+        TDK.Analytics.TrackCustomEvent(testEventName, null, highPriority: true);
+        yield return new WaitForSeconds(2);
+        
+        string expectedPersistancePath = Path.Combine(testTDKAbstractedEngineApi.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
+        string expectedRoute = "https://localhost:5000/devAnalyticsApiUrl/events";
+        string expectedPayload = $".*\"name\":\"{testEventName}\".*";
+        ValidateNextLog($"[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: {expectedPersistancePath}");
+        ValidateNextLog(
+            $"rgx:{Regex.Escape("Intercepted request to the following route: " + expectedRoute)} - payload: {expectedPayload}"
+        );
+        ValidateNextLog("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
+    }
+
+    IEnumerator TestBatchEvents() {
+        MockAnalyticsRequest(HttpStatusCode.OK, "{}");
+
+        string testEventName2 = "test event 2";
+        TDK.Analytics.TrackCustomEvent(testEventName2, null);
+        EnsureAllLogsWereValidated();
+        yield return new WaitForSeconds(2);
+        EnsureAllLogsWereValidated();
+        yield return new WaitForSeconds(10);
+        string expectedRoute = "https://localhost:5000/devAnalyticsApiUrl/events";
+        string expectedPayload = $".*\"name\":\"{testEventName2}\".*";
+        ValidateNextLog(
+            $"rgx:{Regex.Escape("Intercepted request to the following route: " + expectedRoute)} - payload: {expectedPayload}"
+        );
+        ValidateNextLog("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
+    }
+
+    [UnityTest]
+    public IEnumerator AnalyticsTestQueueCustomEvent()
+    {
+        Assert.That(TDK.Initialized, Is.False, "TDK should not be initialized at the start of the test, make sure tests are run one by one");
+        yield return new WaitUntil(() => TDK.Initialized);
+        ValidateLogs(new string[] {
+            
+        });
+    }
+    
+    // TODO test harness scene and pressing buttons
 }

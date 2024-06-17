@@ -9,7 +9,7 @@ namespace Treasure
     {
         public Dictionary<string, object> Settings { get; set; }
         
-        private static string _filePath;
+        private string _filePath;
 
         public LocalSettings(string settingsDirectory)
         {
