@@ -171,7 +171,7 @@ PlayerSettings:
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
   AndroidBundleVersionCode: 1
-  AndroidMinSdkVersion: 22
+  AndroidMinSdkVersion: 24
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 1
   aotOptions: 
@@ -839,9 +839,9 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary
-    Standalone: TDK_HELIKA;RH_SerializedDictionary;TDK_THIRDWEB
-    WebGL: TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary
+    Android: '!TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary;TREASURE_ANALYTICS'
+    Standalone: '!TDK_HELIKA;RH_SerializedDictionary;TDK_THIRDWEB;TREASURE_ANALYTICS'
+    WebGL: '!TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary;TREASURE_ANALYTICS'
     iPhone: TDK_HELIKA;TDK_THIRDWEB;RH_SerializedDictionary
   additionalCompilerArguments: {}
   platformArchitecture: {}

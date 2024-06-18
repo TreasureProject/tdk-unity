@@ -15,7 +15,7 @@ namespace Treasure
         {
             #if UNITY_EDITOR
             UnityEngine.Debug.Log(message);
-            ExternalLogCallback?.Invoke(message);
+            TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
             #else
             if(logOnMainThread)
             {
@@ -46,7 +46,7 @@ namespace Treasure
                     #else
                     UnityEngine.Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
                     #endif
-                    ExternalLogCallback?.Invoke(message);
+                    TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
                 }
                 catch
                 {
@@ -59,7 +59,7 @@ namespace Treasure
         {
             #if UNITY_EDITOR || TP_UA
             UnityEngine.Debug.LogWarning(message);
-            ExternalLogCallback?.Invoke(message);
+            TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
             #else
             if(logOnMainThread)
             {
@@ -102,7 +102,7 @@ namespace Treasure
         {
             #if UNITY_EDITOR || TP_UA
             UnityEngine.Debug.LogError(message);
-            ExternalLogCallback?.Invoke(message);
+            TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
             #else
             if(logOnMainThread)
             {
