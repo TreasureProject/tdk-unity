@@ -213,7 +213,8 @@ namespace Thirdweb
             else
             {
                 var web3 = Utils.GetWeb3(_sdk.Session.ChainId, _sdk.Session.Options.clientId, _sdk.Session.Options.bundleId);
-                var function = web3.Eth.GetContract(Contract.ABI, Contract.Address).GetFunction(Input.To);
+                var contract = web3.Eth.GetContract(Contract.ABI, Contract.Address);
+                var function = Utils.GetFunctionMatchSignature(contract, FunctionName, args);
                 Input.Data = function.GetData(args);
             }
             return this;
@@ -442,7 +443,8 @@ namespace Thirdweb
             }
             else
             {
-                var supports1559 = Utils.Supports1559(_sdk.Session.ChainId.ToString());
+                var force1559 = Input.Type != null && Input.Type.HexValue == new HexBigInteger((int)TransactionType.EIP1559).HexValue;
+                var supports1559 = force1559 || (Input.Type == null && Utils.Supports1559(_sdk.Session.ChainId.ToString()));
                 if (supports1559)
                 {
                     if (Input.GasPrice == null)

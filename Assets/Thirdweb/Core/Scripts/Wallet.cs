@@ -493,7 +493,7 @@ namespace Thirdweb
                     if (_sdk.Session.ActiveWallet.GetProvider() == WalletProvider.SmartWallet)
                     {
                         // Zk AA
-                        if (_sdk.Session.ChainId == 300 || _sdk.Session.ChainId == 324)
+                        if (Utils.IsZkSyncChain(_sdk.Session.ChainId))
                         {
                             var hashToken = jsonObject.SelectToken("$.message.data");
                             if (hashToken != null)
@@ -1003,7 +1003,8 @@ namespace Thirdweb
         LocalWallet,
         SmartWallet,
         Hyperplay,
-        InAppWallet
+        InAppWallet,
+        Rabby
     }
 
     /// <summary>

@@ -36,10 +36,16 @@ namespace Treasure
                 .Select(chainId => new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] })
                 .ToArray();
 
-            var smartWalletConfig = new ThirdwebSDK.SmartWalletConfig
+            // TODO this is copied code from ThirdwebManager.cs, we should refactor it so it wont get outdated
+            var smartWalletConfig = new ThirdwebSDK.SmartWalletConfig()
             {
-                factoryAddress = _config.FactoryAddress,
-                gasless = true
+                factoryAddress = string.IsNullOrEmpty(_config.FactoryAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS : _config.FactoryAddress,
+                gasless = true,
+                erc20PaymasterAddress = null,
+                erc20TokenAddress = null,
+                bundlerUrl = $"https://{chainIdentifier}.bundler.thirdweb.com",
+                paymasterUrl = $"https://{chainIdentifier}.bundler.thirdweb.com",
+                entryPointAddress = Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS,
             };
 
             var options = new ThirdwebSDK.Options

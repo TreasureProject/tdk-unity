@@ -43,6 +43,10 @@ namespace Treasure
             TDKConnectUIManager.Instance.ShowConfirmLoginModal(_email);
         }
 
+        // TODO most here is copied code from InAppWalletUI.cs with tweaks;
+        // - since we inherit it here we should refactor it to call the base method so its up to date
+        // - we should catch the exception wherever we call Connect and check its an otp error instead of assuming it is
+        // - we should add a screen with a spinner while waiting for the browser to connect via socials/oauth
         public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions, string clientId)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
@@ -52,6 +56,7 @@ namespace Treasure
             _embeddedWallet = embeddedWallet;
             _email = email;
             _phone = phoneNumber;
+            _clientId = clientId;
             _user = null;
             _exception = null;
             OTPInput.text = "";
@@ -71,6 +76,7 @@ namespace Treasure
                     AuthProvider.Apple => "Apple",
                     AuthProvider.Facebook => "Facebook",
                     AuthProvider.JWT => "CustomAuth",
+                    AuthProvider.PhoneOTP => "PhoneOTP",
                     _ => throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}"),
                 };
                 return await _embeddedWallet.GetUserAsync(_email, authProvider);
@@ -107,6 +113,9 @@ namespace Treasure
                         break;
                     case AuthProvider.AuthEndpoint:
                         await LoginWithAuthEndpoint(authOptions.jwtOrPayload, authOptions.encryptionKey);
+                        break;
+                    case AuthProvider.PhoneOTP:
+                        await LoginWithPhoneNumber();
                         break;
                     default:
                         throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}");
