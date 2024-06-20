@@ -14,6 +14,9 @@ public class IdentityUI : MonoBehaviour
         }
         catch (Exception e)
         {
+            // TODO improve error handling generally:
+            // - doing `Debug.LogError(e)` gives a better error trace
+            // - not catching at all makes the stack trace "file + line links" clickable
             TDKLogger.LogError($"Error starting user session: {e.Message}");
         }
     }
