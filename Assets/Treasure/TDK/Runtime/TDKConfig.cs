@@ -13,7 +13,7 @@ namespace Treasure
         [SerializeField] private string _cartridgeTag = string.Empty;
         [SerializeField] private string _devTdkApiUrl = "https://tdk-api.spellcaster.lol";
         [SerializeField] private string _prodTdkApiUrl = "https://tdk-api.treasure.lol";
-        [SerializeField] private string _devAnalyticsApiUrl = "https://darkmatter-dev.treasure.lol/ingress";
+        [SerializeField] private string _devAnalyticsApiUrl = "https://darkmatter.spellcaster.lol/ingress";
         [SerializeField] private string _prodAnalyticsApiUrl = "https://darkmatter.treasure.lol/ingress";
         [SerializeField] private int _sessionLengthDays = 3;
 

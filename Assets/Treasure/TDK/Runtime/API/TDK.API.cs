@@ -64,7 +64,7 @@ namespace Treasure
             var rawResponse = req.downloadHandler.text;
             if (req.result != UnityWebRequest.Result.Success)
             {
-                throw new UnityException($"[TDK.API.Get] {req.error}: {rawResponse}");
+                throw new UnityException($"[TDK.API.Get] {req.error}{(rawResponse.Length > 0 ? ": " + rawResponse : " (no response)")}");
             }
 
             return rawResponse;

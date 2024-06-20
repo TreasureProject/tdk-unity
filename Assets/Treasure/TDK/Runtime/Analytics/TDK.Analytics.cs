@@ -31,7 +31,7 @@ namespace Treasure
 
         internal void SetTreasureConnectInfo(string smartWalletAddress, int chainId)
         {
-#if TDK_ANALYTICS
+#if TREASURE_ANALYTICS
             TDKServiceLocator.GetService<TDKAnalyticsService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
 #endif
 
@@ -44,11 +44,11 @@ namespace Treasure
             });
         }
 
-        public void TrackCustomEvent(string eventName, Dictionary<string, object> eventProps = null)
+        public void TrackCustomEvent(string eventName, Dictionary<string, object> eventProps = null, bool highPriority = false)
         {
             // send events to treasure analytics
-#if TDK_ANALYTICS
-            TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(eventName, eventProps);
+#if TREASURE_ANALYTICS
+            TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(eventName, eventProps, highPriority);
 #endif
 
             // send events to helika
