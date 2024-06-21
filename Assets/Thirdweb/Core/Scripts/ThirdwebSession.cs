@@ -51,6 +51,11 @@ namespace Thirdweb
 
         #region Internal Methods
 
+        public void MakeActiveWalletNull()
+        {
+            ActiveWallet = null;
+        }
+
         internal async Task<string> Connect(WalletConnection walletConnection)
         {
             switch (walletConnection.provider)
