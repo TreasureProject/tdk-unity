@@ -55,7 +55,7 @@ namespace Treasure
 
         private async Task StartBackgroundDiskCacheFlush() {
             if (_diskFlushCancellationTokenSource != null) {
-                TDKLogger.LogWarning("Must stop previous disk flush before starting a new one");
+                TDKLogger.LogWarning("[TDKAnalyticsService.Cache:StartBackgroundDiskCacheFlush] Must stop previous disk flush before starting a new one");
                 return;
             }
 			_diskFlushCancellationTokenSource = new CancellationTokenSource();
@@ -65,10 +65,10 @@ namespace Treasure
 				try {
 					await FlushDiskCache();
 				} catch (Exception ex) {
-					TDKLogger.LogWarning($"Unexpected error processing persisted files: {ex.Message}");
+					TDKLogger.LogWarning($"[TDKAnalyticsService.Cache:StartBackgroundDiskCacheFlush] Unexpected error processing persisted files: {ex.Message}");
 					errorsEncountered += 1;
 					if (errorsEncountered > 3) {
-						TDKLogger.LogWarning("Too many unexpected errors encountered processing persisted files. Stoping process...");
+						TDKLogger.LogWarning("[TDKAnalyticsService.Cache:StartBackgroundDiskCacheFlush] Too many unexpected errors encountered processing persisted files. Stoping process...");
 						break;
 					}
 				}

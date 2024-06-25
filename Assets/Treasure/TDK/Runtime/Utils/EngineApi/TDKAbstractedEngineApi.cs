@@ -41,5 +41,10 @@ namespace Treasure
             PlayerPrefs.DeleteKey(key);
             PlayerPrefs.Save();
         }
+
+        public bool HasInternetConnection()
+        {
+            return Application.internetReachability != NetworkReachability.NotReachable;
+        }
     }
 }
