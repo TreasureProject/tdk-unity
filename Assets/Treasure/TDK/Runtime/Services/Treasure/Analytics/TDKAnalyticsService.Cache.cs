@@ -58,23 +58,23 @@ namespace Treasure
                 TDKLogger.LogWarning("[TDKAnalyticsService.Cache:StartBackgroundDiskCacheFlush] Must stop previous disk flush before starting a new one");
                 return;
             }
-			_diskFlushCancellationTokenSource = new CancellationTokenSource();
+            _diskFlushCancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = _diskFlushCancellationTokenSource.Token;
-			int errorsEncountered = 0;
-			while (!cancellationToken.IsCancellationRequested) {
-				try {
-					await FlushDiskCache();
-				} catch (Exception ex) {
-					TDKLogger.LogWarning($"[TDKAnalyticsService.Cache:StartBackgroundDiskCacheFlush] Unexpected error processing persisted files: {ex.Message}");
-					errorsEncountered += 1;
-					if (errorsEncountered > 3) {
-						TDKLogger.LogWarning("[TDKAnalyticsService.Cache:StartBackgroundDiskCacheFlush] Too many unexpected errors encountered processing persisted files. Stoping process...");
-						break;
-					}
-				}
-				await Task.Delay(TimeSpan.FromSeconds(AnalyticsConstants.DISK_CACHE_FLUSH_TIME_SECONDS));
-			}
-		}
+            int errorsEncountered = 0;
+            while (!cancellationToken.IsCancellationRequested) {
+                try {
+                    await FlushDiskCache();
+                } catch (Exception ex) {
+                    TDKLogger.LogWarning($"[TDKAnalyticsService.Cache:StartBackgroundDiskCacheFlush] Unexpected error processing persisted files: {ex.Message}");
+                    errorsEncountered += 1;
+                    if (errorsEncountered > 3) {
+                        TDKLogger.LogWarning("[TDKAnalyticsService.Cache:StartBackgroundDiskCacheFlush] Too many unexpected errors encountered processing persisted files. Stoping process...");
+                        break;
+                    }
+                }
+                await Task.Delay(TimeSpan.FromSeconds(AnalyticsConstants.DISK_CACHE_FLUSH_TIME_SECONDS));
+            }
+        }
 
         private async void TerminateCacheFlushing()
         {
@@ -92,7 +92,7 @@ namespace Treasure
                 TimeSpan.FromSeconds(AnalyticsConstants.MEMORY_CACHE_FLUSH_TIME_SECONDS),
                 TimeSpan.FromSeconds(AnalyticsConstants.MEMORY_CACHE_FLUSH_TIME_SECONDS)
             );
-		}
+        }
 
         private async Task FlushMemoryCache()
         {
