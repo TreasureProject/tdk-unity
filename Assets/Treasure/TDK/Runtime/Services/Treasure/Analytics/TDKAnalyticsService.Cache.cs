@@ -120,6 +120,11 @@ namespace Treasure
         {
             // DeleteOldBatches();
 
+            if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection()) {
+                TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] No internet connection, skipping persisted batch processing");
+                return;
+            }
+
             string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
             if(files.Length > 0)
             {
