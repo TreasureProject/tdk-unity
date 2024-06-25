@@ -14,6 +14,7 @@ namespace Treasure
         private string _diskCachePath;
 
         private Timer _flushCacheTimer;
+        private CancellationTokenSource _diskFlushCancellationTokenSource;
 
         private async void InitEventCaching()
         {
@@ -35,8 +36,8 @@ namespace Treasure
             }
             TDKLogger.Log("[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: " + _diskCachePath);
 
-            // Flush disk cache on startup
-            await FlushDiskCache();
+            await FlushDiskCache(); // Flush disk cache on startup
+            _ = StartBackgroundDiskCacheFlush(); // Flush disk cache periodically
         }
 
         private void StartPeriodicMemoryFlush()
@@ -53,8 +54,34 @@ namespace Treasure
             ResetFlushTimer();
         }
 
+        private async Task StartBackgroundDiskCacheFlush() {
+            if (_diskFlushCancellationTokenSource != null) {
+                TDKLogger.LogWarning("Must stop previous disk flush before starting a new one");
+                return;
+            }
+			_diskFlushCancellationTokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = _diskFlushCancellationTokenSource.Token;
+			int errorsEncountered = 0;
+			while (!cancellationToken.IsCancellationRequested) {
+				try {
+					await FlushDiskCache();
+				} catch (Exception ex) {
+					TDKLogger.LogWarning($"Unexpected error processing persisted files: {ex.Message}");
+					errorsEncountered += 1;
+					if (errorsEncountered > 3) {
+						TDKLogger.LogWarning("Too many unexpected errors encountered processing persisted files. Stoping process...");
+						break;
+					}
+				}
+				await Task.Delay(TimeSpan.FromSeconds(AnalyticsConstants.DISK_CACHE_FLUSH_TIME_SECONDS));
+			}
+		}
+
         private async void TerminateCacheFlushing()
         {
+            _diskFlushCancellationTokenSource?.Cancel();
+            _diskFlushCancellationTokenSource?.Dispose();
+            _diskFlushCancellationTokenSource = null;
             _flushCacheTimer?.Dispose();
             _flushCacheTimer = null;
             await FlushMemoryCache();
@@ -63,8 +90,8 @@ namespace Treasure
         private void ResetFlushTimer()
         {
             _flushCacheTimer?.Change(
-                TimeSpan.FromSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS),
-                TimeSpan.FromSeconds(AnalyticsConstants.CACHE_FLUSH_TIME_SECONDS)
+                TimeSpan.FromSeconds(AnalyticsConstants.MEMORY_CACHE_FLUSH_TIME_SECONDS),
+                TimeSpan.FromSeconds(AnalyticsConstants.MEMORY_CACHE_FLUSH_TIME_SECONDS)
             );
 		}
 
@@ -88,8 +115,6 @@ namespace Treasure
                     PersistEventBatch(memoryCacheCopy);
                 }
             }
-
-            await FlushDiskCache();
         }
 
         private Task FlushDiskCache()
