@@ -16,7 +16,7 @@ namespace Treasure
         private Timer _flushCacheTimer;
         private CancellationTokenSource _diskFlushCancellationTokenSource;
 
-        private async void InitEventCaching()
+        private void InitEventCaching()
         {
             // Initialize memory cache
             _memoryCache = new List<string>();
@@ -36,8 +36,7 @@ namespace Treasure
             }
             TDKLogger.Log("[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: " + _diskCachePath);
 
-            await FlushDiskCache(); // Flush disk cache on startup
-            _ = StartBackgroundDiskCacheFlush(); // Flush disk cache periodically
+            _ = StartBackgroundDiskCacheFlush(); // Flush disk cache on startup and periodically
         }
 
         private void StartPeriodicMemoryFlush()
@@ -117,63 +116,60 @@ namespace Treasure
             }
         }
 
-        private Task FlushDiskCache()
+        private async Task FlushDiskCache()
         {
-            return Task.Run(async () =>
-            {
-                // DeleteOldBatches();
+            // DeleteOldBatches();
 
-                string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
-                if(files.Length > 0)
-                {
-                    TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing " + files.Length + " persisted batches");
+            string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
+            if(files.Length > 0)
+            {
+                TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing " + files.Length + " persisted batches");
+            }
+
+            foreach (string filePath in files)
+            {
+                string content = File.ReadAllText(filePath);
+                string fileName = Path.GetFileName(filePath);
+                string localSettingsKey = fileName + "_sendattemps";
+
+                int numSendAttempts = 0;
+                try {
+                    numSendAttempts = TDK.Instance.LocalSettings.Get<int>(localSettingsKey);
+                }
+                catch(Exception e) {
+                    TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key not found: " + e.Message);
+                    // set key to 0 in case the error is due to the value not being a valid int
+                    TDK.Instance.LocalSettings.Set<int>(localSettingsKey, 0);
                 }
 
-                foreach (string filePath in files)
-                {
-                    string content = File.ReadAllText(filePath);
-                    string fileName = Path.GetFileName(filePath);
-                    string localSettingsKey = fileName + "_sendattemps";
+                // If max send attempts have been reached, delete the file and stop processing
+                if(numSendAttempts > AnalyticsConstants.PERSISTENT_MAX_RETRIES) {
+                    File.Delete(filePath);
+                    TDK.Instance.LocalSettings.Delete(localSettingsKey);
+                    break;
+                }
 
-                    int numSendAttempts = 0;
+                // Send the disk events for io
+                var success = await SendEventBatch(content);
+
+                if(success) {
+                    // Delete the file if the send was successful
+                    File.Delete(filePath);
+                    
+                    // Clear the localSettings key
                     try {
-                        numSendAttempts = TDK.Instance.LocalSettings.Get<int>(localSettingsKey);
+                        TDK.Instance.LocalSettings.Delete(localSettingsKey);
                     }
                     catch(Exception e) {
-                        TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key not found: " + e.Message);
-                        // set key to 0 in case the error is due to the value not being a valid int
-                        TDK.Instance.LocalSettings.Set<int>(localSettingsKey, 0);
-                    }
-
-                    // If max send attempts have been reached, delete the file and stop processing
-                    if(numSendAttempts > AnalyticsConstants.PERSISTENT_MAX_RETRIES) {
-                        File.Delete(filePath);
-                        TDK.Instance.LocalSettings.Delete(localSettingsKey);
-                        break;
-                    }
-
-                    // Send the disk events for io
-                    var success = await SendEventBatch(content);
-
-                    if(success) {
-                        // Delete the file if the send was successful
-                        File.Delete(filePath);
-                        
-                        // Clear the localSettings key
-                        try {
-                            TDK.Instance.LocalSettings.Delete(localSettingsKey);
-                        }
-                        catch(Exception e) {
-                            TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key removal failed: " + e.Message);
-                        }   
-                        TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] removing cache file: " + filePath);
-                    }
-                    else {
-                        // Increment the localSettings send attempt if send failed
-                        TDK.Instance.LocalSettings.Set<int>(localSettingsKey, numSendAttempts + 1);
-                    }
+                        TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] local settings key removal failed: " + e.Message);
+                    }   
+                    TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] removing cache file: " + filePath);
                 }
-            });
+                else {
+                    // Increment the localSettings send attempt if send failed
+                    TDK.Instance.LocalSettings.Set<int>(localSettingsKey, numSendAttempts + 1);
+                }
+            }
         }
         /// <dev>
         /// Delete old batches from disk cache that are older than 30 days
