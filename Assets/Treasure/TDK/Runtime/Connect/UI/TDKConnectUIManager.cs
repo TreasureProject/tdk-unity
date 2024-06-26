@@ -37,7 +37,7 @@ namespace Treasure
             });
             backGroundButton.onClick.AddListener(() =>
             {
-                Hide(true);
+                Hide();
             });
         }
 
@@ -88,15 +88,10 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
         }
 
-        public void Hide(bool checkIsConfirmModal = false)
+        public void Hide()
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
-
-            if (checkIsConfirmModal && currentModalOpended.GetComponent<ConfirmLoginModal>() != null)
-            {
-                _ = TDK.Connect.Disconnect(false, true);
-            }
 
             currentModalOpended = null;
 

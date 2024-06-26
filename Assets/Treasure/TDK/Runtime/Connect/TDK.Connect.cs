@@ -208,7 +208,7 @@ namespace Treasure
 #endif
         }
 
-        public async Task Disconnect(bool endSession = false, bool clearWallet = false)
+        public async Task Disconnect(bool endSession = false)
         {
 #if TDK_THIRDWEB
             if (await IsWalletConnected())
@@ -217,9 +217,6 @@ namespace Treasure
                 OnDisconnected?.Invoke();
             }
 #endif
-
-            if (clearWallet)
-                TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.CallMakeActiveWalletNull();
 
             _address = null;
             _email = null;

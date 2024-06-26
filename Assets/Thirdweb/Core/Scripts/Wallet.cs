@@ -83,12 +83,7 @@ namespace Thirdweb
             else
             {
                 await _sdk.Session.Disconnect(endSession);
-            }          
-        }
-
-        public void CallMakeActiveWalletNull()
-        {
-            _sdk.Session.MakeActiveWalletNull();
+            }
         }
 
         /// <summary>
