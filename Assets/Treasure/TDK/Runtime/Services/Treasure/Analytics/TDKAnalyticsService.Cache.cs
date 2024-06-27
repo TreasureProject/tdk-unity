@@ -120,15 +120,17 @@ namespace Treasure
         {
             // DeleteOldBatches();
 
+            string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
+            if(files.Length == 0)
+            {
+                return;
+            }
+            
+            TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing " + files.Length + " persisted batches");
+            
             if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection()) {
                 TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] No internet connection, skipping persisted batch processing");
                 return;
-            }
-
-            string[] files = Directory.GetFiles(_diskCachePath, "*.eventbatch");
-            if(files.Length > 0)
-            {
-                TDKLogger.Log("[TDKAnalyticsService.Cache:FlushDiskCache] processing " + files.Length + " persisted batches");
             }
 
             foreach (string filePath in files)
