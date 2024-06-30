@@ -18,7 +18,7 @@ namespace Treasure
 
         private IEnumerator GetServerTime()
         {
-            while (Application.internetReachability == NetworkReachability.NotReachable)
+            while (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
             {
                 yield return new WaitForSeconds(RETRY_INTERVAL);
             }

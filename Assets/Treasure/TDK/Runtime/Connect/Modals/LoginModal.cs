@@ -86,7 +86,7 @@ namespace Treasure
 
         private async void ConnectSocial(SocialAuthProvider provider)
         {
-            if (!HaveInternetConnection())
+            if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
             {
                 errorText.text = "Please make sure you have active Internet connection.";
                 errorText.gameObject.SetActive(true);
@@ -126,7 +126,7 @@ namespace Treasure
 
         private async void OnClickConnectwithEmail()
         {
-            if (!HaveInternetConnection())
+            if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
             {
                 errorText.text = "Please make sure you have active Internet connection.";
                 errorText.gameObject.SetActive(true);
@@ -163,11 +163,6 @@ namespace Treasure
                 errorText.text = message;
                 errorText.gameObject.SetActive(true);
             }
-        }
-
-        private bool HaveInternetConnection()
-        {
-            return !(Application.internetReachability == NetworkReachability.NotReachable);
         }
 
         // test code
