@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Thirdweb;
 using Thirdweb.EWS;
 using Thirdweb.Wallets;
-using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -16,11 +15,6 @@ namespace Treasure
         public UnityEvent OnEmailOTPVerificationSuccess;
         [Space]
         [SerializeField] private ConfirmLoginModal confirmLoginModal;
-
-        private void Start()
-        {
-            UnityEventTools.AddPersistentListener(OnOTPVerificationFailed, HandleWrongOTP);
-        }
 
         public override async Task LoginWithOTP()
         {
@@ -145,9 +139,10 @@ namespace Treasure
                 var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 if (res.User == null)
                 {
-                    if (res.CanRetry && OnOTPVerificationFailed.GetPersistentEventCount() > 0)
+                    if (res.CanRetry)
                     {
                         OnOTPVerificationFailed.Invoke();
+                        HandleWrongOTP();
                         return;
                     }
                     _exception = new UnityException("User OTP Verification Failed.");
