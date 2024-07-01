@@ -2,6 +2,8 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using Thirdweb.Wallets;
+
 
 #if TDK_THIRDWEB
 using Thirdweb;
@@ -180,12 +182,12 @@ namespace Treasure
             _options = options;
             var chainId = await GetChainId();
             var wc = new WalletConnection(
-                    provider: WalletProvider.SmartWallet,
-                    chainId: (int)chainId,
-                    email: email,
-                    authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                    personalWallet: WalletProvider.InAppWallet
-                );
+                provider: WalletProvider.SmartWallet,
+                chainId: (int)chainId,
+                email: email,
+                authOptions: new AuthOptions(AuthProvider.EmailOTP),
+                personalWallet: WalletProvider.InAppWallet
+            );
             await ConnectWallet(wc, chainId);
 #else
             TDKLogger.LogError("Unable to connect email. TDK Connect wallet service not implemented.");
@@ -211,9 +213,14 @@ namespace Treasure
         public async Task Disconnect(bool endSession = false)
         {
 #if TDK_THIRDWEB
-            if (await IsWalletConnected())
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            bool hasStartedConnectionPreviously = thirdwebService.SDK.Session.ActiveWallet != null;
+            if (hasStartedConnectionPreviously || await IsWalletConnected())
             {
-                await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Disconnect(endSession);
+                InAppWalletUI.Instance.Cancel(); // cancel any in progress connect operations
+                await new WaitForEndOfFrame();
+                // this clears SDK.Session.ActiveWallet and allows for a fresh connection attempt
+                await thirdwebService.Wallet.Disconnect(endSession);
                 OnDisconnected?.Invoke();
             }
 #endif

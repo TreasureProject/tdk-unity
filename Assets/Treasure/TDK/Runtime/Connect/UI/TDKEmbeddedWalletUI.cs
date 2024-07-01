@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Thirdweb;
 using Thirdweb.EWS;
 using Thirdweb.Wallets;
+using UnityEditor.Events;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -18,11 +19,7 @@ namespace Treasure
 
         private void Start()
         {
-            OnOTPVerificationFailed.AddListener(() =>
-            {
-                TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
-                SetOtpCodeIsWrong();
-            });
+            UnityEventTools.AddPersistentListener(OnOTPVerificationFailed, HandleWrongOTP);
         }
 
         public override async Task LoginWithOTP()
@@ -128,11 +125,10 @@ namespace Treasure
 
             await new WaitUntil(() => _user != null || _exception != null);
 
-            //(TODO) need to handle when OTP is wrong 
-            //EmbeddedWalletCanvas.SetActive(false);
+            // TODO need to handle when OTP is wrong 
+            // InAppWalletCanvas.SetActive(false);
             if (_exception != null)
             {
-                SetOtpCodeIsWrong();
                 throw _exception;
             }
             return _user;
@@ -173,8 +169,9 @@ namespace Treasure
             }
         }
 
-        private void SetOtpCodeIsWrong()
+        private void HandleWrongOTP()
         {
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
             Debug.LogError("Login with OTP failed");
             confirmLoginModal.SetErrorText("OTP code is wrong");
             SubmitButton.GetComponent<LoadingButton>().SetLoading(false);
