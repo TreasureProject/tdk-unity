@@ -16,15 +16,6 @@ namespace Treasure
         [Space]
         [SerializeField] private ConfirmLoginModal confirmLoginModal;
 
-        private void Start()
-        {
-            OnOTPVerificationFailed.AddListener(() =>
-            {
-                TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
-                SetOtpCodeIsWrong();
-            });
-        }
-
         public override async Task LoginWithOTP()
         {
             if (_email == null)
@@ -128,11 +119,10 @@ namespace Treasure
 
             await new WaitUntil(() => _user != null || _exception != null);
 
-            //(TODO) need to handle when OTP is wrong 
-            //EmbeddedWalletCanvas.SetActive(false);
+            // TODO need to handle when OTP is wrong 
+            // InAppWalletCanvas.SetActive(false);
             if (_exception != null)
             {
-                SetOtpCodeIsWrong();
                 throw _exception;
             }
             return _user;
@@ -149,9 +139,10 @@ namespace Treasure
                 var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 if (res.User == null)
                 {
-                    if (res.CanRetry && OnOTPVerificationFailed.GetPersistentEventCount() > 0)
+                    if (res.CanRetry)
                     {
                         OnOTPVerificationFailed.Invoke();
+                        HandleWrongOTP();
                         return;
                     }
                     _exception = new UnityException("User OTP Verification Failed.");
@@ -173,8 +164,9 @@ namespace Treasure
             }
         }
 
-        private void SetOtpCodeIsWrong()
+        private void HandleWrongOTP()
         {
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
             Debug.LogError("Login with OTP failed");
             confirmLoginModal.SetErrorText("OTP code is wrong");
             SubmitButton.GetComponent<LoadingButton>().SetLoading(false);

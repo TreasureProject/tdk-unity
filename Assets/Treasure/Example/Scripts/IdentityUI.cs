@@ -23,7 +23,7 @@ public class IdentityUI : MonoBehaviour
 
     public void OnEndUserSessionBtn()
     {
-        TDK.Identity.EndUserSession();
+        _ = TDK.Identity.EndUserSession();
     }
 
     public void OnValidateUserSessionBtn()
