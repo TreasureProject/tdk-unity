@@ -29,7 +29,7 @@ namespace Treasure
             disconnectButton.onClick.AddListener(() =>
             {
                 TDKConnectUIManager.Instance.LogOut();
-                _ = TDK.Connect.Disconnect(true);
+                _ = TDK.Identity.EndUserSession();
             });
         }
 

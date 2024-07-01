@@ -278,7 +278,7 @@ namespace Treasure
 #endif
         }
 
-        public async void EndUserSession()
+        public async Task EndUserSession()
         {
             try
             {
