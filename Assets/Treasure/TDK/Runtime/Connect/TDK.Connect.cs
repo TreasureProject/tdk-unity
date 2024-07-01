@@ -2,11 +2,10 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using Thirdweb.Wallets;
-
 
 #if TDK_THIRDWEB
 using Thirdweb;
+using Thirdweb.Wallets;
 #endif
 
 namespace Treasure
@@ -214,8 +213,7 @@ namespace Treasure
         {
 #if TDK_THIRDWEB
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            bool hasStartedConnectionPreviously = thirdwebService.SDK.Session.ActiveWallet != null;
-            if (hasStartedConnectionPreviously || await IsWalletConnected())
+            if (thirdwebService.SDK.Session.ActiveWallet != null || await IsWalletConnected())
             {
                 InAppWalletUI.Instance.Cancel(); // cancel any in progress connect operations
                 await new WaitForEndOfFrame();
