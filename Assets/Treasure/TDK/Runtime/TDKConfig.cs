@@ -58,6 +58,9 @@ namespace Treasure
 
         public void SetModuleConfig<T>(T moduleConfig)
         {
+            if (moduleConfigurations == null) {
+                moduleConfigurations = new ScriptableObjectDictionary();
+            }
             moduleConfigurations.Add(typeof(T).Name, moduleConfig);
         }
 

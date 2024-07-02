@@ -65,18 +65,21 @@ namespace Treasure
         private static void AutoInitialize()
         {
 #if !TDK_SKIP_AUTO_INITIALIZE // this flag is for unit tests, where we want to initialize manually
-            AutoInitializeInternal();
-#endif
-        }
-
-        private static void AutoInitializeInternal()
-        {
-            Instance.gameObject.AddComponent<TDKTimeKeeper>();
-            Instance.InitializeProperties(
+            Initialize(
                 tdkConfig: TDKConfig.LoadFromResources(),
                 abstractedEngineApi: new TDKAbstractedEngineApi(),
                 localSettings: new LocalSettings(Application.persistentDataPath)
             );
+#endif
+        }
+
+        public static void Initialize(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings)
+        {
+            if (Initialized) {
+                return;
+            }
+            Instance.gameObject.AddComponent<TDKTimeKeeper>();
+            Instance.InitializeProperties(tdkConfig, abstractedEngineApi, localSettings);
             Instance.InitializeSubsystems();
 
             // track app start event
@@ -87,14 +90,14 @@ namespace Treasure
             Initialized = true;
         }
 
-        public void InitializeProperties(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings) {
+        private void InitializeProperties(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings) {
             Instance.AppConfig = tdkConfig;
 
             Instance._abstractedEngineApi = abstractedEngineApi;
             Instance._localsettings = localSettings;
         }
 
-        public void InitializeSubsystems() {
+        private void InitializeSubsystems() {
             InitCommon();
             InitAnalytics();
             InitAPI();

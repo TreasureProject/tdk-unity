@@ -168,6 +168,9 @@ public class AnalyticsTest
             prodAnalyticsApiUrl = "https://localhost:5000/prodAnalyticsApiUrl",
             sessionLengthDays = 123
         });
+        var thirdwebConfig = ScriptableObject.CreateInstance<TDKThirdwebConfig>();
+        testTDKConfig.SetModuleConfig(thirdwebConfig);
+        
         testTDKAbstractedEngineApi = new TestTDKAbstractedEngineApi();
 
         ClearPersistedEventBatches();
@@ -184,12 +187,17 @@ public class AnalyticsTest
     [UnityTest]
     public IEnumerator AnalyticsTestComplex1()
     {
-        TDK.Instance.InitializeProperties(
+        TDK.Initialize(
             testTDKConfig,
             testTDKAbstractedEngineApi,
             new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );
-        TDK.Instance.InitializeSubsystems();
+
+        yield return TestHelpers.WaitUntilWithMax(() => logs.Count >= 2, 5);
+        
+        string expectedPersistancePath = Path.Combine(testTDKAbstractedEngineApi.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
+        ValidateNextLog($"[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: {expectedPersistancePath}");
+        ValidateNextLog("rgx:.* Got server epoch time: \\d+");
 
         yield return TestHighPrioEvent();
         yield return TestBatchEvents();
@@ -202,10 +210,8 @@ public class AnalyticsTest
         TDK.Analytics.TrackCustomEvent(testEventName, null, highPriority: true);
         yield return new WaitForSeconds(2);
         
-        string expectedPersistancePath = Path.Combine(testTDKAbstractedEngineApi.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
         string expectedRoute = "https://localhost:5000/devAnalyticsApiUrl/events";
         string expectedPayload = $".*\"name\":\"{testEventName}\".*";
-        ValidateNextLog($"[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: {expectedPersistancePath}");
         ValidateNextLog(
             $"rgx:{Regex.Escape("Intercepted request to the following route: " + expectedRoute)} - payload: {expectedPayload}"
         );
