@@ -14,18 +14,19 @@ namespace Helika
         public string apiKey;
         public string gameId;
         public HelikaEnvironment helikaEnv = HelikaEnvironment.Localhost;
-        public bool sendingEvents = false;
+        public TelemetryLevel telemetry = TelemetryLevel.None;
+        public bool printEventsToConsole = true;
         private EventManager eventManager;
         public string playerId;
 
-        async Task Start()
+        void Start()
         {
             eventManager = EventManager.Instance;
-            await eventManager.Init(apiKey, gameId, helikaEnv, sendingEvents);
+            eventManager.Init(apiKey, gameId, helikaEnv, telemetry, printEventsToConsole);
             eventManager.SetPlayerID(playerId);
         }
 
-        // async void Update()
+        // void Update()
         // {
         //     if (Input.GetKeyDown("space"))
         //     {
@@ -35,22 +36,22 @@ namespace Helika
         //             { "user_id", 10 },
         //             { "wallet_address", "0x8540507642419A0A8Af94Ba127F175dA090B58B0" }
         //         };
-        //         await eventManager.SendEvent("connect_wallet", dictionary);
+        //         eventManager.SendEvent("connect_wallet", dictionary);
 
         //         // This is an example of sending multiples of a single event
         //         Dictionary<string, object> evt1 = new Dictionary<string, object>
         //         {
         //             { "user_id", 10 },
-        //             { "source", "win" }
+        //             { "source", "win" },
         //             { "points", 15 }
         //         };
         //         Dictionary<string, object> evt2 = new Dictionary<string, object>
         //         {
         //             { "user_id", 10 },
-        //             { "source", "top_3_player" }
+        //             { "source", "top_3_player" },
         //             { "points", 5 }
         //         };
-        //         await eventManager.SendEvents("add_points", new Dictionary<string, object>[] { evt1, evt2 });
+        //         eventManager.SendEvents("add_points", new Dictionary<string, object>[] { evt1, evt2 });
 
         //         // If you'd like to send a whole game events and overwrite automatically added properties like 'game_id', 
         //         // you can use the EventManager.SendCustomEvent() and EventManager.SendCustomEvents().
@@ -76,7 +77,7 @@ namespace Helika
         //             ))
         //         );
         //         JObject[] uniqueEvents = new JObject[] { startEvent, middleEvent, endEvent };
-        //         await eventManager.SendCustomEvents(uniqueEvents);
+        //         eventManager.SendCustomEvents(uniqueEvents);
         //     }
         // }
     }
