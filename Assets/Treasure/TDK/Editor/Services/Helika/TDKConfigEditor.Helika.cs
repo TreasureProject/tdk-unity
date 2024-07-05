@@ -5,7 +5,7 @@ namespace Treasure
 {
     public partial class TDKConfigEditor
     {
-        [MenuItem ("Treasure/TDK/Create Config/Helika", false, 103)]
+        // [MenuItem ("Treasure/TDK/Create Config/Helika", false, 103)]
         public static void CreateHelikaConfig()
         {
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);
