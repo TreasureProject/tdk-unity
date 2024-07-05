@@ -14,13 +14,17 @@ namespace Treasure
 
             _config = TDK.Instance.AppConfig.GetModuleConfig<TDKHelikaConfig>();
 
-            EventManager.Instance.Init(
-                _config.ApiKey,
-                TDK.Instance.AppConfig.CartridgeTag,
-                TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD ? HelikaEnvironment.Production : HelikaEnvironment.Develop,
-                TelemetryLevel.All,
-                TDK.Instance.AppConfig.Environment == TDKConfig.Env.DEV
-            );
+            if (_config != null) {
+                EventManager.Instance.Init(
+                    _config.ApiKey,
+                    TDK.Instance.AppConfig.CartridgeTag,
+                    TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD ? HelikaEnvironment.Production : HelikaEnvironment.Develop,
+                    TelemetryLevel.All,
+                    TDK.Instance.AppConfig.Environment == TDKConfig.Env.DEV
+                );
+            } else {
+                TDKLogger.LogWarning("[TDKHelikaService] Helika config not found, skipping initialization.");
+            }
         }
 
         public void SetPlayerId(string playerId)
