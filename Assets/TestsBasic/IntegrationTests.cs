@@ -12,6 +12,8 @@ public class IntegrationTests
     public IEnumerator MySetUp()
     {
         var testTDKAbstractedEngineApi = TestHelpers.GetTestAbstractedEngineApi();
+        var tdkConfig = TDKConfig.LoadFromResources();
+        Assert.That(tdkConfig.AutoInitialize, Is.False, "TDKConfig AutoInitialize must be false when testing");
 
         TDK.Initialize(
             tdkConfig: TDKConfig.LoadFromResources(),
@@ -31,10 +33,29 @@ public class IntegrationTests
 
         yield return new WaitForSeconds(1);
 
-        // TODO move to new helper file
+        yield return ConnectViaUI();
+        
+        yield return new WaitForSeconds(1);
+
+        var navButtonAnalytics = GameObject.Find("Analytics_Btn");
+        navButtonAnalytics.GetComponent<Button>().onClick.Invoke();
+
+        var trackCustomEventButton = GameObject.Find("Btn_TrackCustomEvent");
+
+        Assert.That(trackCustomEventButton.activeInHierarchy, Is.True);
+        trackCustomEventButton.GetComponent<Button>().onClick.Invoke();
+        
+        yield return new WaitForSeconds(3);
+    }
+
+    private static IEnumerator ConnectViaUI()
+    {
+        var navButtonConnect = GameObject.Find("Connect_Btn");
+        navButtonConnect.GetComponent<Button>().onClick.Invoke();
+
         var connectButton = GameObject.Find("Btn_ConnectWallet");
         var loginModal = Object.FindAnyObjectByType<LoginModal>(FindObjectsInactive.Include);
-        
+
         Assert.That(connectButton.activeInHierarchy, Is.True);
         Assert.That(loginModal.gameObject.activeInHierarchy, Is.False);
         connectButton.GetComponent<Button>().onClick.Invoke();
@@ -55,7 +76,7 @@ public class IntegrationTests
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.False);
 
         yield return new WaitForSeconds(1);
-        
+
         connectButton.GetComponent<Button>().onClick.Invoke();
         Assert.That(loginModal.gameObject.activeInHierarchy, Is.False);
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.True);
@@ -63,6 +84,5 @@ public class IntegrationTests
         yield return new WaitForSeconds(3);
         backgroundButton.GetComponent<Button>().onClick.Invoke();
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.False);
-        yield return new WaitForSeconds(3);
     }
 }

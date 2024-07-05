@@ -8,6 +8,7 @@ namespace Treasure
         public static string DEFAULT_CONFIG_LOCATION = "Assets/Treasure/TDK/Resources";
 
         public enum Env { DEV, PROD }
+        public enum LoggerLevelValue { SILENT = 100, ERROR = 40, WARNING = 30, INFO = 20, DEBUG = 10 }
 
         [SerializeField] private Env _environment = Env.DEV;
         [SerializeField] private string _cartridgeTag = string.Empty;
@@ -19,6 +20,9 @@ namespace Treasure
 
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
+
+        [SerializeField] private LoggerLevelValue _loggerLevel = LoggerLevelValue.INFO;
+        [SerializeField] private bool _autoInitialize = true;
 
         public Env Environment
         {
@@ -44,6 +48,17 @@ namespace Treasure
         public int SessionLengthDays
         {
             get { return _sessionLengthDays; }
+        }
+
+        public LoggerLevelValue LoggerLevel
+        {
+            get { return _loggerLevel; }
+            set { _loggerLevel = value; }
+        }
+
+        public bool AutoInitialize
+        {
+            get { return _autoInitialize; }
         }
 
         public T GetModuleConfig<T>()

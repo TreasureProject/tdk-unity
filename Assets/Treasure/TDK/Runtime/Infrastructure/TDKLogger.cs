@@ -13,6 +13,9 @@ namespace Treasure
 
         public static void Log(string message, bool logOnMainThread=true)
         {
+            if (TDK.Instance.AppConfig.LoggerLevel > TDKConfig.LoggerLevelValue.INFO) {
+                return;
+            }
             #if UNITY_EDITOR
             UnityEngine.Debug.Log(message);
             TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
@@ -36,7 +39,10 @@ namespace Treasure
 
         private static void LogInternal(string message)
         {
-            if(verboseLogging && !string.IsNullOrEmpty(message))
+            if (TDK.Instance.AppConfig.LoggerLevel > TDKConfig.LoggerLevelValue.DEBUG) {
+                return;
+            }
+            if(!string.IsNullOrEmpty(message))
             {
                 try {
                     #if UNITY_EDITOR
@@ -57,6 +63,9 @@ namespace Treasure
 
         public static void LogWarning(string message, bool logOnMainThread=true)
         {
+            if (TDK.Instance.AppConfig.LoggerLevel > TDKConfig.LoggerLevelValue.WARNING) {
+                return;
+            }
             #if UNITY_EDITOR || TP_UA
             UnityEngine.Debug.LogWarning(message);
             TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
@@ -80,7 +89,10 @@ namespace Treasure
 
         private static void LogWarningInternal(string message)
         {
-            if(verboseLogging && !string.IsNullOrEmpty(message))
+            if (TDK.Instance.AppConfig.LoggerLevel > TDKConfig.LoggerLevelValue.DEBUG) {
+                return;
+            }
+            if(!string.IsNullOrEmpty(message))
             {
                 try {
                     #if UNITY_EDITOR
@@ -100,6 +112,9 @@ namespace Treasure
 
         public static void LogError(string message, bool logOnMainThread=true)
         {
+            if (TDK.Instance.AppConfig.LoggerLevel > TDKConfig.LoggerLevelValue.ERROR) {
+                return;
+            }
             #if UNITY_EDITOR || TP_UA
             UnityEngine.Debug.LogError(message);
             TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
@@ -123,6 +138,9 @@ namespace Treasure
 
         private static void LogErrorInternal(string message)
         {
+            if (TDK.Instance.AppConfig.LoggerLevel > TDKConfig.LoggerLevelValue.ERROR) {
+                return;
+            }
             if(!string.IsNullOrEmpty(message))
             {
                 try {

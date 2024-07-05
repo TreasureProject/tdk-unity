@@ -64,13 +64,14 @@ namespace Treasure
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void AutoInitialize()
         {
-#if !TDK_SKIP_AUTO_INITIALIZE // this flag is for unit tests, where we want to initialize manually
-            Initialize(
-                tdkConfig: TDKConfig.LoadFromResources(),
-                abstractedEngineApi: new TDKAbstractedEngineApi(),
-                localSettings: new LocalSettings(Application.persistentDataPath)
-            );
-#endif
+            var tdkConfig = TDKConfig.LoadFromResources();
+            if (tdkConfig.AutoInitialize) {
+                Initialize(
+                    tdkConfig: TDKConfig.LoadFromResources(),
+                    abstractedEngineApi: new TDKAbstractedEngineApi(),
+                    localSettings: new LocalSettings(Application.persistentDataPath)
+                );
+            }
         }
 
         public static void Initialize(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings)
