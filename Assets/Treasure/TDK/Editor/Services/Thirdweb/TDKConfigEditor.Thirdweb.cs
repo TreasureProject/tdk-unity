@@ -5,7 +5,7 @@ namespace Treasure
 {
     public partial class TDKConfigEditor
     {
-        [MenuItem ("Treasure/TDK/Create Config/Thirdweb", false, 103)]
+        // [MenuItem ("Treasure/TDK/Create Config/Thirdweb", false, 103)]
         public static void CreateThirdwebConfig()
         {
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);
