@@ -3722,6 +3722,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6021104786555122630, guid: b72515ad7f50db24ea387062536bc541, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: c8ee5fe1e62f841deb994c894dc0706a, type: 3}
+    - target: {fileID: 7318988387895393834, guid: b72515ad7f50db24ea387062536bc541, type: 3}
+      propertyPath: m_text
+      value: Loading...
+      objectReference: {fileID: 0}
     - target: {fileID: 7789732457361176347, guid: b72515ad7f50db24ea387062536bc541, type: 3}
       propertyPath: m_Name
       value: HeaderLogo
