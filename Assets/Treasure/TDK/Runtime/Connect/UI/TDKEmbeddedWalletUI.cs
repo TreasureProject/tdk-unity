@@ -16,15 +16,6 @@ namespace Treasure
         [Space]
         [SerializeField] private ConfirmLoginModal confirmLoginModal;
 
-        private void Start()
-        {
-            OnOTPVerificationFailed.AddListener(() =>
-            {
-                TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
-                SetOtpCodeIsWrong();
-            });
-        }
-
         public override async Task LoginWithOTP()
         {
             if (_email == null)
@@ -43,7 +34,11 @@ namespace Treasure
             TDKConnectUIManager.Instance.ShowConfirmLoginModal(_email);
         }
 
-        public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions)
+        // TODO most here is copied code from InAppWalletUI.cs with tweaks;
+        // - since we inherit it here we should refactor it to call the base method so its up to date
+        // - we should catch the exception wherever we call Connect and check its an otp error instead of assuming it is
+        // - we should add a screen with a spinner while waiting for the browser to connect via socials/oauth
+        public override async Task<Thirdweb.EWS.User> Connect(EmbeddedWallet embeddedWallet, string email, string phoneNumber, AuthOptions authOptions, string clientId)
         {
             var config = Resources.Load<ThirdwebConfig>("ThirdwebConfig");
             _customScheme = config != null ? config.customScheme : null;
@@ -52,6 +47,7 @@ namespace Treasure
             _embeddedWallet = embeddedWallet;
             _email = email;
             _phone = phoneNumber;
+            _clientId = clientId;
             _user = null;
             _exception = null;
             OTPInput.text = "";
@@ -71,6 +67,7 @@ namespace Treasure
                     AuthProvider.Apple => "Apple",
                     AuthProvider.Facebook => "Facebook",
                     AuthProvider.JWT => "CustomAuth",
+                    AuthProvider.PhoneOTP => "PhoneOTP",
                     _ => throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}"),
                 };
                 return await _embeddedWallet.GetUserAsync(_email, authProvider);
@@ -108,6 +105,9 @@ namespace Treasure
                     case AuthProvider.AuthEndpoint:
                         await LoginWithAuthEndpoint(authOptions.jwtOrPayload, authOptions.encryptionKey);
                         break;
+                    case AuthProvider.PhoneOTP:
+                        await LoginWithPhoneNumber();
+                        break;
                     default:
                         throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}");
                 }
@@ -119,11 +119,10 @@ namespace Treasure
 
             await new WaitUntil(() => _user != null || _exception != null);
 
-            //(TODO) need to handle when OTP is wrong 
-            //EmbeddedWalletCanvas.SetActive(false);
+            // TODO need to handle when OTP is wrong 
+            // InAppWalletCanvas.SetActive(false);
             if (_exception != null)
             {
-                SetOtpCodeIsWrong();
                 throw _exception;
             }
             return _user;
@@ -140,9 +139,10 @@ namespace Treasure
                 var res = await _embeddedWallet.VerifyOtpAsync(_email, otp, string.IsNullOrEmpty(RecoveryInput.text) ? null : RecoveryInput.text);
                 if (res.User == null)
                 {
-                    if (res.CanRetry && OnOTPVerificationFailed.GetPersistentEventCount() > 0)
+                    if (res.CanRetry)
                     {
                         OnOTPVerificationFailed.Invoke();
+                        HandleWrongOTP();
                         return;
                     }
                     _exception = new UnityException("User OTP Verification Failed.");
@@ -164,8 +164,9 @@ namespace Treasure
             }
         }
 
-        private void SetOtpCodeIsWrong()
+        private void HandleWrongOTP()
         {
+            TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
             Debug.LogError("Login with OTP failed");
             confirmLoginModal.SetErrorText("OTP code is wrong");
             SubmitButton.GetComponent<LoadingButton>().SetLoading(false);

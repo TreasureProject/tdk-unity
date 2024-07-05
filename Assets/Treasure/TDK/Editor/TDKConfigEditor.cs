@@ -14,7 +14,7 @@ namespace Treasure
             }
         }
 
-        [MenuItem ("Treasure/TDK/Create Config/Root Config", false, 101)]
+        // [MenuItem ("Treasure/TDK/Create Config/Root Config", false, 101)]
         public static void CreateTDKConfig_Menu()
         {
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);

@@ -86,13 +86,21 @@ namespace Treasure
 
         private async void ConnectSocial(SocialAuthProvider provider)
         {
+            if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
+            {
+                errorText.text = "Please make sure you have active Internet connection.";
+                errorText.gameObject.SetActive(true);
+                return;
+            }
+
             try
             {
+                await TDK.Connect.Disconnect(); // clean up any previous connection attempts
                 await TDK.Connect.ConnectSocial(provider);
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex.Message);
+                Debug.LogError(ex);
             }
         }
 
@@ -119,6 +127,13 @@ namespace Treasure
 
         private async void OnClickConnectwithEmail()
         {
+            if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
+            {
+                errorText.text = "Please make sure you have active Internet connection.";
+                errorText.gameObject.SetActive(true);
+                return;
+            }
+
             if (ValidateEmail(emailInputField.text, out var message))
             {
                 errorText.gameObject.SetActive(false);
@@ -128,6 +143,7 @@ namespace Treasure
 
                 try
                 {
+                    await TDK.Connect.Disconnect(); // clean up any previous connection attempts
                     await TDK.Connect.ConnectEmail(emailInputField.text);
                 }
                 catch (Exception e)
@@ -135,7 +151,7 @@ namespace Treasure
                     TDKLogger.LogError($"[LoginModal:OnClickConnectwithEmail] {e.Message}");
 
                     // Ignore error display if user purposely closed the verification modal
-                    if (e.Message != "User closed modal")
+                    if (e.Message != "User closed modal" && e.Message != "User cancelled")
                     {
                         errorText.text = e.Message;
                         errorText.gameObject.SetActive(true);

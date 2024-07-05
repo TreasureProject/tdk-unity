@@ -124,7 +124,6 @@
     "name": "Treasure Ruby",
     "chain": "treasure",
     "rpc": [
-      "https://978657.rpc.thirdweb.com/${THIRDWEB_API_KEY}",
       "https://rpc-testnet.treasure.lol/http",
       "wss://rpc-testnet.treasure.lol/ws"
     ],
@@ -158,52 +157,82 @@
     "redFlags": []
   },
   {
-    "data": {
-      "name": "B3 Sepolia",
-      "chain": "B3 Sepolia",
-      "rpc": [
-        "https://1993.rpc.thirdweb.com/${THIRDWEB_API_KEY}",
-        "https://sepolia.b3.fun/http"
-      ],
-      "nativeCurrency": {
-        "name": "ETH",
-        "symbol": "ETH",
-        "decimals": 18
-      },
-      "shortName": "b3-sepolia",
-      "chainId": 1993,
-      "networkId": 1993,
-      "slug": "b3-sepolia",
-      "infoURL": "https://docs.b3.fun/",
-      "icon": "ipfs://Qmc6XdDC7FSn2YyBwFXUNVbk9Nmhvn2Bz7iMqCA1ofwhQC/b3-logo-temp-cropped.png",
-      "features": [],
-      "faucets": ["https://faucet.b3.fun/"],
-      "explorers": [
-        {
-          "name": "blockscout",
-          "url": "https://sepolia.explorer.b3.fun/",
-          "standard": "EIP3091",
-          "icon": {
-            "url": "ipfs://Qmc6XdDC7FSn2YyBwFXUNVbk9Nmhvn2Bz7iMqCA1ofwhQC/b3-logo-temp-cropped.png",
-            "width": 512,
-            "height": 512,
-            "format": "png"
-          }
-        }
-      ],
-      "title": "B3 Sepolia",
-      "testnet": true,
-      "redFlags": [],
-      "parent": {
-        "type": "L3",
-        "chain": "eip155-1",
-        "bridges": [
-          {
-            "url": "https://bridge.b3.fun/"
-          }
-        ]
-      }
+    "name": "B3 Sepolia",
+    "chain": "B3 Sepolia",
+    "rpc": ["https://sepolia.b3.fun/http"],
+    "nativeCurrency": {
+      "name": "ETH",
+      "symbol": "ETH",
+      "decimals": 18
     },
-    "error": null
+    "shortName": "b3-sepolia",
+    "chainId": 1993,
+    "networkId": 1993,
+    "slug": "b3-sepolia",
+    "infoURL": "https://docs.b3.fun/",
+    "icon": "ipfs://Qmc6XdDC7FSn2YyBwFXUNVbk9Nmhvn2Bz7iMqCA1ofwhQC/b3-logo-temp-cropped.png",
+    "features": [],
+    "faucets": ["https://faucet.b3.fun/"],
+    "explorers": [
+      {
+        "name": "blockscout",
+        "url": "https://sepolia.explorer.b3.fun/",
+        "standard": "EIP3091"
+      }
+    ],
+    "title": "B3 Sepolia",
+    "testnet": true,
+    "redFlags": [],
+    "parent": {
+      "type": "L3",
+      "chain": "eip155-1",
+      "bridges": [
+        {
+          "url": "https://bridge.b3.fun/"
+        }
+      ]
+    }
+  },
+  {
+    "name": "Gemuchain Testnet",
+    "chain": "Gemuchain",
+    "rpc": ["https://gemutest-rpc.gemuchain.io/"],
+    "nativeCurrency": { "name": "GEMU", "symbol": "GEMU", "decimals": 18 },
+    "shortName": "GEMU",
+    "chainId": 1903648807,
+    "networkId": 1903648807,
+    "slug": "gemuchain-testnet",
+    "icon": "ipfs://QmSw7QvgrkuykN1ZTr2QQZZjuxbx9CsZDuuTD1cv1hQo8G",
+    "features": [],
+    "faucets": [],
+    "explorers": [
+      {
+        "name": "blockscout",
+        "url": "https://gemutest-explorer.gemuchain.io/",
+        "standard": "EIP3091"
+      }
+    ],
+    "testnet": true,
+    "redFlags": []
+  },
+  {
+    "name": "Zuraverse",
+    "chain": "ZURA",
+    "rpc": ["https://zuraverse-2712670149155000-1.jsonrpc.sagarpc.io"],
+    "nativeCurrency": {
+      "name": "ZURA",
+      "symbol": "ZURA",
+      "decimals": 18
+    },
+    "shortName": "ZURA",
+    "chainId": 2712670149155000,
+    "networkId": 2712670149155000,
+    "slug": "zuraverse",
+    "icon": "https://bafybeiez6za62lqpt6zoizlzs33poax4fl3czuecvze2peeknuhkrhk5om.ipfs.w3s.link/ZV_mascot_white_trans.png",
+    "features": [],
+    "faucets": [],
+    "explorers": [],
+    "testnet": false,
+    "redFlags": []
   }
 ]

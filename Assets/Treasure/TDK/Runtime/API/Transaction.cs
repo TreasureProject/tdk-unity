@@ -1,6 +1,6 @@
-using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Treasure
 {
@@ -25,6 +25,7 @@ namespace Treasure
         }
 
         public string address;
+        public object[] abi;
         public string functionName;
         public object[] args;
         public TransactionOverrides txOverrides;

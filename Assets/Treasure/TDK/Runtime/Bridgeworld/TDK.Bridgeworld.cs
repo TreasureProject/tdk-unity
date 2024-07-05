@@ -42,8 +42,8 @@ namespace Treasure
     {
         public async Task<Transaction> ApprovePermits()
         {
-            TDKLogger.Log("Approving Consumables for transfer to Harvester");
-            return await TDK.Common.ApproveERC1155(Contract.Consumables, nftHandlerAddress);
+            TDKLogger.Log("Approving Permits for transfer to Harvester");
+            return await TDK.Common.ApproveERC1155(permitsAddress, nftHandlerAddress);
         }
 
         public async Task<Transaction> StakePermits(int amount)
@@ -269,35 +269,30 @@ namespace Treasure
                 throw new UnityException("MAGIC balance too low");
             }
 
-            var approvalTasks = new List<Task>();
-            var stakeTasks = new List<Task>();
-
             var remainingDepositCap = userMagicMaxStakeable - userMagicStaked;
             if (remainingDepositCap < amount)
             {
                 var capRequired = decimal.Parse(Utils.ToEth((amount - remainingDepositCap).ToString()));
                 var capPerPart = decimal.Parse(Utils.ToEth(permitsMagicMaxStakeable.ToString()));
                 var requiredPermits = (int)Math.Ceiling(capRequired / capPerPart);
-                if (requiredPermits < userPermitsBalance)
+                if (userPermitsBalance < requiredPermits)
                 {
                     throw new UnityException("Ancient Permits balance too low");
                 }
 
                 if (!userPermitsApproved)
                 {
-                    approvalTasks.Add(ApprovePermits());
+                    await ApprovePermits();
                 }
 
-                stakeTasks.Add(StakePermits(requiredPermits));
+                await StakePermits(requiredPermits);
             }
 
             if (userMagicAllowance < amount)
             {
-                approvalTasks.Add(ApproveMagic(amount));
+                await ApproveMagic(amount);
             }
 
-            await Task.WhenAll(approvalTasks);
-            await Task.WhenAll(stakeTasks);
             await DepositMagic(amount);
 #else
             TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");

@@ -36,7 +36,8 @@ namespace Treasure
         private void OnEnable()
         {
             confirmCode.GetComponent<LoadingButton>().SetLoading(false);
-            infoText.text = $"We have sent a code to {_email}, please enter it below to confirm  your login";
+            SetErrorText("");
+            infoText.text = $"We have sent a code to {_email}, please enter it below to confirm your login";
         }
 
         public bool CheckConfirmationCodeIsValid()
@@ -61,7 +62,7 @@ namespace Treasure
         public void SetErrorText(string text)
         {
             errorText.text = text;
-            errorText.gameObject.SetActive(true);
+            errorText.gameObject.SetActive(text.Length > 0);
         }
 
         // test code

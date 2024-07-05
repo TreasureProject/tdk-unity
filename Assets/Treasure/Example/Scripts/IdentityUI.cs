@@ -1,3 +1,4 @@
+using System;
 using Treasure;
 using UnityEngine;
 
@@ -5,14 +6,24 @@ public class IdentityUI : MonoBehaviour
 {
     [SerializeField] private InputPopUp promptDialogPrefab;
 
-    public void OnStartUserSessionBtn()
+    public async void OnStartUserSessionBtn()
     {
-        _ = TDK.Identity.StartUserSession();
+        try
+        {
+            _ = await TDK.Identity.StartUserSession();
+        }
+        catch (Exception e)
+        {
+            // TODO improve error handling generally:
+            // - doing `Debug.LogError(e)` gives a better error trace
+            // - not catching at all makes the stack trace "file + line links" clickable
+            TDKLogger.LogError($"Error starting user session: {e.Message}");
+        }
     }
 
     public void OnEndUserSessionBtn()
     {
-        TDK.Identity.EndUserSession();
+        _ = TDK.Identity.EndUserSession();
     }
 
     public void OnValidateUserSessionBtn()
@@ -23,7 +34,14 @@ public class IdentityUI : MonoBehaviour
 
     public async void OnAuthTokenSubmit(string value)
     {
-        var chainId = await TDK.Connect.GetChainId();
-        await TDK.Identity.ValidateUserSession(chainId, value);
+        try
+        {
+            var chainId = await TDK.Connect.GetChainId();
+            await TDK.Identity.ValidateUserSession(chainId, value);
+        }
+        catch (Exception e)
+        {
+            TDKLogger.LogError($"Error validating user session: {e.Message}");
+        }
     }
 }

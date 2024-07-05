@@ -1,6 +1,7 @@
+#if !UNITY_WEBGL
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 
 namespace Treasure
 {
@@ -22,30 +23,28 @@ namespace Treasure
             string jsonEvtStr = JsonConvert.SerializeObject(BuildBaseEvent(eventName, eventProps));
 
             // if the event has been flagged as high priority, attempt sending immediately
-            if(highPriority) {
+            if (highPriority)
+            {
                 var result = await SendEvent(jsonEvtStr);
-                
+
                 // if sending was successful we exit execution...
-                if(result) {
+                if (result)
+                {
                     return;
                 }
             }
 
-            // ...if highPriority send fails, the event enters into event batch cache
+            // If event is not highPriority or if highPriority send fails, the event enters into event batch cache
+            CacheEvent(jsonEvtStr);
+        }
 
-            // check if adding the event exceeds the cache limits
-            if(_eventCache.Count + 1 > AnalyticsConstants.MAX_CACHE_EVENT_COUNT || CalculateCacheSizeInBytes() + jsonEvtStr.Length > AnalyticsConstants.MAX_CACHE_SIZE_KB * 1024)
-            {
-                // flush the cache if limits are exceeded
-                FlushCache(); 
-                
-                // restart flush coroutine
-                StopCoroutine(FlushTimer());
-                StartCoroutine(FlushTimer());
-            }
-
-            // add the serialized event to the cache
-            _eventCache.Add(jsonEvtStr);
+        /// <summary>
+        /// Flush all pending events to the analytics backend
+        /// </summary>
+        public async void FlushCache()
+        {
+            await FlushMemoryCache();
         }
     }
 }
+#endif
