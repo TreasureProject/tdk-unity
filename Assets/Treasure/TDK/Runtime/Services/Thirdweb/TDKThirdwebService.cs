@@ -25,8 +25,12 @@ namespace Treasure
             base.Awake();
 
             _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>();
-
-            InitializeSDK(_config.DefaultChainIdentifier);
+            
+            if (_config != null) {
+                InitializeSDK(_config.DefaultChainIdentifier);
+            } else {
+                TDKLogger.LogWarning("[TDKThirdwebService] Thirdweb config not found, skipping initialization.");
+            }            
         }
 
         public void InitializeSDK(string chainIdentifier)
