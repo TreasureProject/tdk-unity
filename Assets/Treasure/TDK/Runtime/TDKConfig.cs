@@ -21,7 +21,8 @@ namespace Treasure
         [Serializable] public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
         [SerializeField] ScriptableObjectDictionary moduleConfigurations = null;
 
-        [SerializeField] private LoggerLevelValue _loggerLevel = LoggerLevelValue.INFO;
+        [SerializeField] private LoggerLevelValue _devLoggerLevel = LoggerLevelValue.INFO;
+        [SerializeField] private LoggerLevelValue _prodLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private bool _autoInitialize = true;
 
         public Env Environment
@@ -52,8 +53,7 @@ namespace Treasure
 
         public LoggerLevelValue LoggerLevel
         {
-            get { return _loggerLevel; }
-            set { _loggerLevel = value; }
+            get { return Environment == Env.DEV ? _devLoggerLevel : _prodLoggerLevel; }
         }
 
         public bool AutoInitialize
