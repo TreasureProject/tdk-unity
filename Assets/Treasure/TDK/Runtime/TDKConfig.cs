@@ -54,6 +54,7 @@ namespace Treasure
         public LoggerLevelValue LoggerLevel
         {
             get { return Environment == Env.DEV ? _devLoggerLevel : _prodLoggerLevel; }
+            set { if (Environment == Env.DEV) _devLoggerLevel = value; else _prodLoggerLevel = value; }
         }
 
         public bool AutoInitialize
