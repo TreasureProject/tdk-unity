@@ -136,7 +136,7 @@ namespace Treasure
 
         public async Task SetChainId(ChainId chainId)
         {
-            if (_chainId == chainId)
+            if (await GetChainId() == chainId)
             {
                 TDKLogger.Log($"Chain is already set to {chainId}");
                 return;

@@ -58,12 +58,27 @@ public class IntegrationTests
 
     private IEnumerator SetChain()
     {
+        yield return ForceFlushCache();
+        
+        tdkLogs.Clear();
+        
+        _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
+        yield return new WaitForSeconds(2);
         _ = TDK.Connect.SetChainId(ChainId.Arbitrum);
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2);
+        _ = TDK.Connect.SetChainId(ChainId.Arbitrum);
+        yield return new WaitForSeconds(2);
         _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
-        yield return new WaitForSeconds(3);
-        _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2);
+        
+        Assert.That(tdkLogs, Is.EquivalentTo(new List<string> {
+            "Chain is already set to ArbitrumSepolia",
+            "Initializing Thirdweb SDK for chain: arbitrum",
+            "Switched chain to Arbitrum",
+            "Chain is already set to Arbitrum",
+            "Initializing Thirdweb SDK for chain: arbitrum-sepolia",
+            "Switched chain to ArbitrumSepolia",
+        }));
     }
 
     // Note: this does not work on webgl by default, for socials login (oauth) we need a host with cors enabled
@@ -116,8 +131,9 @@ public class IntegrationTests
 
         Assert.That(trackCustomEventButton.activeInHierarchy, Is.True);
         
+        yield return ForceFlushCache();
+        
         tdkLogs.Clear();
-        // TODO force flush events
         trackCustomEventButton.GetComponent<Button>().onClick.Invoke();
 
         yield return TestHelpers.WaitUntilWithMax(() => tdkLogs.Count >= 2, 15f);
@@ -127,9 +143,17 @@ public class IntegrationTests
         var payloadLogParts = tdkLogs[0].Split(" Payload:");
         Assert.That(payloadLogParts[0], Is.EqualTo("[TDKAnalyticsService.IO:SendEventBatch]"));
         var eventsArray = Newtonsoft.Json.JsonConvert.DeserializeObject<List<AnalyticsEvent>>(payloadLogParts[1])!;
-        Assert.That(eventsArray[eventsArray.Count - 1].name, Is.EqualTo("custom_event"));
+        Assert.That(eventsArray.Count, Is.EqualTo(1));
+        Assert.That(eventsArray[0].name, Is.EqualTo("custom_event"));
         
         Assert.That(tdkLogs[1], Is.EqualTo("[TDKAnalyticsService.IO:SendEvents] Events sent successfully"));
+    }
+
+    private IEnumerator ForceFlushCache()
+    {
+        var analyticsService = TDKServiceLocator.GetService<TDKAnalyticsService>();
+        analyticsService.FlushCache();
+        yield return new WaitForSeconds(5);
     }
 
     [System.Serializable]

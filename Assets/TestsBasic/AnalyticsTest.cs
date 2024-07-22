@@ -11,10 +11,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text;
 using System;
-using System.Linq;
 
-// For running these tests you need to modify scripting defines: remove TDK_HELIKA and add TREASURE_ANALYTICS
-// It needs to be done manually for now, we might want a better way, perhaps something like this:
 // https://forum.unity.com/threads/info-on-unity_include_tests-define.890095/#post-7495937
 // to remove/add scripting defines programatically, perhaps a custom editor button can do that + run the tests
 
@@ -103,9 +100,13 @@ public class AnalyticsTest
     }
 
     void MockAnalyticsRequest(HttpStatusCode statusCode, string jsonResponse) {
+#if !UNITY_WEBGL
         TDKServiceLocator.GetService<TDKAnalyticsService>().SetHttpMessageHandler(
             new MockHttpMessageHandler(statusCode, jsonResponse)
         );
+#else
+        throw new Exception("Mocking requests for webgl not implemented");
+#endif
     }
 
     System.Collections.Generic.List<string> logs = new();
