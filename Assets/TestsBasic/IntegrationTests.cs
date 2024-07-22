@@ -48,37 +48,16 @@ public class IntegrationTests
         yield return new WaitForSeconds(1);
 
         if (connected) {
-            yield return SetChain();
+            yield return SetChain(); // TODO this breaks the CreateSession call, is it intended?
         }
 
         yield return SendAnalyticsEvents();
-        
-        yield return new WaitForSeconds(3);
-    }
 
-    private IEnumerator SetChain()
-    {
+        yield return new WaitForSeconds(3);
+
+        yield return CreateSession();
+        
         yield return ForceFlushCache();
-        
-        tdkLogs.Clear();
-        
-        _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
-        yield return new WaitForSeconds(2);
-        _ = TDK.Connect.SetChainId(ChainId.Arbitrum);
-        yield return new WaitForSeconds(2);
-        _ = TDK.Connect.SetChainId(ChainId.Arbitrum);
-        yield return new WaitForSeconds(2);
-        _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
-        yield return new WaitForSeconds(2);
-        
-        Assert.That(tdkLogs, Is.EquivalentTo(new List<string> {
-            "Chain is already set to ArbitrumSepolia",
-            "Initializing Thirdweb SDK for chain: arbitrum",
-            "Switched chain to Arbitrum",
-            "Chain is already set to Arbitrum",
-            "Initializing Thirdweb SDK for chain: arbitrum-sepolia",
-            "Switched chain to ArbitrumSepolia",
-        }));
     }
 
     // Note: this does not work on webgl by default, for socials login (oauth) we need a host with cors enabled
@@ -122,6 +101,31 @@ public class IntegrationTests
         connected = true;
     }
 
+    private IEnumerator SetChain()
+    {
+        yield return ForceFlushCache();
+        
+        tdkLogs.Clear();
+        
+        _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
+        yield return new WaitForSeconds(2);
+        _ = TDK.Connect.SetChainId(ChainId.Arbitrum);
+        yield return new WaitForSeconds(2);
+        _ = TDK.Connect.SetChainId(ChainId.Arbitrum);
+        yield return new WaitForSeconds(2);
+        _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
+        yield return new WaitForSeconds(2);
+        
+        Assert.That(tdkLogs, Is.EquivalentTo(new List<string> {
+            "Chain is already set to ArbitrumSepolia",
+            "Initializing Thirdweb SDK for chain: arbitrum",
+            "Switched chain to Arbitrum",
+            "Chain is already set to Arbitrum",
+            "Initializing Thirdweb SDK for chain: arbitrum-sepolia",
+            "Switched chain to ArbitrumSepolia",
+        }));
+    }
+
     private IEnumerator SendAnalyticsEvents()
     {
         var navButtonAnalytics = GameObject.Find("Analytics_Btn");
@@ -140,12 +144,55 @@ public class IntegrationTests
 
         Assert.That(tdkLogs.Count, Is.EqualTo(2));
         
-        var payloadLogParts = tdkLogs[0].Split(" Payload:");
-        Assert.That(payloadLogParts[0], Is.EqualTo("[TDKAnalyticsService.IO:SendEventBatch]"));
-        var eventsArray = Newtonsoft.Json.JsonConvert.DeserializeObject<List<AnalyticsEvent>>(payloadLogParts[1])!;
+        var eventsArray = AnalyticsEvent.ExtractPayloadFromLog(tdkLogs[0]);
         Assert.That(eventsArray.Count, Is.EqualTo(1));
         Assert.That(eventsArray[0].name, Is.EqualTo("custom_event"));
+        Assert.That(tdkLogs[1], Is.EqualTo("[TDKAnalyticsService.IO:SendEvents] Events sent successfully"));
+    }
+
+    private IEnumerator CreateSession()
+    {   
+        yield return ForceFlushCache();
+
+        tdkLogs.Clear();
+
+        Assert.That(TDK.Identity.IsAuthenticated, Is.False);
+        var startTask = TDK.Identity.StartUserSession();
+        yield return TestHelpers.WaitUntilWithMax(() => startTask.IsCompleted, 10);
+        Assert.That(TDK.Identity.IsAuthenticated, Is.True);
+
+        Assert.That(tdkLogs.Count, Is.EqualTo(5));
+        Assert.That(tdkLogs[0], Is.EqualTo("Fetching login payload"));
+        Assert.That(tdkLogs[1], Is.EqualTo("Signing login payload"));
+        Assert.That(tdkLogs[2], Is.EqualTo("Logging in and fetching TDK auth token"));
+        Assert.That(tdkLogs[3], Is.EqualTo("Using existing session key").Or.EqualTo("Creating new session key"));
+        Assert.That(tdkLogs[4], Is.EqualTo("User session started successfully"));
+
+        tdkLogs.Clear();
+
+        startTask = TDK.Identity.StartUserSession();
+        yield return TestHelpers.WaitUntilWithMax(() => startTask.IsCompleted, 10);
+
+        Assert.That(tdkLogs, Is.EquivalentTo(new List<string> {
+            "Validating existing user session",
+            "Fetching user details",
+            "Existing user session is valid",
+            "User already has a valid session",
+        }));
+
+        tdkLogs.Clear();
+
+        var endTask = TDK.Identity.EndUserSession();
+        yield return TestHelpers.WaitUntilWithMax(() => endTask.IsCompleted, 10);
+        Assert.That(TDK.Identity.IsAuthenticated, Is.False);
+
+        yield return ForceFlushCache();
+
+        Assert.That(tdkLogs.Count, Is.EqualTo(2));
         
+        var eventsArray = AnalyticsEvent.ExtractPayloadFromLog(tdkLogs[0]);
+        Assert.That(eventsArray.Count, Is.EqualTo(1));
+        Assert.That(eventsArray[0].name, Is.EqualTo("tc_disconnected"));
         Assert.That(tdkLogs[1], Is.EqualTo("[TDKAnalyticsService.IO:SendEvents] Events sent successfully"));
     }
 
@@ -159,5 +206,12 @@ public class IntegrationTests
     [System.Serializable]
     class AnalyticsEvent {
         public string name;
+
+        public static List<AnalyticsEvent> ExtractPayloadFromLog(string logString) {
+            var payloadLogParts = logString.Split(" Payload:");
+            Assert.That(payloadLogParts[0], Is.EqualTo("[TDKAnalyticsService.IO:SendEventBatch]"));
+            var eventsArray = Newtonsoft.Json.JsonConvert.DeserializeObject<List<AnalyticsEvent>>(payloadLogParts[1])!;
+            return eventsArray;
+        }
     }
 }
