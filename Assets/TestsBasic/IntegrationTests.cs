@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using NUnit.Framework;
 using Treasure;
 using UnityEngine;
@@ -48,14 +47,16 @@ public class IntegrationTests
         yield return new WaitForSeconds(1);
 
         if (connected) {
-            yield return SetChain(); // TODO this breaks the CreateSession call, is it intended?
+            yield return SetChain();
         }
 
         yield return SendAnalyticsEvents();
 
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1);
 
         yield return CreateSession();
+
+        yield return new WaitForSeconds(1);
         
         yield return ForceFlushCache();
     }
@@ -107,22 +108,24 @@ public class IntegrationTests
         
         tdkLogs.Clear();
         
-        _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
-        yield return new WaitForSeconds(2);
-        _ = TDK.Connect.SetChainId(ChainId.Arbitrum);
-        yield return new WaitForSeconds(2);
-        _ = TDK.Connect.SetChainId(ChainId.Arbitrum);
-        yield return new WaitForSeconds(2);
-        _ = TDK.Connect.SetChainId(ChainId.ArbitrumSepolia);
-        yield return new WaitForSeconds(2);
+        yield return TestHelpers.WaitForTask(TDK.Connect.SetChainId(ChainId.ArbitrumSepolia));
+        yield return TestHelpers.WaitForTask(TDK.Connect.SetChainId(ChainId.Arbitrum));
+        yield return TestHelpers.WaitForTask(TDK.Connect.SetChainId(ChainId.Arbitrum));
+        yield return TestHelpers.WaitForTask(TDK.Connect.SetChainId(ChainId.ArbitrumSepolia));
+
+        Assert.That(tdkLogs.Count, Is.EqualTo(10));
         
-        Assert.That(tdkLogs, Is.EquivalentTo(new List<string> {
+        Assert.That(tdkLogs, Is.EqualTo(new List<string> {
             "Chain is already set to ArbitrumSepolia",
             "Initializing Thirdweb SDK for chain: arbitrum",
+            "[TDK.Connect:Connect] Connecting to SmartWallet...",
+            "[TDK.Connect:Connect] Connection success!",
             "Switched chain to Arbitrum",
             "Chain is already set to Arbitrum",
             "Initializing Thirdweb SDK for chain: arbitrum-sepolia",
-            "Switched chain to ArbitrumSepolia",
+            "[TDK.Connect:Connect] Connecting to SmartWallet...",
+            "[TDK.Connect:Connect] Connection success!",
+            "Switched chain to ArbitrumSepolia"
         }));
     }
 
@@ -157,8 +160,7 @@ public class IntegrationTests
         tdkLogs.Clear();
 
         Assert.That(TDK.Identity.IsAuthenticated, Is.False);
-        var startTask = TDK.Identity.StartUserSession();
-        yield return TestHelpers.WaitUntilWithMax(() => startTask.IsCompleted, 10);
+        yield return TestHelpers.WaitForTask(TDK.Identity.StartUserSession(), 10);
         Assert.That(TDK.Identity.IsAuthenticated, Is.True);
 
         Assert.That(tdkLogs.Count, Is.EqualTo(5));
@@ -170,10 +172,9 @@ public class IntegrationTests
 
         tdkLogs.Clear();
 
-        startTask = TDK.Identity.StartUserSession();
-        yield return TestHelpers.WaitUntilWithMax(() => startTask.IsCompleted, 10);
+        yield return TestHelpers.WaitForTask(TDK.Identity.StartUserSession(), 10);
 
-        Assert.That(tdkLogs, Is.EquivalentTo(new List<string> {
+        Assert.That(tdkLogs, Is.EqualTo(new List<string> {
             "Validating existing user session",
             "Fetching user details",
             "Existing user session is valid",
@@ -182,8 +183,7 @@ public class IntegrationTests
 
         tdkLogs.Clear();
 
-        var endTask = TDK.Identity.EndUserSession();
-        yield return TestHelpers.WaitUntilWithMax(() => endTask.IsCompleted, 10);
+        yield return TestHelpers.WaitForTask(TDK.Identity.EndUserSession(), 10);
         Assert.That(TDK.Identity.IsAuthenticated, Is.False);
 
         yield return ForceFlushCache();

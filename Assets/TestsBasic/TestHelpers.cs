@@ -3,6 +3,8 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Threading.Tasks;
+using NUnit.Framework;
 using Treasure;
 using UnityEngine;
 
@@ -64,5 +66,10 @@ public class TestHelpers
             timeout -= Time.deltaTime;
             return timeout <= 0 || predicate();
         });
+    }
+
+    public static IEnumerator WaitForTask(Task task, float maxWait = 5) {
+        yield return WaitUntilWithMax(() => task.IsCompleted, maxWait);
+        Assert.That(task.IsCompleted);
     }
 }

@@ -47,7 +47,7 @@ namespace Treasure
         #region private vars
         private Options? _options;
         private ChainId _chainId = ChainId.Unknown;
-        private string _email;
+        private WalletConnection _lastWalletConnection;
         private string _address;
         #endregion
 
@@ -87,11 +87,6 @@ namespace Treasure
             return _chainId;
         }
 
-        public string Email
-        {
-            get { return _email; }
-        }
-
         public string Address
         {
             get { return _address; }
@@ -115,9 +110,10 @@ namespace Treasure
             TDKLogger.Log($"[TDK.Connect:Connect] Connecting to {wc.provider}...");
             var result = await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Connect(wc);
             _address = result;
-            _email = wc.email;
+            _lastWalletConnection = wc;
             OnConnected?.Invoke(_address);
             TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
+            TDKLogger.LogDebug($"[TDK.Connect:Connect] Connection success!");
 #else
             TDKLogger.LogError("Unable to connect wallet. TDK Connect wallet service not implemented.");
 #endif
@@ -147,11 +143,11 @@ namespace Treasure
 #if TDK_THIRDWEB
             // Thirdweb SDK currently doesn't allow you to switch networks while connected to a smart wallet
             // Reinitialize it and auto-connect instead
-            var connectedEmail = _email;
+            var lastWalletConnection = _lastWalletConnection;
             TDKServiceLocator.GetService<TDKThirdwebService>().InitializeSDK(Constants.ChainIdToName[chainId]);
-            if (!string.IsNullOrEmpty(connectedEmail))
+            if (lastWalletConnection != null)
             {
-                await ConnectEmail(connectedEmail, new Options { isSilent = true });
+                await Reconnect(lastWalletConnection);
             }
 #endif
 
@@ -175,10 +171,10 @@ namespace Treasure
             TDKConnectUIManager.Instance.Hide();
         }
 
-        public async Task ConnectEmail(string email, Options? options = null)
+        public async Task ConnectEmail(string email)
         {
 #if TDK_THIRDWEB
-            _options = options;
+            _options = null;
             var chainId = await GetChainId();
             var wc = new WalletConnection(
                 provider: WalletProvider.SmartWallet,
@@ -196,6 +192,7 @@ namespace Treasure
         public async Task ConnectSocial(SocialAuthProvider provider)
         {
 #if TDK_THIRDWEB
+            _options = null;
             var chainId = await GetChainId();
             var wc = new WalletConnection(
                 provider: WalletProvider.SmartWallet,
@@ -206,6 +203,17 @@ namespace Treasure
             await ConnectWallet(wc, chainId);
 #else
             TDKLogger.LogError("Unable to connect social. TDK Connect wallet service not implemented.");
+#endif
+        }
+
+        public async Task Reconnect(WalletConnection lastWalletConnection)
+        {
+#if TDK_THIRDWEB
+            _options = new Options { isSilent = true };
+            var chainId = await GetChainId();
+            await ConnectWallet(lastWalletConnection, chainId);
+#else
+            TDKLogger.LogError("Unable to reconnect. TDK Connect wallet service not implemented.");
 #endif
         }
 
@@ -224,7 +232,7 @@ namespace Treasure
 #endif
 
             _address = null;
-            _email = null;
+            _lastWalletConnection = null;
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);
         }
         #endregion
