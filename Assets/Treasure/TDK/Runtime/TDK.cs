@@ -101,6 +101,7 @@ namespace Treasure
             InitIdentity();
             InitConnect();
             InitBridgeworld();
+            InitMagicswap();
         }
     }
 }
