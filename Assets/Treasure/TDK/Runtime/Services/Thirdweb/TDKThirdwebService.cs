@@ -35,6 +35,7 @@ namespace Treasure
 
         public void InitializeSDK(string chainIdentifier)
         {
+            TDKLogger.LogDebug("Initializing Thirdweb SDK for chain: " + chainIdentifier);
             var supportedChains = ((ChainId[])Enum.GetValues(typeof(ChainId)))
                 .Where(chainId => chainId != ChainId.Unknown)
                 .Select(chainId => new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] })

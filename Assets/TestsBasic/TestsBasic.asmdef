@@ -1,5 +1,5 @@
 {
-    "name": "Tests",
+    "name": "TestsBasic",
     "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
@@ -11,14 +11,14 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS",
         "TREASURE_ANALYTICS",
-        "!TDK_HELIKA",
-        "TDK_SKIP_AUTO_INITIALIZE"
+        "!TDK_HELIKA"
     ],
     "versionDefines": [],
     "noEngineReferences": false

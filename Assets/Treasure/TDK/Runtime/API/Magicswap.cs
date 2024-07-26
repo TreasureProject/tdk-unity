@@ -45,7 +45,7 @@ namespace Treasure
         public string urlSlug;
         public string collectionId;
         public List<string> collectionTokenIds;
-        public int priceUSD; // TODO check type; big, int or double? examples are 0
+        public double priceUSD;
         public string reserve;
     }
 

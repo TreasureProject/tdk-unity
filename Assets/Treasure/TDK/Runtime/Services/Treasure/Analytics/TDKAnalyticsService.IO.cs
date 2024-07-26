@@ -33,7 +33,7 @@ namespace Treasure
                 {
                     payload = "[" + payload + "]";
                 }
-                // TDKLogger.Log("[TDKAnalyticsService.IO:SendEvents] Payload:" + payload);
+                TDKLogger.LogDebug("[TDKAnalyticsService.IO:SendEventBatch] Payload:" + payload);
 
                 // Set the base address ensuring trailing slash
                 string baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl;

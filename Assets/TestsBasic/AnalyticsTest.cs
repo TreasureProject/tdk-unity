@@ -11,10 +11,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text;
 using System;
-using System.Linq;
 
-// For running these tests you need to modify scripting defines: remove TDK_HELIKA and add TREASURE_ANALYTICS
-// It needs to be done manually for now, we might want a better way, perhaps something like this:
 // https://forum.unity.com/threads/info-on-unity_include_tests-define.890095/#post-7495937
 // to remove/add scripting defines programatically, perhaps a custom editor button can do that + run the tests
 
@@ -103,9 +100,13 @@ public class AnalyticsTest
     }
 
     void MockAnalyticsRequest(HttpStatusCode statusCode, string jsonResponse) {
+#if !UNITY_WEBGL
         TDKServiceLocator.GetService<TDKAnalyticsService>().SetHttpMessageHandler(
             new MockHttpMessageHandler(statusCode, jsonResponse)
         );
+#else
+        throw new Exception("Mocking requests for webgl not implemented");
+#endif
     }
 
     System.Collections.Generic.List<string> logs = new();
@@ -168,6 +169,9 @@ public class AnalyticsTest
             prodAnalyticsApiUrl = "https://localhost:5000/prodAnalyticsApiUrl",
             sessionLengthDays = 123
         });
+        var thirdwebConfig = ScriptableObject.CreateInstance<TDKThirdwebConfig>();
+        testTDKConfig.SetModuleConfig(thirdwebConfig);
+        
         testTDKAbstractedEngineApi = new TestTDKAbstractedEngineApi();
 
         ClearPersistedEventBatches();
@@ -184,12 +188,17 @@ public class AnalyticsTest
     [UnityTest]
     public IEnumerator AnalyticsTestComplex1()
     {
-        TDK.Instance.InitializeProperties(
+        TDK.Initialize(
             testTDKConfig,
             testTDKAbstractedEngineApi,
             new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );
-        TDK.Instance.InitializeSubsystems();
+
+        yield return TestHelpers.WaitUntilWithMax(() => logs.Count >= 2, 5);
+        
+        string expectedPersistancePath = Path.Combine(testTDKAbstractedEngineApi.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
+        ValidateNextLog($"[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: {expectedPersistancePath}");
+        ValidateNextLog("rgx:.* Got server epoch time: \\d+");
 
         yield return TestHighPrioEvent();
         yield return TestBatchEvents();
@@ -202,10 +211,8 @@ public class AnalyticsTest
         TDK.Analytics.TrackCustomEvent(testEventName, null, highPriority: true);
         yield return new WaitForSeconds(2);
         
-        string expectedPersistancePath = Path.Combine(testTDKAbstractedEngineApi.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
         string expectedRoute = "https://localhost:5000/devAnalyticsApiUrl/events";
         string expectedPayload = $".*\"name\":\"{testEventName}\".*";
-        ValidateNextLog($"[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: {expectedPersistancePath}");
         ValidateNextLog(
             $"rgx:{Regex.Escape("Intercepted request to the following route: " + expectedRoute)} - payload: {expectedPayload}"
         );

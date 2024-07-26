@@ -95,5 +95,9 @@ namespace Treasure
             string filePath = Path.Combine(Application.persistentDataPath, fileName);
             File.WriteAllBytes(filePath, textureBytes);
         }
+
+        public string GetCurrentNameText() {
+            return nameText.text;
+        }
     }
 }
