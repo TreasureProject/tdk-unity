@@ -119,7 +119,7 @@ namespace Treasure
 #endif
         }
 
-        private async Task ReconnectInternal(WalletConnection walletConnection)
+        private async Task Reconnect(WalletConnection walletConnection)
         {
 #if TDK_THIRDWEB
             _options = new Options { isSilent = true };
@@ -130,7 +130,7 @@ namespace Treasure
 #endif
         }
 
-        private WalletConnection MakeEmailWalletConnection(string email, ChainId chainId) {
+        private WalletConnection CreateEmailWalletConnection(string email, ChainId chainId) {
             return new WalletConnection(
                 provider: WalletProvider.SmartWallet,
                 chainId: (int)chainId,
@@ -168,7 +168,7 @@ namespace Treasure
             TDKServiceLocator.GetService<TDKThirdwebService>().InitializeSDK(Constants.ChainIdToName[chainId]);
             if (lastWalletConnection != null)
             {
-                await ReconnectInternal(lastWalletConnection);
+                await Reconnect(lastWalletConnection);
             }
 #endif
 
@@ -197,7 +197,7 @@ namespace Treasure
 #if TDK_THIRDWEB
             _options = null;
             var chainId = await GetChainId();
-            var wc = MakeEmailWalletConnection(email, chainId);
+            var wc = CreateEmailWalletConnection(email, chainId);
             await ConnectWallet(wc, chainId);
 #else
             TDKLogger.LogError("Unable to connect email. TDK Connect wallet service not implemented.");
@@ -223,8 +223,8 @@ namespace Treasure
 
         public async Task Reconnect(string email) {
             var chainId = await GetChainId();
-            var wc = MakeEmailWalletConnection(email, chainId);
-            await ReconnectInternal(wc);
+            var wc = CreateEmailWalletConnection(email, chainId);
+            await Reconnect(wc);
         }
 
         public async Task Disconnect(bool endSession = false)
