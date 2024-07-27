@@ -125,6 +125,26 @@ namespace Treasure
         public List<MagicswapPool> pools;
     }
 
+    [Serializable]
+    public class SwapBody {
+        [Serializable]
+        public class NFTInput {
+            public string id;
+            public int quantity; // TODO check type
+        }
+
+        public string backendWallet;
+        public string tokenInId;
+        public string tokenOutId;
+        public string amountIn;
+        public string amountOut;
+        public List<string> path;
+        public bool isExactOut;
+        public List<NFTInput> nftsIn;
+        public List<NFTInput> nftsOut;
+        public int slippage; // TODO check type
+    }
+
     public partial class API
     {
         public async Task<List<MagicswapPool>> GetAllPools()
@@ -143,9 +163,16 @@ namespace Treasure
         {
             var body = JsonConvert.SerializeObject(new { tokenInId, tokenOutId, amount, isExactOut });
             var response = await Post("/magicswap/route", body);
-            return JsonConvert.DeserializeObject<MagicswapRoute>(response, new JsonSerializerSettings() {
-                MissingMemberHandling = MissingMemberHandling.Error // TODO remove this after further testing
-            });
+            return JsonConvert.DeserializeObject<MagicswapRoute>(response);
+        }
+
+        // TODO add to TDK harness scene
+        public async Task<Transaction> Swap(SwapBody swapBody) {
+            var body = JsonConvert.SerializeObject(swapBody);
+            var response = await Post("/magicswap/swap", body);
+            var transaction = JsonConvert.DeserializeObject<Transaction>(response);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
+            return transaction;
         }
     }
 }
