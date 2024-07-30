@@ -65,7 +65,7 @@ namespace Treasure
         public MagicswapToken token1;
         public string reserve0;
         public string reserve1;
-        public BigInteger reserveUSD; // TODO check type; big, int or double? examples are 0
+        public BigInteger reserveUSD;
         public string totalSupply;
         public string txCount;
         public double volumeUSD;
@@ -74,7 +74,7 @@ namespace Treasure
         public string royaltiesFee;
         public string royaltiesBeneficiary = null;
         public string totalFee;
-        public List<DayData> dayData; // TODO confirm naming
+        public List<DayData> dayData;
         public string name;
         public bool hasNFT;
         public bool isNFTNFT;
@@ -103,8 +103,6 @@ namespace Treasure
             public LegTokenInfo tokenTo;
             public BigInteger assumedAmountIn;
             public BigInteger assumedAmountOut;
-            public int swapPortion; // TODO check type; examples are 1
-            public int absolutePortion; // TODO check type; examples are 1
         }
 
         public string amountIn;
@@ -166,7 +164,6 @@ namespace Treasure
             return JsonConvert.DeserializeObject<MagicswapRoute>(response);
         }
 
-        // TODO implement overloads of this fn for common use cases (token-token, token-nft, nft-nft)
         public async Task<Transaction> Swap(SwapBody swapBody) {
             var body = JsonConvert.SerializeObject(swapBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore

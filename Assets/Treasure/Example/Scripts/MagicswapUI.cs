@@ -8,8 +8,6 @@ using Treasure;
 using UnityEngine;
 using UnityEngine.UI;
 
-// TODO nft-nft test?
-// TODO nft-token test?
 public class MagicswapUI : MonoBehaviour
 {
     public TMP_Text InfoText;
@@ -30,7 +28,8 @@ public class MagicswapUI : MonoBehaviour
         InfoText.text = "Fetching pool details...";
         try
         {
-            var poolData = await TDK.Magicswap.GetPoolById("0x0626699bc82858c16ae557b2eaad03a58cfcc8bd");
+            var magicToTreasuresPoolId = "0x0626699bc82858c16ae557b2eaad03a58cfcc8bd";
+            var poolData = await TDK.Magicswap.GetPoolById(magicToTreasuresPoolId);
             InfoText.text = JsonConvert.SerializeObject(poolData, Formatting.Indented);
         }
         catch (Exception ex)
@@ -45,9 +44,10 @@ public class MagicswapUI : MonoBehaviour
         try
         {
             InfoText.text = "Fetching route...";
+            var magicAddress = await TDK.Common.GetContractAddress(Treasure.Contract.Magic);
             var routeData = await TDK.Magicswap.GetRoute(
-                tokenInId: "0x55d0cf68a1afe0932aff6f36c87efa703508191c",
-                tokenOutId: "0xd30e91d5cd201d967c908d9e74f6cea9efe35e06",
+                tokenInId: magicAddress,
+                tokenOutId: "0xd30e91d5cd201d967c908d9e74f6cea9efe35e06", // from pool fetch
                 amount: "1",
                 isExactOut: true
             );
@@ -102,6 +102,7 @@ public class MagicswapUI : MonoBehaviour
         var bodyJson = "";
         try
         {
+            // magicswapRoute.amountIn = (BigInteger.Parse(magicswapRoute.amountIn) + 100000000).ToString();
             var swapBody = new SwapBody {
                 tokenInId = magicswapRoute.tokenIn.id,
                 tokenOutId = magicswapRoute.tokenOut.id,
