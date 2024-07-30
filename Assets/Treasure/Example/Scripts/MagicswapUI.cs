@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Newtonsoft.Json;
@@ -7,17 +8,22 @@ using Treasure;
 using UnityEngine;
 using UnityEngine.UI;
 
-// TODO show magic balance
-// TODO show approved amount
-// TODO show treasures balance
 // TODO nft-nft test?
 // TODO nft-token test?
 public class MagicswapUI : MonoBehaviour
 {
     public TMP_Text InfoText;
-    public Button swapButton;
+    public TMP_Text MetadataText;
+    public Button ApproveButton;
+    public Button SwapButton;
+    public Button RefreshMetadataButton;
 
     MagicswapRoute magicswapRoute;
+
+    void Start()
+    {
+        RefreshMetadata();
+    }
     
     public async void OnGetPoolDetailsBtn()
     {
@@ -27,7 +33,7 @@ public class MagicswapUI : MonoBehaviour
             var poolData = await TDK.Magicswap.GetPoolById("0x0626699bc82858c16ae557b2eaad03a58cfcc8bd");
             InfoText.text = JsonConvert.SerializeObject(poolData, Formatting.Indented);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             InfoText.text = "Error: " + ex.Message;
             throw;
@@ -47,9 +53,8 @@ public class MagicswapUI : MonoBehaviour
             );
             InfoText.text = JsonConvert.SerializeObject(routeData, Formatting.Indented);
             magicswapRoute = routeData;
-            swapButton.interactable = true;
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             InfoText.text = "Error: " + ex.Message;
             throw;
@@ -64,7 +69,7 @@ public class MagicswapUI : MonoBehaviour
             var poolsData = await TDK.Magicswap.GetAllPools();
             InfoText.text = JsonConvert.SerializeObject(poolsData, Formatting.Indented);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             InfoText.text = "Error: " + ex.Message;
             throw;
@@ -73,15 +78,16 @@ public class MagicswapUI : MonoBehaviour
 
     public async void OnApproveBtn() {
         var amount = BigInteger.Parse("1000000000000000000000"); // 1000 MAGIC
-        var magicswapRouterAddress = Constants.ContractAddresses[await TDK.Connect.GetChainId()][Treasure.Contract.MagicswapV2Router];
+        var magicswapRouterAddress = await TDK.Common.GetContractAddress(Treasure.Contract.MagicswapV2Router);
         try
         {
             InfoText.text = $"Approving {Utils.ToEth(amount.ToString())} MAGIC for Magicswap...";
             var transaction = await TDK.Common.ApproveERC20(Treasure.Contract.Magic, magicswapRouterAddress, amount);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
             InfoText.text = $"Response: {responseJson}";
+            RefreshMetadata();
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             InfoText.text = $"Error: {ex.Message}";
             throw;
@@ -89,13 +95,17 @@ public class MagicswapUI : MonoBehaviour
     }
 
     public async void OnSwapBtn() {
+        if (magicswapRoute == null) {
+            InfoText.text = "Must get route before swap!";
+            return;
+        }
         var bodyJson = "";
         try
         {
             var swapBody = new SwapBody {
                 tokenInId = magicswapRoute.tokenIn.id,
                 tokenOutId = magicswapRoute.tokenOut.id,
-                amountIn = (BigInteger.Parse(magicswapRoute.amountIn) + 1).ToString(), // TODO is this expected?
+                amountIn = magicswapRoute.amountIn,
                 nftsOut = new List<SwapBody.NFTInput> {
                     new() {
                         id = magicswapRoute.tokenOut.collectionTokenIds[0],
@@ -112,11 +122,56 @@ public class MagicswapUI : MonoBehaviour
             var transaction = await TDK.Magicswap.Swap(swapBody);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
             InfoText.text = $"Response: {responseJson}\nRequest body: {bodyJson}";
+            RefreshMetadata();
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             InfoText.text = $"Error: {ex.Message}\nRequest body: {bodyJson}";
             throw;
         }
+    }
+
+    public async void RefreshMetadata() {
+        try
+        {
+            var walletConnected = await TDK.Connect.IsWalletConnected();
+            ApproveButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+            SwapButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+            if (!walletConnected) {
+                MetadataText.text = "Connect Wallet first (Connect tab)";
+                return;
+            }
+            if (!TDK.Identity.IsAuthenticated) {
+                MetadataText.text = "Start User Session first (Identity tab)";
+                return;
+            }
+            MetadataText.text = "Loading metadata...";
+            
+            RefreshMetadataButton.interactable = false;
+            var magicAddress = await TDK.Common.GetContractAddress(Treasure.Contract.Magic);
+            var magicswapRouterAddress = await TDK.Common.GetContractAddress(Treasure.Contract.MagicswapV2Router);
+            var treasuresAddress = await TDK.Common.GetContractAddress(Treasure.Contract.Treasures);
+            var magicContract = TDKServiceLocator.GetService<TDKThirdwebService>().SDK.GetContract(magicAddress);
+            var treasuresContract = TDKServiceLocator.GetService<TDKThirdwebService>().SDK.GetContract(treasuresAddress);
+            var balance = await magicContract.ERC20.Balance();
+            var allowance = await magicContract.ERC20.Allowance(magicswapRouterAddress);
+            var treasures39 = await treasuresContract.ERC1155.Balance("39"); // TODO dont hardcode this
+            MetadataText.text = $@"Magic balance:
+{Utils.ToEth(balance.value)}
+Router allowance:
+{Utils.ToEth(allowance.value)}
+Treasures:
+#39: {treasures39}";
+        }
+        catch (Exception ex)
+        {
+            MetadataText.text = "Error: " + ex.Message;
+            throw;
+        }
+        finally
+        {
+            RefreshMetadataButton.interactable = true;
+        }
+        
     }
 }
