@@ -73,7 +73,7 @@ public class MagicswapUI : MonoBehaviour
 
     public async void OnApproveBtn() {
         var amount = BigInteger.Parse("1000000000000000000000"); // 1000 MAGIC
-        var magicswapRouterAddress = Constants.ContractAddresses[await TDK.Connect.GetChainId()][Treasure.Contract.MagicswapRouter];
+        var magicswapRouterAddress = Constants.ContractAddresses[await TDK.Connect.GetChainId()][Treasure.Contract.MagicswapV2Router];
         try
         {
             InfoText.text = $"Approving {Utils.ToEth(amount.ToString())} MAGIC for Magicswap...";

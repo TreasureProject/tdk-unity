@@ -130,7 +130,7 @@ namespace Treasure
         [Serializable]
         public class NFTInput {
             public string id;
-            public BigInteger quantity;
+            public int quantity;
         }
 
         public string tokenInId;
