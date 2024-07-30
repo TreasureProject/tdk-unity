@@ -26,6 +26,7 @@ namespace Treasure
         HarvesterEmberwing,
         // Treasure Misc
         ManagedAccountFactory,
+        MagicswapRouter, // TODO confirm name/location. check ContractAddresses for all chains
         // Zeeverse
         ZeeverseZee,
         ZeeverseItems,
@@ -54,6 +55,7 @@ namespace Treasure
                     { Contract.ERC1155TokenSetCorruptionHandler, "0x3c62778d8e01ed17c1048b64edaf121d36c71a4e" },
                     { Contract.HarvesterEmberwing, "0x36882e71d11eadd9f869b0fd70d18d5045939986" },
                     { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
+                    { Contract.MagicswapRouter, "0xb740d5804ea2061432469119cfa40cbb4586dd17" },
                     { Contract.ZeeverseZee, "0x094fa8ae08426ab180e71e60fa253b079e13b9fe" },
                     { Contract.ZeeverseItems, "0x58318bceaa0d249b62fad57d134da7475e551b47" },
                     { Contract.ZeeverseVeeClaimer, "0x1cebdde81a9e4cd377bc7da5000797407cf9a58a" },
@@ -70,6 +72,7 @@ namespace Treasure
                     { Contract.ERC1155TokenSetCorruptionHandler, "0x937817e7fe8e3b3543db46f14473d5f110a79ece" },
                     { Contract.HarvesterEmberwing, "0x816c0717cf263e7da4cd33d4979ad15dbb70f122" },
                     { Contract.ManagedAccountFactory, "0xae7f7e9286f5f9ede167a19d1d605df4fdbc417b" },
+                    { Contract.MagicswapRouter, "0xd0a4fbcc5cde863a2be50c75b564efd942b03154" },
                     { Contract.ZeeverseZee, "0xb1af672c7e0e8880c066ecc24930a12ff2ee8534" },
                     { Contract.ZeeverseItems, "0xfaad5aa3209ab1b25ede22ed4da5521538b649fa" },
                     { Contract.ZeeverseVeeClaimer, "0xf7abce65b1e683b7a42113f69ef76ee35cabbddc" }

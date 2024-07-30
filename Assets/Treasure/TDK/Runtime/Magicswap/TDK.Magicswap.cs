@@ -32,5 +32,9 @@ namespace Treasure
         {
             return await TDK.API.GetRoute(tokenInId, tokenOutId, amount, isExactOut);
         }
+
+        public async Task<Transaction> Swap(SwapBody swapBody) {
+            return await TDK.API.Swap(swapBody);
+        }
     }
 }

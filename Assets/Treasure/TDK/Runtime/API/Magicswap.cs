@@ -114,7 +114,7 @@ namespace Treasure
         public List<RouteLeg> legs;
         public List<string> path;
         public double priceImpact;
-        public int derivedValue; // TODO check type; examples are small-ish ints
+        public double derivedValue;
         public double lpFee;
         public double protocolFee;
         public double royaltiesFee;
@@ -130,19 +130,19 @@ namespace Treasure
         [Serializable]
         public class NFTInput {
             public string id;
-            public int quantity; // TODO check type
+            public BigInteger quantity;
         }
 
-        public string backendWallet;
         public string tokenInId;
         public string tokenOutId;
         public string amountIn;
         public string amountOut;
         public List<string> path;
-        public bool isExactOut;
-        public List<NFTInput> nftsIn;
-        public List<NFTInput> nftsOut;
-        public int slippage; // TODO check type
+        public bool isExactOut = false;
+        public List<NFTInput> nftsIn = null;
+        public List<NFTInput> nftsOut = null;
+        public double? slippage = null;
+        public string backendWallet = null;
     }
 
     public partial class API
@@ -166,9 +166,13 @@ namespace Treasure
             return JsonConvert.DeserializeObject<MagicswapRoute>(response);
         }
 
-        // TODO add to TDK harness scene
+        // TODO handle unauthorized error?
+        // TODO handle generic error (cannot estimate gas; transaction may fail or may require manual gas limit)
+        // TODO implement overloads of this fn for common use cases (token-token, token-nft, nft-nft)
         public async Task<Transaction> Swap(SwapBody swapBody) {
-            var body = JsonConvert.SerializeObject(swapBody);
+            var body = JsonConvert.SerializeObject(swapBody, new JsonSerializerSettings {
+                NullValueHandling = NullValueHandling.Ignore
+            });
             var response = await Post("/magicswap/swap", body);
             var transaction = JsonConvert.DeserializeObject<Transaction>(response);
             transaction = await TDK.Common.WaitForTransaction(transaction.queueId);

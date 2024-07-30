@@ -36,7 +36,7 @@ namespace Treasure
                     sw.Start();
                     while (sw.ElapsedMilliseconds < 2500)
                     {
-                        await Task.Yield();
+                        await Task.Yield(); // TODO any reason not to use `await Task.Delay(2500)`?
                     }
                     sw.Stop();
                 }
