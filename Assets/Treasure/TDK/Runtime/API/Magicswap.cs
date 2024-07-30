@@ -166,8 +166,6 @@ namespace Treasure
             return JsonConvert.DeserializeObject<MagicswapRoute>(response);
         }
 
-        // TODO handle unauthorized error?
-        // TODO handle generic error (cannot estimate gas; transaction may fail or may require manual gas limit)
         // TODO implement overloads of this fn for common use cases (token-token, token-nft, nft-nft)
         public async Task<Transaction> Swap(SwapBody swapBody) {
             var body = JsonConvert.SerializeObject(swapBody, new JsonSerializerSettings {

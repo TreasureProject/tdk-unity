@@ -155,13 +155,28 @@ public class MagicswapUI : MonoBehaviour
             var treasuresContract = TDKServiceLocator.GetService<TDKThirdwebService>().SDK.GetContract(treasuresAddress);
             var balance = await magicContract.ERC20.Balance();
             var allowance = await magicContract.ERC20.Allowance(magicswapRouterAddress);
-            var treasures39 = await treasuresContract.ERC1155.Balance("39"); // TODO dont hardcode this
-            MetadataText.text = $@"Magic balance:
+            var text = $@"Magic balance:
 {Utils.ToEth(balance.value)}
 Router allowance:
-{Utils.ToEth(allowance.value)}
-Treasures:
-#39: {treasures39}";
+{Utils.ToEth(allowance.value)}";
+
+            if (magicswapRoute != null) {
+                if (magicswapRoute.tokenOut.isNFT) {
+                    var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
+                    var treasures = new List<(string id, BigInteger balance)>();
+                    foreach (var tokenId in tokenIds) {
+                        var treasureBalance = await treasuresContract.ERC1155.Balance(tokenId);
+                        if (treasureBalance > 0) {
+                            treasures.Add((tokenId, treasureBalance));
+                        }
+                    }
+                    if (treasures.Count > 0) {
+                        text += $"\n{magicswapRoute.tokenOut.name}:\n";
+                        text += string.Join("\n", treasures.ConvertAll((t) => $"#{t.id}: {t.balance}"));
+                    }
+                }
+            }
+            MetadataText.text = text;
         }
         catch (Exception ex)
         {
