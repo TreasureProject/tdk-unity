@@ -65,7 +65,7 @@ namespace Treasure
         public MagicswapToken token1;
         public string reserve0;
         public string reserve1;
-        public BigInteger reserveUSD; // TODO check type; big, int or double? examples are 0
+        public BigInteger reserveUSD;
         public string totalSupply;
         public string txCount;
         public double volumeUSD;
@@ -74,7 +74,7 @@ namespace Treasure
         public string royaltiesFee;
         public string royaltiesBeneficiary = null;
         public string totalFee;
-        public List<DayData> dayData; // TODO confirm naming
+        public List<DayData> dayData;
         public string name;
         public bool hasNFT;
         public bool isNFTNFT;
@@ -103,8 +103,6 @@ namespace Treasure
             public LegTokenInfo tokenTo;
             public BigInteger assumedAmountIn;
             public BigInteger assumedAmountOut;
-            public int swapPortion; // TODO check type; examples are 1
-            public int absolutePortion; // TODO check type; examples are 1
         }
 
         public string amountIn;
@@ -114,7 +112,7 @@ namespace Treasure
         public List<RouteLeg> legs;
         public List<string> path;
         public double priceImpact;
-        public int derivedValue; // TODO check type; examples are small-ish ints
+        public double derivedValue;
         public double lpFee;
         public double protocolFee;
         public double royaltiesFee;
@@ -123,6 +121,26 @@ namespace Treasure
     [Serializable]
     public class MagicswapPoolsResponse {
         public List<MagicswapPool> pools;
+    }
+
+    [Serializable]
+    public class SwapBody {
+        [Serializable]
+        public class NFTInput {
+            public string id;
+            public int quantity;
+        }
+
+        public string tokenInId;
+        public string tokenOutId;
+        public string amountIn;
+        public string amountOut;
+        public List<string> path;
+        public bool isExactOut = false;
+        public List<NFTInput> nftsIn = null;
+        public List<NFTInput> nftsOut = null;
+        public double? slippage = null;
+        public string backendWallet = null;
     }
 
     public partial class API
@@ -143,9 +161,17 @@ namespace Treasure
         {
             var body = JsonConvert.SerializeObject(new { tokenInId, tokenOutId, amount, isExactOut });
             var response = await Post("/magicswap/route", body);
-            return JsonConvert.DeserializeObject<MagicswapRoute>(response, new JsonSerializerSettings() {
-                MissingMemberHandling = MissingMemberHandling.Error // TODO remove this after further testing
+            return JsonConvert.DeserializeObject<MagicswapRoute>(response);
+        }
+
+        public async Task<Transaction> Swap(SwapBody swapBody) {
+            var body = JsonConvert.SerializeObject(swapBody, new JsonSerializerSettings {
+                NullValueHandling = NullValueHandling.Ignore
             });
+            var response = await Post("/magicswap/swap", body);
+            var transaction = JsonConvert.DeserializeObject<Transaction>(response);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
+            return transaction;
         }
     }
 }
