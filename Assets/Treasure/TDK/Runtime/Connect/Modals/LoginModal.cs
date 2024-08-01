@@ -8,8 +8,6 @@ namespace Treasure
 {
     public class LoginModal : ModalBase
     {
-        [SerializeField] private AppSettingsData appSettingsData;
-        [Space]
         [SerializeField] private GameObject socialLoginHolder;
         [SerializeField] private GameObject googleLogin;
         [SerializeField] private GameObject appleLogin;
@@ -106,22 +104,23 @@ namespace Treasure
 
         private void SetupFromSettings()
         {
-            socialLoginHolder.SetActive(appSettingsData.loginSettings.HasSocialLogin());
-            googleLogin.SetActive(appSettingsData.loginSettings.hasGoogleLogin);
-            appleLogin.SetActive(appSettingsData.loginSettings.hasAppleLogin);
-            facebookLogin.SetActive(appSettingsData.loginSettings.hasFacebookLogin);
+            var loginSettings = TDK.Instance.AppSettingsData.loginSettings;
+            socialLoginHolder.SetActive(loginSettings.HasSocialLogin());
+            googleLogin.SetActive(loginSettings.hasGoogleLogin);
+            appleLogin.SetActive(loginSettings.hasAppleLogin);
+            facebookLogin.SetActive(loginSettings.hasFacebookLogin);
 
-            loginEmailHolder.SetActive(appSettingsData.loginSettings.hasEmailLogin);
-            loginWalletHolder.SetActive(appSettingsData.loginSettings.hasWalletLogin);
+            loginEmailHolder.SetActive(loginSettings.hasEmailLogin);
+            loginWalletHolder.SetActive(loginSettings.hasWalletLogin);
 
             if (landscapeRightSideHolder != null)
             {
-                landscapeRightSideHolder.SetActive(appSettingsData.loginSettings.HasSocialLogin() || appSettingsData.loginSettings.hasEmailLogin);
-                orSeparatorObject.SetActive(appSettingsData.loginSettings.HasSocialLogin() && appSettingsData.loginSettings.hasEmailLogin);
+                landscapeRightSideHolder.SetActive(loginSettings.HasSocialLogin() || loginSettings.hasEmailLogin);
+                orSeparatorObject.SetActive(loginSettings.HasSocialLogin() && loginSettings.hasEmailLogin);
             }
             else
             {
-                orSeparatorObject.SetActive(appSettingsData.loginSettings.hasWalletLogin && appSettingsData.loginSettings.hasEmailLogin);
+                orSeparatorObject.SetActive(loginSettings.hasWalletLogin && loginSettings.hasEmailLogin);
             }
         }
 

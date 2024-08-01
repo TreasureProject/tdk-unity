@@ -16,6 +16,7 @@ namespace Treasure
         private LocalSettings _localsettings;
 
         public TDKConfig AppConfig { get; private set; }
+        public AppSettingsData AppSettingsData { get; private set; }
 
         void OnApplicationPause(bool isPaused)
         {
@@ -67,20 +68,26 @@ namespace Treasure
             var tdkConfig = TDKConfig.LoadFromResources();
             if (tdkConfig.AutoInitialize) {
                 Initialize(
-                    tdkConfig: TDKConfig.LoadFromResources(),
+                    tdkConfig: tdkConfig,
+                    appSettingsData: AppSettingsData.LoadFromResources(),
                     abstractedEngineApi: new TDKAbstractedEngineApi(),
                     localSettings: new LocalSettings(Application.persistentDataPath)
                 );
             }
         }
 
-        public static void Initialize(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings)
+        public static void Initialize(
+            TDKConfig tdkConfig,
+            AppSettingsData appSettingsData,
+            IAbstractedEngineApi abstractedEngineApi,
+            LocalSettings localSettings
+        )
         {
             if (Initialized) {
                 return;
             }
             Instance.gameObject.AddComponent<TDKTimeKeeper>();
-            Instance.InitializeProperties(tdkConfig, abstractedEngineApi, localSettings);
+            Instance.InitializeProperties(tdkConfig, appSettingsData, abstractedEngineApi, localSettings);
             Instance.InitializeSubsystems();
 
             // track app start event
@@ -91,8 +98,14 @@ namespace Treasure
             Initialized = true;
         }
 
-        private void InitializeProperties(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings) {
+        private void InitializeProperties(
+            TDKConfig tdkConfig,
+            AppSettingsData appSettingsData,
+            IAbstractedEngineApi abstractedEngineApi,
+            LocalSettings localSettings
+        ) {
             Instance.AppConfig = tdkConfig;
+            Instance.AppSettingsData = appSettingsData;
 
             Instance._abstractedEngineApi = abstractedEngineApi;
             Instance._localsettings = localSettings;

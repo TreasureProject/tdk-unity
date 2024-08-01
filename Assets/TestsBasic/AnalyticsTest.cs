@@ -152,6 +152,7 @@ public class AnalyticsTest
     }
 
     TDKConfig testTDKConfig;
+    AppSettingsData appSettingsData;
     TestTDKAbstractedEngineApi testTDKAbstractedEngineApi;
 
     [UnitySetUp]
@@ -171,6 +172,8 @@ public class AnalyticsTest
         });
         var thirdwebConfig = ScriptableObject.CreateInstance<TDKThirdwebConfig>();
         testTDKConfig.SetModuleConfig(thirdwebConfig);
+
+        appSettingsData = ScriptableObject.CreateInstance<AppSettingsData>();
         
         testTDKAbstractedEngineApi = new TestTDKAbstractedEngineApi();
 
@@ -190,6 +193,7 @@ public class AnalyticsTest
     {
         TDK.Initialize(
             testTDKConfig,
+            appSettingsData,
             testTDKAbstractedEngineApi,
             new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );

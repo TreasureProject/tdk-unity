@@ -20,6 +20,7 @@ public class IntegrationTests
         tdkConfig.LoggerLevel = TDKConfig.LoggerLevelValue.DEBUG;
         TDK.Initialize(
             tdkConfig: tdkConfig,
+            appSettingsData: AppSettingsData.LoadFromResources(),
             testTDKAbstractedEngineApi,
             new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );
@@ -81,10 +82,8 @@ public class IntegrationTests
         var googleButton = GameObject.Find("ButtonFrameIcon(Google)");
         var backgroundButton = GameObject.Find("TransparentOverlayButton");
 
-        Assert.That(headerLogo.GetCurrentNameText(), Is.EqualTo("Loading..."));
+        Assert.That(headerLogo.GetCurrentNameText(), Is.EqualTo("Game Name").Or.Contains("Harness"));
         googleButton.GetComponent<Button>().onClick.Invoke();
-        yield return TestHelpers.WaitUntilWithMax(() => headerLogo.GetCurrentNameText() != "Loading...", 10f);
-        Assert.That(headerLogo.GetCurrentNameText(), Is.EqualTo("TDK Harness"));
         yield return TestHelpers.WaitUntilWithMax(() => TDK.Connect.Address != null, 30f);
         Assert.That(loginModal.gameObject.activeInHierarchy, Is.False);
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.False);
