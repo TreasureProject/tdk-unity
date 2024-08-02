@@ -106,7 +106,7 @@ namespace Treasure
 
         private bool ValidateActiveSigner(string backendWallet, List<string> callTargets, string signer, IEnumerable<string> approvedTargets, string endTimestamp)
         {
-            var signerCallTargets = approvedTargets.Select(callTarget => callTarget.ToLowerInvariant());
+            var signerApprovedTargets = approvedTargets.Select(approvedTarget => approvedTarget.ToLowerInvariant());
             var expirationDate = BigInteger.Parse(endTimestamp);
             return
                 // Expiration date is at least 1 hour in the future
@@ -116,7 +116,7 @@ namespace Treasure
                 // Expected backend wallet is signer
                 signer.ToLowerInvariant() == backendWallet &&
                 // All requested call targets are approved
-                callTargets.All(callTarget => signerCallTargets.Contains(callTarget));
+                callTargets.All(callTarget => signerApprovedTargets.Contains(callTarget));
         }
         #endregion
 
