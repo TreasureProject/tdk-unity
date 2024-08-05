@@ -24,6 +24,11 @@ namespace Treasure
         [MenuItem ("Treasure/Set Prod Environment", false, 102)]
         public static void SetProdEnvironment() { SetDevEnvironment(false); }
 
+        [MenuItem ("Treasure/Edit Settings", false, 103)]
+        public static void EditSettings() {
+            Selection.activeObject=AssetDatabase.LoadMainAssetAtPath("Assets/Treasure/TDK/Resources/AppSettingsData.asset");
+        }
+
         void OnGUI()
         {
             EditorGUILayout.BeginVertical();
