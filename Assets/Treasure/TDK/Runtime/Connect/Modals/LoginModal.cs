@@ -37,7 +37,7 @@ namespace Treasure
 
         private void Start()
         {
-            SetupFromSettings();
+            SetupUI();
 
             emailInputField.onSelect.AddListener(value => keyBoardSpace.gameObject.SetActive(true));
             emailInputField.onDeselect.AddListener(value => keyBoardSpace.gameObject.SetActive(false));
@@ -78,7 +78,7 @@ namespace Treasure
 
         private void OnEnable()
         {
-            SetupFromSettings();
+            SetupUI();
             connectButton.GetComponent<LoadingButton>().SetLoading(false);
         }
 
@@ -102,25 +102,24 @@ namespace Treasure
             }
         }
 
-        private void SetupFromSettings()
+        private void SetupUI()
         {
-            var loginSettings = TDK.Instance.AppSettingsData.loginSettings;
-            socialLoginHolder.SetActive(loginSettings.HasSocialLogin());
-            googleLogin.SetActive(loginSettings.hasGoogleLogin);
-            appleLogin.SetActive(loginSettings.hasAppleLogin);
-            facebookLogin.SetActive(loginSettings.hasFacebookLogin);
+            socialLoginHolder.SetActive(true);
+            googleLogin.SetActive(true);
+            appleLogin.SetActive(true);
+            facebookLogin.SetActive(true);
 
-            loginEmailHolder.SetActive(loginSettings.hasEmailLogin);
-            loginWalletHolder.SetActive(loginSettings.hasWalletLogin);
+            loginEmailHolder.SetActive(true);
+            loginWalletHolder.SetActive(false);
 
             if (landscapeRightSideHolder != null)
             {
-                landscapeRightSideHolder.SetActive(loginSettings.HasSocialLogin() || loginSettings.hasEmailLogin);
-                orSeparatorObject.SetActive(loginSettings.HasSocialLogin() && loginSettings.hasEmailLogin);
+                landscapeRightSideHolder.SetActive(true);
+                orSeparatorObject.SetActive(true);
             }
             else
             {
-                orSeparatorObject.SetActive(loginSettings.hasWalletLogin && loginSettings.hasEmailLogin);
+                orSeparatorObject.SetActive(false);
             }
         }
 

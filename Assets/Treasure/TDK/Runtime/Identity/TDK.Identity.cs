@@ -88,7 +88,7 @@ namespace Treasure
         {
 #if TDK_THIRDWEB
             var permissionStartTimestamp = (decimal)Utils.GetUnixTimeStampNow() - 60 * 60;
-            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
+            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + TDK.Instance.AppConfig.SessionLengthSeconds);
             await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.CreateSessionKey(
                 signerAddress: backendWallet,
                 approvedTargets: callTargets,
@@ -134,8 +134,8 @@ namespace Treasure
                     chainId = chainId
                 });
 
-                var backendWallet = await TDK.Instance.AppSettingsData.GetBackendWallet();
-                var callTargets = await TDK.Instance.AppSettingsData.GetCallTargets();
+                var backendWallet = await TDK.Instance.AppConfig.GetBackendWallet();
+                var callTargets = await TDK.Instance.AppConfig.GetCallTargets();
                 // Check if any active signers match the call targets
                 var hasActiveSession = user.allActiveSigners.Any((signer) =>
                 {
@@ -193,8 +193,8 @@ namespace Treasure
                 await TDK.Connect.SetChainId(chainId);
             }
 
-            var backendWallet = await TDK.Instance.AppSettingsData.GetBackendWallet();
-            var callTargets = await TDK.Instance.AppSettingsData.GetCallTargets();
+            var backendWallet = await TDK.Instance.AppConfig.GetBackendWallet();
+            var callTargets = await TDK.Instance.AppConfig.GetCallTargets();
             var didCreateSession = false;
 
             // If smart wallet isn't deployed yet, create a new session to bundle the two txs

@@ -7,7 +7,6 @@ namespace Treasure
 {
     public class TDKThirdwebService : TDKBaseService
     {
-        private TDKThirdwebConfig _config;
         private ThirdwebSDK _sdk;
 
         public ThirdwebSDK SDK
@@ -24,18 +23,19 @@ namespace Treasure
         {
             base.Awake();
 
-            _config = TDK.Instance.AppConfig.GetModuleConfig<TDKThirdwebConfig>();
+            ChainId defaultChainId = TDK.Instance.AppConfig.DefaultChainId;
             
-            if (_config != null) {
-                InitializeSDK(_config.DefaultChainIdentifier);
+            if (defaultChainId != ChainId.Unknown) {
+                InitializeSDK(Constants.ChainIdToName[defaultChainId]);
             } else {
-                TDKLogger.LogWarning("[TDKThirdwebService] Thirdweb config not found, skipping initialization.");
+                TDKLogger.LogWarning("[TDKThirdwebService] Invalid default chain in config, skipping initialization.");
             }            
         }
 
         public void InitializeSDK(string chainIdentifier)
         {
             TDKLogger.LogDebug("Initializing Thirdweb SDK for chain: " + chainIdentifier);
+            var tdkConfig = TDK.Instance.AppConfig;
             var supportedChains = ((ChainId[])Enum.GetValues(typeof(ChainId)))
                 .Where(chainId => chainId != ChainId.Unknown)
                 .Select(chainId => new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] })
@@ -44,7 +44,7 @@ namespace Treasure
             // TODO this is copied code from ThirdwebManager.cs, we should refactor it so it wont get outdated
             var smartWalletConfig = new ThirdwebSDK.SmartWalletConfig()
             {
-                factoryAddress = string.IsNullOrEmpty(_config.FactoryAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS : _config.FactoryAddress,
+                factoryAddress = string.IsNullOrEmpty(tdkConfig.FactoryAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS : tdkConfig.FactoryAddress,
                 gasless = true,
                 erc20PaymasterAddress = null,
                 erc20TokenAddress = null,
@@ -56,7 +56,7 @@ namespace Treasure
             var options = new ThirdwebSDK.Options
             {
                 smartWalletConfig = smartWalletConfig,
-                clientId = _config.ClientId,
+                clientId = tdkConfig.ClientId,
                 supportedChains = supportedChains
             };
 

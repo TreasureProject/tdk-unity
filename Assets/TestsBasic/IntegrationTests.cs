@@ -20,7 +20,6 @@ public class IntegrationTests
         tdkConfig.LoggerLevel = TDKConfig.LoggerLevelValue.DEBUG;
         TDK.Initialize(
             tdkConfig: tdkConfig,
-            appSettingsData: AppSettingsData.LoadFromResources(),
             testTDKAbstractedEngineApi,
             new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );

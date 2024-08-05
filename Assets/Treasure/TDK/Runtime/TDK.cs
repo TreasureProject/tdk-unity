@@ -16,7 +16,6 @@ namespace Treasure
         private LocalSettings _localsettings;
 
         public TDKConfig AppConfig { get; private set; }
-        public AppSettingsData AppSettingsData { get; private set; }
 
         void OnApplicationPause(bool isPaused)
         {
@@ -69,7 +68,6 @@ namespace Treasure
             if (tdkConfig.AutoInitialize) {
                 Initialize(
                     tdkConfig: tdkConfig,
-                    appSettingsData: AppSettingsData.LoadFromResources(),
                     abstractedEngineApi: new TDKAbstractedEngineApi(),
                     localSettings: new LocalSettings(Application.persistentDataPath)
                 );
@@ -78,7 +76,6 @@ namespace Treasure
 
         public static void Initialize(
             TDKConfig tdkConfig,
-            AppSettingsData appSettingsData,
             IAbstractedEngineApi abstractedEngineApi,
             LocalSettings localSettings
         )
@@ -87,7 +84,7 @@ namespace Treasure
                 return;
             }
             Instance.gameObject.AddComponent<TDKTimeKeeper>();
-            Instance.InitializeProperties(tdkConfig, appSettingsData, abstractedEngineApi, localSettings);
+            Instance.InitializeProperties(tdkConfig, abstractedEngineApi, localSettings);
             Instance.InitializeSubsystems();
 
             // track app start event
@@ -100,12 +97,10 @@ namespace Treasure
 
         private void InitializeProperties(
             TDKConfig tdkConfig,
-            AppSettingsData appSettingsData,
             IAbstractedEngineApi abstractedEngineApi,
             LocalSettings localSettings
         ) {
             Instance.AppConfig = tdkConfig;
-            Instance.AppSettingsData = appSettingsData;
 
             Instance._abstractedEngineApi = abstractedEngineApi;
             Instance._localsettings = localSettings;

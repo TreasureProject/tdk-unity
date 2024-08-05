@@ -24,9 +24,10 @@ namespace Treasure
         [MenuItem ("Treasure/Set Prod Environment", false, 102)]
         public static void SetProdEnvironment() { SetDevEnvironment(false); }
 
-        [MenuItem ("Treasure/Edit Settings", false, 103)]
-        public static void EditSettings() {
-            Selection.activeObject=AssetDatabase.LoadMainAssetAtPath("Assets/Treasure/TDK/Resources/AppSettingsData.asset");
+        [MenuItem ("Treasure/Edit Config", false, 103)]
+        public static void EditConfig() {
+            string tdkConfigPath = TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset";
+            Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(tdkConfigPath);
         }
 
         void OnGUI()
@@ -36,7 +37,7 @@ namespace Treasure
                 GUILayout.Label("Paste game config JSON below:");
                 _jsonConfigStr = EditorGUILayout.TextArea(_jsonConfigStr, GUILayout.Height(495));
 
-                if (GUILayout.Button("Cofigure TDK", GUILayout.ExpandWidth(true), GUILayout.Height(80)))
+                if (GUILayout.Button("Configure TDK", GUILayout.ExpandWidth(true), GUILayout.Height(80)))
                 {
                     ConfigTDK();
                 }
@@ -46,15 +47,11 @@ namespace Treasure
 
         public static void ConfigTDK()
         {
-            var gameConfig = JsonUtility.FromJson<TDKGameConfig>(_jsonConfigStr);
-            TDKConfigEditor.CreateTDKConfig(gameConfig.tdk);
+            var gameConfig = JsonUtility.FromJson<SerializedTDKConfig>(_jsonConfigStr);
+            TDKConfigEditor.CreateTDKConfig(gameConfig);
 
             #if TDK_HELIKA
-            TDKConfigEditor.CreateHelikaConfig(gameConfig.helika);
-            #endif
-
-            #if TDK_THIRDWEB
-            TDKConfigEditor.CreateThirdwebConfig(gameConfig.thirdweb);
+            TDKConfigEditor.CreateHelikaConfig(gameConfig);
             #endif
 
             _window.Close();
@@ -80,19 +77,5 @@ namespace Treasure
                 throw;
             }
         }
-    }
-
-    [Serializable]
-    public class TDKGameConfig
-    {
-        [SerializeField] public SerializedTDKConfig tdk;
-        
-        #if TDK_HELIKA
-        [SerializeField] public SerializedHelikaConfig helika;
-        #endif
-
-        #if TDK_THIRDWEB
-        [SerializeField] public SerializedThirdwebConfig thirdweb;
-        #endif
     }
 }

@@ -46,29 +46,17 @@ namespace Treasure
             }
         }
 
-        public void SetConfig(SerializedHelikaConfig config)
+        public void SetConfig(SerializedTDKConfig config)
         {
-            _prodApiKeyWeb = config.prodApiKeyWeb;
-            _prodApiKeyIos = config.prodApiKeyIos;
-            _prodApiKeyAndroid = config.prodApiKeyAndroid;
-            _prodApiKeyDesktop = config.prodApiKeyDesktop;
-            _devApiKeyWeb = config.devApiKeyWeb;
-            _devApiKeyIos = config.devApiKeyIos;
-            _devApiKeyAndroid = config.devApiKeyAndroid;
-            _devApiKeyDesktop = config.devApiKeyDesktop;
+            var helikaConfig = config.helika;
+            _prodApiKeyWeb = helikaConfig.prodApiKeyWeb;
+            _prodApiKeyIos = helikaConfig.prodApiKeyIos;
+            _prodApiKeyAndroid = helikaConfig.prodApiKeyAndroid;
+            _prodApiKeyDesktop = helikaConfig.prodApiKeyDesktop;
+            _devApiKeyWeb = helikaConfig.devApiKeyWeb;
+            _devApiKeyIos = helikaConfig.devApiKeyIos;
+            _devApiKeyAndroid = helikaConfig.devApiKeyAndroid;
+            _devApiKeyDesktop = helikaConfig.devApiKeyDesktop;
         }
-    }
-
-    [Serializable]
-    public class SerializedHelikaConfig
-    {
-        [SerializeField] public string prodApiKeyWeb;
-        [SerializeField] public string prodApiKeyIos;
-        [SerializeField] public string prodApiKeyAndroid;
-        [SerializeField] public string prodApiKeyDesktop;
-        [SerializeField] public string devApiKeyWeb;
-        [SerializeField] public string devApiKeyIos;
-        [SerializeField] public string devApiKeyAndroid;
-        [SerializeField] public string devApiKeyDesktop;
     }
 }
