@@ -13,11 +13,12 @@ namespace Treasure
         public class ScriptableObjectDictionary : TreasureSerializableDictionary<string, ScriptableObject> { }
 
         [Serializable]
-        public class SessionOption {
+        public class SessionOption
+        {
             public ChainId chainId;
             public string backendWallet;
-            public double nativeTokenLimitPerTransaction;
             public List<string> callTargets;
+            public double nativeTokenLimitPerTransaction;
         }
 
         public enum Env { DEV, PROD }
@@ -68,7 +69,7 @@ namespace Treasure
         public string ClientId => Environment == Env.DEV ? _devClientId : _prodClientId;
 
         public string FactoryAddress => _connectFactoryAddress;
-        
+
         public ChainId DefaultChainId =>
             Environment == Env.DEV ? _connectDevDefaultChainId : _connectProdDefaultChainId;
 
@@ -87,16 +88,23 @@ namespace Treasure
 
         public async Task<string> GetBackendWallet()
         {
-            ChainId chainId = await TDK.Connect.GetChainId();
-            SessionOption option = _sessionOptions.Find(d => d.chainId == chainId);
+            var chainId = await TDK.Connect.GetChainId();
+            var option = _sessionOptions.Find(d => d.chainId == chainId);
             return option?.backendWallet.ToLowerInvariant();
         }
 
         public async Task<List<string>> GetCallTargets()
         {
-            ChainId chainId = await TDK.Connect.GetChainId();
-            SessionOption option = _sessionOptions.Find(d => d.chainId == chainId);
+            var chainId = await TDK.Connect.GetChainId();
+            var option = _sessionOptions.Find(d => d.chainId == chainId);
             return option != null ? option.callTargets.ConvertAll(ct => ct.ToLowerInvariant()) : new List<string>();
+        }
+
+        public async Task<double> GetNativeTokenLimitPerTransaction()
+        {
+            var chainId = await TDK.Connect.GetChainId();
+            var option = _sessionOptions.Find(d => d.chainId == chainId);
+            return option?.nativeTokenLimitPerTransaction ?? 0;
         }
 
         public T GetModuleConfig<T>()
@@ -111,7 +119,8 @@ namespace Treasure
 
         public void SetModuleConfig<T>(T moduleConfig)
         {
-            if (moduleConfigurations == null) {
+            if (moduleConfigurations == null)
+            {
                 moduleConfigurations = new ScriptableObjectDictionary();
             }
             moduleConfigurations.Add(typeof(T).Name, moduleConfig);
@@ -144,13 +153,18 @@ namespace Treasure
             );
             _connectSessionDurationSec = config.connect.sessionDurationSec;
             _connectSessionMinDurationLeftSec = config.connect.sessionMinDurationLeftSec;
-            if (config.connect.sessionOptions != null) {
-                _sessionOptions = config.connect.sessionOptions.ConvertAll(option => new SessionOption {
+            if (config.connect.sessionOptions != null)
+            {
+                _sessionOptions = config.connect.sessionOptions.ConvertAll(option => new SessionOption
+                {
                     chainId = Constants.NameToChainId.GetValueOrDefault(option.chainIdentifier, ChainId.Unknown),
                     backendWallet = option.backendWallet,
                     callTargets = option.callTargets,
+                    nativeTokenLimitPerTransaction = option.nativeTokenLimitPerTransaction,
                 });
-            } else {
+            }
+            else
+            {
                 _sessionOptions = new List<SessionOption>();
             }
 
@@ -164,7 +178,8 @@ namespace Treasure
     public class SerializedTDKConfig
     {
         [Serializable]
-        public class GeneralConfig {
+        public class GeneralConfig
+        {
             public string cartridgeTag;
             public string cartridgeName;
             public string devApiUrl;
@@ -174,12 +189,15 @@ namespace Treasure
         }
 
         [Serializable]
-        public class ConnectConfig {
+        public class ConnectConfig
+        {
             [Serializable]
-            public class SerializedSessionOption {
+            public class SerializedSessionOption
+            {
                 public string chainIdentifier;
                 public string backendWallet;
                 public List<string> callTargets;
+                public double nativeTokenLimitPerTransaction;
             }
 
             public string factoryAddress;
@@ -191,7 +209,8 @@ namespace Treasure
         }
 
         [Serializable]
-        public class AnalyticsConfig {
+        public class AnalyticsConfig
+        {
             public string devApiUrl;
             public string prodApiUrl;
         }
