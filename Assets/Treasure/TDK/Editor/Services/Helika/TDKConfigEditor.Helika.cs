@@ -18,7 +18,7 @@ namespace Treasure
             AssetDatabase.SaveAssetIfDirty(tdkConfig);
         }
 
-        public static void CreateHelikaConfig(SerializedHelikaConfig serializedConfig=null)
+        public static void CreateHelikaConfig(SerializedTDKConfig serializedConfig=null)
         {
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);
 

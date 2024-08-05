@@ -7,7 +7,6 @@ namespace Treasure
 {
     public class ConfirmLoginModal : ModalBase
     {
-        [SerializeField] private AppSettingsData appSettingsData;
         [SerializeField] private TMP_Text infoText;
         [SerializeField] private GameObject confirmationInputCodeHolder;
         [Space]

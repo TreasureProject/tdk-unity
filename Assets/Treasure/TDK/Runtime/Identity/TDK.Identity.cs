@@ -27,7 +27,6 @@ namespace Treasure
     public class Identity
     {
         #region private vars
-        private Dictionary<ChainId, Project> _chainIdToProject = new Dictionary<ChainId, Project>();
         private string _address;
         private string _authToken;
         #endregion
@@ -64,18 +63,6 @@ namespace Treasure
         #endregion
 
         #region private methods
-        private async Task<Project> GetProjectByChainId(ChainId chainId)
-        {
-            if (_chainIdToProject.ContainsKey(chainId))
-            {
-                return _chainIdToProject[chainId];
-            }
-
-            var project = await TDK.API.GetProjectBySlug(TDK.Instance.AppConfig.CartridgeTag, new API.RequestOverrides { chainId = chainId });
-            _chainIdToProject[chainId] = project;
-            return project;
-        }
-
         private async Task<string> SignLoginPayload(AuthPayload payload)
         {
 #if TDK_THIRDWEB
@@ -97,14 +84,14 @@ namespace Treasure
 #endif
         }
 
-        private async Task CreateSessionKey(Project project)
+        private async Task CreateSessionKey(string backendWallet, List<string> callTargets)
         {
 #if TDK_THIRDWEB
             var permissionStartTimestamp = (decimal)Utils.GetUnixTimeStampNow() - 60 * 60;
-            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + 60 * 60 * 24 * TDK.Instance.AppConfig.SessionLengthDays);
+            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + TDK.Instance.AppConfig.SessionLengthSeconds);
             await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.CreateSessionKey(
-                signerAddress: project.backendWallet,
-                approvedTargets: project.callTargets,
+                signerAddress: backendWallet,
+                approvedTargets: callTargets,
                 nativeTokenLimitPerTransactionInWei: "0",
                 permissionStartTimestamp: permissionStartTimestamp.ToString(),
                 permissionEndTimestamp: permissionEndTimestamp.ToString(),
@@ -117,9 +104,9 @@ namespace Treasure
 #endif
         }
 
-        private bool ValidateActiveSigner(Project project, string signer, IEnumerable<string> approvedTargets, string endTimestamp)
+        private bool ValidateActiveSigner(string backendWallet, List<string> callTargets, string signer, IEnumerable<string> approvedTargets, string endTimestamp)
         {
-            var signerCallTargets = approvedTargets.Select(callTarget => callTarget.ToLowerInvariant());
+            var signerApprovedTargets = approvedTargets.Select(approvedTarget => approvedTarget.ToLowerInvariant());
             var expirationDate = BigInteger.Parse(endTimestamp);
             return
                 // Expiration date is at least 1 hour in the future
@@ -127,24 +114,16 @@ namespace Treasure
                 // Expiration date is not too far in the future
                 expirationDate <= Utils.GetUnixTimeStampIn10Years() &&
                 // Expected backend wallet is signer
-                signer.ToLowerInvariant() == project.backendWallet &&
+                signer.ToLowerInvariant() == backendWallet &&
                 // All requested call targets are approved
-                project.requestedCallTargets.All(callTarget => signerCallTargets.Contains(callTarget));
+                callTargets.All(callTarget => signerApprovedTargets.Contains(callTarget));
         }
         #endregion
 
         #region public api
-        public async Task<Project> GetProject()
-        {
-            var chainId = await TDK.Connect.GetChainId();
-            return await GetProjectByChainId(chainId);
-        }
-
         public async Task<User?> ValidateUserSession(ChainId chainId, string authToken)
         {
             TDKLogger.Log("Validating existing user session");
-            var project = await GetProjectByChainId(chainId);
-
             try
             {
                 // Fetch user details for provided auth token
@@ -155,10 +134,12 @@ namespace Treasure
                     chainId = chainId
                 });
 
-                // Check if any active signers match the requested projects' call targets
+                var backendWallet = await TDK.Instance.AppConfig.GetBackendWallet();
+                var callTargets = await TDK.Instance.AppConfig.GetCallTargets();
+                // Check if any active signers match the call targets
                 var hasActiveSession = user.allActiveSigners.Any((signer) =>
                 {
-                    return ValidateActiveSigner(project, signer.signer, signer.approvedTargets, signer.endTimestamp);
+                    return ValidateActiveSigner(backendWallet, callTargets, signer.signer, signer.approvedTargets, signer.endTimestamp);
                 });
 
                 if (!hasActiveSession)
@@ -212,14 +193,15 @@ namespace Treasure
                 await TDK.Connect.SetChainId(chainId);
             }
 
-            var project = await GetProjectByChainId(chainId);
+            var backendWallet = await TDK.Instance.AppConfig.GetBackendWallet();
+            var callTargets = await TDK.Instance.AppConfig.GetCallTargets();
             var didCreateSession = false;
 
             // If smart wallet isn't deployed yet, create a new session to bundle the two txs
             if (!await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.IsDeployed())
             {
                 TDKLogger.Log("Deploying smart wallet and creating session key");
-                await CreateSessionKey(project);
+                await CreateSessionKey(backendWallet, callTargets);
                 didCreateSession = true;
             }
 
@@ -251,17 +233,17 @@ namespace Treasure
 
                 if (activeSigners != null && activeSigners.Count > 0)
                 {
-                    // Check if any active signers match the requested projects' call targets
+                    // Check if any active signers match the call targets
                     hasActiveSession = activeSigners.Any((signer) =>
                     {
-                        return ValidateActiveSigner(project, signer.signer, signer.permissions.approvedCallTargets, signer.permissions.expirationDate);
+                        return ValidateActiveSigner(backendWallet, callTargets, signer.signer, signer.permissions.approvedCallTargets, signer.permissions.expirationDate);
                     });
                 }
 
                 if (!hasActiveSession)
                 {
                     TDKLogger.Log("Creating new session key");
-                    await CreateSessionKey(project);
+                    await CreateSessionKey(backendWallet, callTargets);
                 }
                 else
                 {

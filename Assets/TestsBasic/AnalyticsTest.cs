@@ -162,15 +162,21 @@ public class AnalyticsTest
         
         testTDKConfig = ScriptableObject.CreateInstance<TDKConfig>();
         testTDKConfig.SetConfig(new SerializedTDKConfig {
-            cartridgeTag = "Unit Testing",
-            devTdkApiUrl = "https://localhost:5000/devTdkApiUrl",
-            prodTdkApiUrl = "https://localhost:5000/prodTdkApiUrl",
-            devAnalyticsApiUrl = "https://localhost:5000/devAnalyticsApiUrl",
-            prodAnalyticsApiUrl = "https://localhost:5000/prodAnalyticsApiUrl",
-            sessionLengthDays = 123
+            general = new SerializedTDKConfig.GeneralConfig() {
+                cartridgeTag = "harness",
+                cartridgeName = "Harness",
+                devApiUrl = "https://localhost:5000/devTdkApiUrl",
+                prodApiUrl = "https://localhost:5000/prodTdkApiUrl",
+            },
+            analytics = new SerializedTDKConfig.AnalyticsConfig() {
+                devApiUrl = "https://localhost:5000/devAnalyticsApiUrl",
+                prodApiUrl = "https://localhost:5000/prodAnalyticsApiUrl",
+            },
+            connect = new SerializedTDKConfig.ConnectConfig() {
+                devDefaultChainIdentifier = "arbitrum-sepolia",
+                prodDefaultChainIdentifier = "arbitrum"
+            },
         });
-        var thirdwebConfig = ScriptableObject.CreateInstance<TDKThirdwebConfig>();
-        testTDKConfig.SetModuleConfig(thirdwebConfig);
         
         testTDKAbstractedEngineApi = new TestTDKAbstractedEngineApi();
 

@@ -8,8 +8,6 @@ namespace Treasure
 {
     public class LoginModal : ModalBase
     {
-        [SerializeField] private AppSettingsData appSettingsData;
-        [Space]
         [SerializeField] private GameObject socialLoginHolder;
         [SerializeField] private GameObject googleLogin;
         [SerializeField] private GameObject appleLogin;
@@ -39,7 +37,7 @@ namespace Treasure
 
         private void Start()
         {
-            SetupFromSettings();
+            SetupUI();
 
             emailInputField.onSelect.AddListener(value => keyBoardSpace.gameObject.SetActive(true));
             emailInputField.onDeselect.AddListener(value => keyBoardSpace.gameObject.SetActive(false));
@@ -80,7 +78,7 @@ namespace Treasure
 
         private void OnEnable()
         {
-            SetupFromSettings();
+            SetupUI();
             connectButton.GetComponent<LoadingButton>().SetLoading(false);
         }
 
@@ -104,24 +102,24 @@ namespace Treasure
             }
         }
 
-        private void SetupFromSettings()
+        private void SetupUI()
         {
-            socialLoginHolder.SetActive(appSettingsData.loginSettings.HasSocialLogin());
-            googleLogin.SetActive(appSettingsData.loginSettings.hasGoogleLogin);
-            appleLogin.SetActive(appSettingsData.loginSettings.hasAppleLogin);
-            facebookLogin.SetActive(appSettingsData.loginSettings.hasFacebookLogin);
+            socialLoginHolder.SetActive(true);
+            googleLogin.SetActive(true);
+            appleLogin.SetActive(true);
+            facebookLogin.SetActive(true);
 
-            loginEmailHolder.SetActive(appSettingsData.loginSettings.hasEmailLogin);
-            loginWalletHolder.SetActive(appSettingsData.loginSettings.hasWalletLogin);
+            loginEmailHolder.SetActive(true);
+            loginWalletHolder.SetActive(false);
 
             if (landscapeRightSideHolder != null)
             {
-                landscapeRightSideHolder.SetActive(appSettingsData.loginSettings.HasSocialLogin() || appSettingsData.loginSettings.hasEmailLogin);
-                orSeparatorObject.SetActive(appSettingsData.loginSettings.HasSocialLogin() && appSettingsData.loginSettings.hasEmailLogin);
+                landscapeRightSideHolder.SetActive(true);
+                orSeparatorObject.SetActive(true);
             }
             else
             {
-                orSeparatorObject.SetActive(appSettingsData.loginSettings.hasWalletLogin && appSettingsData.loginSettings.hasEmailLogin);
+                orSeparatorObject.SetActive(false);
             }
         }
 

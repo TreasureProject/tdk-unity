@@ -67,14 +67,18 @@ namespace Treasure
             var tdkConfig = TDKConfig.LoadFromResources();
             if (tdkConfig.AutoInitialize) {
                 Initialize(
-                    tdkConfig: TDKConfig.LoadFromResources(),
+                    tdkConfig: tdkConfig,
                     abstractedEngineApi: new TDKAbstractedEngineApi(),
                     localSettings: new LocalSettings(Application.persistentDataPath)
                 );
             }
         }
 
-        public static void Initialize(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings)
+        public static void Initialize(
+            TDKConfig tdkConfig,
+            IAbstractedEngineApi abstractedEngineApi,
+            LocalSettings localSettings
+        )
         {
             if (Initialized) {
                 return;
@@ -91,7 +95,11 @@ namespace Treasure
             Initialized = true;
         }
 
-        private void InitializeProperties(TDKConfig tdkConfig, IAbstractedEngineApi abstractedEngineApi, LocalSettings localSettings) {
+        private void InitializeProperties(
+            TDKConfig tdkConfig,
+            IAbstractedEngineApi abstractedEngineApi,
+            LocalSettings localSettings
+        ) {
             Instance.AppConfig = tdkConfig;
 
             Instance._abstractedEngineApi = abstractedEngineApi;
