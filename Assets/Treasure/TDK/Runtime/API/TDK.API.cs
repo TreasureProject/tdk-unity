@@ -36,6 +36,9 @@ namespace Treasure
             };
             req.SetRequestHeader("Content-Type", "application/json");
 
+            // Set the API key header
+            req.SetRequestHeader("x-api-key", TDK.Instance.AppConfig.ApiKey);
+
             // Set chain ID with override option
             if (overrides.HasValue && overrides.Value.chainId > 0)
             {
@@ -81,6 +84,9 @@ namespace Treasure
                 downloadHandler = new DownloadHandlerBuffer()
             };
             req.SetRequestHeader("Content-Type", "application/json");
+
+            // Set the API key header
+            req.SetRequestHeader("x-api-key", TDK.Instance.AppConfig.ApiKey);
 
             // Set chain ID with override option
             if (overrides.HasValue && overrides.Value.chainId > 0)

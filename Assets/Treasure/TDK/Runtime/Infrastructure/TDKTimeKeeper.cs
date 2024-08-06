@@ -29,9 +29,6 @@ namespace Treasure
 
             using (UnityWebRequest webRequest = UnityWebRequest.Get(endpoint))
             {
-                // Set the API key header
-                webRequest.SetRequestHeader("x-api-key", TDK.Instance.AppConfig.ApiKey);
-
                 yield return webRequest.SendWebRequest();
 
                 if (webRequest.result != UnityWebRequest.Result.Success)
