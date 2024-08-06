@@ -86,6 +86,8 @@ namespace Treasure
             set { if (Environment == Env.DEV) _devLoggerLevel = value; else _prodLoggerLevel = value; }
         }
 
+        public string ApiKey => Environment == Env.DEV ? _devApiKey : _prodApiKey;
+
         public bool AutoInitialize => _autoInitialize;
 
         public async Task<string> GetBackendWallet()
