@@ -26,7 +26,7 @@ namespace Treasure
                 webRequest.SetRequestHeader("Content-Type", "application/json");
                 
                 // Set the API key header
-                webRequest.SetRequestHeader("x-api-key", apiKey);
+                webRequest.SetRequestHeader("x-api-key", TDK.Instance.AppConfig.ApiKey);
 
                 yield return webRequest.SendWebRequest();
 
