@@ -21,35 +21,49 @@ namespace Treasure
             public double nativeTokenLimitPerTransaction;
         }
 
+        [Serializable]
+        public class GeneralConfig
+        {
+            public string _cartridgeTag;
+            public string _cartridgeName;
+            public Sprite _cartridgeIcon;
+            public string _devApiUrl;
+            public string _prodApiUrl;
+            public string _devApiKey;
+            public string _prodApiKey;
+            public string _devClientId;
+            public string _prodClientId;
+        }
+
+        [Serializable]
+        public class ConnectConfig
+        {
+            public string _factoryAddress;
+            public ChainId _devDefaultChainId;
+            public ChainId _prodDefaultChainId;
+            public int _sessionDurationSec;
+            public int _sessionMinDurationLeftSec; // TODO use in ValidateActiveSigner
+            public List<SessionOption> _sessionOptions;
+        }
+
+        [Serializable]
+        public class AnalyticsConfig
+        {
+            public string _devApiUrl = "https://darkmatter.spellcaster.lol/ingress";
+            public string _prodApiUrl = "https://darkmatter.treasure.lol/ingress";
+        }
+
         public enum Env { DEV, PROD }
         public enum LoggerLevelValue { SILENT = 100, ERROR = 40, WARNING = 30, INFO = 20, DEBUG = 10 }
 
         [SerializeField] private Env _environment = Env.DEV;
 
-        [Header("General")]
-        [SerializeField] private string _cartridgeTag;
-        [SerializeField] private string _cartridgeName;
-        [SerializeField] private Sprite _cartridgeIcon;
-        [SerializeField] private string _devApiUrl;
-        [SerializeField] private string _prodApiUrl;
-        [SerializeField] private string _devApiKey;
-        [SerializeField] private string _prodApiKey;
-        [SerializeField] private string _devClientId;
-        [SerializeField] private string _prodClientId;
+        [SerializeField] private GeneralConfig _general;
 
-        [Header("Connect")] // TODO remove connect prefix from inspector
-        [SerializeField] private string _connectFactoryAddress;
-        [SerializeField] private ChainId _connectDevDefaultChainId;
-        [SerializeField] private ChainId _connectProdDefaultChainId;
-        [SerializeField] private int _connectSessionDurationSec;
-        [SerializeField] private int _connectSessionMinDurationLeftSec; // TODO use in ValidateActiveSigner
-        [SerializeField] private List<SessionOption> _sessionOptions;
+        [SerializeField] private ConnectConfig _connect;
 
-        [Header("Analytics")]
-        [SerializeField] private string _analyticsDevApiUrl = "https://darkmatter.spellcaster.lol/ingress";
-        [SerializeField] private string _analyticsProdApiUrl = "https://darkmatter.treasure.lol/ingress";
+        [SerializeField] private AnalyticsConfig _analytics;
 
-        [Header("Modules")]
         [SerializeField] private ScriptableObjectDictionary moduleConfigurations = null;
 
         [Header("Misc")]
@@ -63,21 +77,21 @@ namespace Treasure
             set { _environment = value; }
         }
 
-        public string CartridgeTag => _cartridgeTag;
-        public string CartridgeName => _cartridgeName;
-        public Sprite CartridgeIcon => _cartridgeIcon;
+        public string CartridgeTag => _general._cartridgeTag;
+        public string CartridgeName =>_general. _cartridgeName;
+        public Sprite CartridgeIcon => _general._cartridgeIcon;
 
-        public string TDKApiUrl => Environment == Env.DEV ? _devApiUrl : _prodApiUrl;
-        public string ClientId => Environment == Env.DEV ? _devClientId : _prodClientId;
+        public string TDKApiUrl => Environment == Env.DEV ? _general._devApiUrl : _general._prodApiUrl;
+        public string ClientId => Environment == Env.DEV ? _general._devClientId : _general._prodClientId;
 
-        public string FactoryAddress => _connectFactoryAddress;
+        public string FactoryAddress => _connect._factoryAddress;
 
         public ChainId DefaultChainId =>
-            Environment == Env.DEV ? _connectDevDefaultChainId : _connectProdDefaultChainId;
+            Environment == Env.DEV ? _connect._devDefaultChainId : _connect._prodDefaultChainId;
 
-        public int SessionLengthSeconds => _connectSessionDurationSec;
+        public int SessionLengthSeconds => _connect._sessionDurationSec;
 
-        public string AnalyticsApiUrl => Environment == Env.DEV ? _analyticsDevApiUrl : _analyticsProdApiUrl;
+        public string AnalyticsApiUrl => Environment == Env.DEV ? _analytics._devApiUrl : _analytics._prodApiUrl;
 
 
         public LoggerLevelValue LoggerLevel
@@ -86,28 +100,28 @@ namespace Treasure
             set { if (Environment == Env.DEV) _devLoggerLevel = value; else _prodLoggerLevel = value; }
         }
 
-        public string ApiKey => Environment == Env.DEV ? _devApiKey : _prodApiKey;
+        public string ApiKey => Environment == Env.DEV ? _general._devApiKey : _general._prodApiKey;
 
         public bool AutoInitialize => _autoInitialize;
 
         public async Task<string> GetBackendWallet()
         {
             var chainId = await TDK.Connect.GetChainId();
-            var option = _sessionOptions.Find(d => d.chainId == chainId);
+            var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
             return option?.backendWallet.ToLowerInvariant();
         }
 
         public async Task<List<string>> GetCallTargets()
         {
             var chainId = await TDK.Connect.GetChainId();
-            var option = _sessionOptions.Find(d => d.chainId == chainId);
+            var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
             return option != null ? option.callTargets.ConvertAll(ct => ct.ToLowerInvariant()) : new List<string>();
         }
 
         public async Task<double> GetNativeTokenLimitPerTransaction()
         {
             var chainId = await TDK.Connect.GetChainId();
-            var option = _sessionOptions.Find(d => d.chainId == chainId);
+            var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
             return option?.nativeTokenLimitPerTransaction ?? 0;
         }
 
@@ -138,30 +152,35 @@ namespace Treasure
         public void SetConfig(SerializedTDKConfig config)
         {
             // General
-            _cartridgeTag = config.general.cartridgeTag;
-            _cartridgeName = config.general.cartridgeName;
-            _devApiUrl = config.general.devApiUrl;
-            _prodApiUrl = config.general.prodApiUrl;
-            _devApiKey = config.general.devApiKey;
-            _prodApiKey = config.general.prodApiKey;
-            _devClientId = config.general.devClientId;
-            _prodClientId = config.general.prodClientId;
+            _general = new GeneralConfig {
+                _cartridgeTag = config.general.cartridgeTag,
+                _cartridgeName = config.general.cartridgeName,
+                _devApiUrl = config.general.devApiUrl,
+                _prodApiUrl = config.general.prodApiUrl,
+                _devApiKey = config.general.devApiKey,
+                _prodApiKey = config.general.prodApiKey,
+                _devClientId = config.general.devClientId,
+                _prodClientId = config.general.prodClientId,
+            };
 
             // Connect
-            _connectFactoryAddress = config.connect.factoryAddress;
-            _connectDevDefaultChainId = Constants.NameToChainId.GetValueOrDefault(
-                config.connect.devDefaultChainIdentifier ?? "",
-                ChainId.Unknown
-            );
-            _connectProdDefaultChainId = Constants.NameToChainId.GetValueOrDefault(
-                config.connect.prodDefaultChainIdentifier ?? "",
-                ChainId.Unknown
-            );
-            _connectSessionDurationSec = config.connect.sessionDurationSec;
-            _connectSessionMinDurationLeftSec = config.connect.sessionMinDurationLeftSec;
+            _connect = new ConnectConfig {
+                _factoryAddress = config.connect.factoryAddress,
+                _devDefaultChainId = Constants.NameToChainId.GetValueOrDefault(
+                    config.connect.devDefaultChainIdentifier ?? "",
+                    ChainId.Unknown
+                ),
+                _prodDefaultChainId = Constants.NameToChainId.GetValueOrDefault(
+                    config.connect.prodDefaultChainIdentifier ?? "",
+                    ChainId.Unknown
+                ),
+                _sessionDurationSec = config.connect.sessionDurationSec,
+                _sessionMinDurationLeftSec = config.connect.sessionMinDurationLeftSec,
+            };
+
             if (config.connect.sessionOptions != null)
             {
-                _sessionOptions = config.connect.sessionOptions.ConvertAll(option => new SessionOption
+                _connect._sessionOptions = config.connect.sessionOptions.ConvertAll(option => new SessionOption
                 {
                     chainId = Constants.NameToChainId.GetValueOrDefault(option.chainIdentifier, ChainId.Unknown),
                     backendWallet = option.backendWallet,
@@ -171,12 +190,14 @@ namespace Treasure
             }
             else
             {
-                _sessionOptions = new List<SessionOption>();
+                _connect._sessionOptions = new List<SessionOption>();
             }
 
             // Analytics
-            _analyticsDevApiUrl = config.analytics.devApiUrl;
-            _analyticsProdApiUrl = config.analytics.prodApiUrl;
+            _analytics = new AnalyticsConfig {
+                _devApiUrl = config.analytics.devApiUrl,
+                _prodApiUrl = config.analytics.prodApiUrl,
+            };
         }
     }
 
@@ -184,7 +205,7 @@ namespace Treasure
     public class SerializedTDKConfig
     {
         [Serializable]
-        public class GeneralConfig
+        public class SerializedGeneralConfig
         {
             public string cartridgeTag;
             public string cartridgeName;
@@ -197,7 +218,7 @@ namespace Treasure
         }
 
         [Serializable]
-        public class ConnectConfig
+        public class SerializedConnectConfig
         {
             [Serializable]
             public class SerializedSessionOption
@@ -217,14 +238,14 @@ namespace Treasure
         }
 
         [Serializable]
-        public class AnalyticsConfig
+        public class SerializedAnalyticsConfig
         {
             public string devApiUrl;
             public string prodApiUrl;
         }
 
         [Serializable]
-        public class HelikaConfig
+        public class SerializedHelikaConfig
         {
             public string prodApiKeyWeb;
             public string prodApiKeyIos;
@@ -236,9 +257,9 @@ namespace Treasure
             public string devApiKeyDesktop;
         }
 
-        public GeneralConfig general;
-        public ConnectConfig connect;
-        public AnalyticsConfig analytics;
-        public HelikaConfig helika;
+        public SerializedGeneralConfig general;
+        public SerializedConnectConfig connect;
+        public SerializedAnalyticsConfig analytics;
+        public SerializedHelikaConfig helika;
     }
 }
