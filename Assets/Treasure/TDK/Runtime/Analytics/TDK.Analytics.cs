@@ -36,7 +36,7 @@ namespace Treasure
 #endif
 
 #if TDK_HELIKA
-            TDKServiceLocator.GetService<TDKHelikaService>().SetPlayerId(smartWalletAddress);
+            TDKServiceLocator.GetService<TDKAnalyticsService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
 #endif
             TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_CONNECTED, new Dictionary<string, object>()
             {
