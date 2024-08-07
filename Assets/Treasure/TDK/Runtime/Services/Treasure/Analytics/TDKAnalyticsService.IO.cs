@@ -44,6 +44,9 @@ namespace Treasure
                 client.BaseAddress = new Uri(baseAddress);
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
 
+                // Set the API key header
+                client.DefaultRequestHeaders.Add("x-api-key", TDK.Instance.AppConfig.ApiKey);
+
                 // send the payload to the analytics backend via HTTP POST request
                 HttpResponseMessage response = await client.PostAsync(
                     "events",

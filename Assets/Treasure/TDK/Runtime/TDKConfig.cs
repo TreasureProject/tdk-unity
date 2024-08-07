@@ -32,6 +32,8 @@ namespace Treasure
         [SerializeField] private Sprite _cartridgeIcon;
         [SerializeField] private string _devApiUrl;
         [SerializeField] private string _prodApiUrl;
+        [SerializeField] private string _devApiKey;
+        [SerializeField] private string _prodApiKey;
         [SerializeField] private string _devClientId;
         [SerializeField] private string _prodClientId;
 
@@ -83,6 +85,8 @@ namespace Treasure
             get { return Environment == Env.DEV ? _devLoggerLevel : _prodLoggerLevel; }
             set { if (Environment == Env.DEV) _devLoggerLevel = value; else _prodLoggerLevel = value; }
         }
+
+        public string ApiKey => Environment == Env.DEV ? _devApiKey : _prodApiKey;
 
         public bool AutoInitialize => _autoInitialize;
 
@@ -138,6 +142,8 @@ namespace Treasure
             _cartridgeName = config.general.cartridgeName;
             _devApiUrl = config.general.devApiUrl;
             _prodApiUrl = config.general.prodApiUrl;
+            _devApiKey = config.general.devApiKey;
+            _prodApiKey = config.general.prodApiKey;
             _devClientId = config.general.devClientId;
             _prodClientId = config.general.prodClientId;
 
@@ -184,6 +190,8 @@ namespace Treasure
             public string cartridgeName;
             public string devApiUrl;
             public string prodApiUrl;
+            public string devApiKey;
+            public string prodApiKey;
             public string devClientId;
             public string prodClientId;
         }

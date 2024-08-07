@@ -24,6 +24,9 @@ namespace Treasure
             using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm($"{baseUrl}events", eventStr))
             {
                 webRequest.SetRequestHeader("Content-Type", "application/json");
+                
+                // Set the API key header
+                webRequest.SetRequestHeader("x-api-key", TDK.Instance.AppConfig.ApiKey);
 
                 yield return webRequest.SendWebRequest();
 
