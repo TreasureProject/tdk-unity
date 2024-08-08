@@ -162,17 +162,17 @@ public class AnalyticsTest
         
         testTDKConfig = ScriptableObject.CreateInstance<TDKConfig>();
         testTDKConfig.SetConfig(new SerializedTDKConfig {
-            general = new SerializedTDKConfig.GeneralConfig() {
+            general = new SerializedTDKConfig.SerializedGeneralConfig() {
                 cartridgeTag = "harness",
                 cartridgeName = "Harness",
                 devApiUrl = "https://localhost:5000/devTdkApiUrl",
                 prodApiUrl = "https://localhost:5000/prodTdkApiUrl",
             },
-            analytics = new SerializedTDKConfig.AnalyticsConfig() {
+            analytics = new SerializedTDKConfig.SerializedAnalyticsConfig() {
                 devApiUrl = "https://localhost:5000/devAnalyticsApiUrl",
                 prodApiUrl = "https://localhost:5000/prodAnalyticsApiUrl",
             },
-            connect = new SerializedTDKConfig.ConnectConfig() {
+            connect = new SerializedTDKConfig.SerializedConnectConfig() {
                 devDefaultChainIdentifier = "arbitrum-sepolia",
                 prodDefaultChainIdentifier = "arbitrum"
             },
