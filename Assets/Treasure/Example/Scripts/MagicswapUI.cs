@@ -14,9 +14,12 @@ public class MagicswapUI : MonoBehaviour
     public TMP_Text MetadataText;
     public Button ApproveButton;
     public Button SwapButton;
+    public Button AddLiquidityButton;
+    public Button RemoveLiquidityButton;
     public Button RefreshMetadataButton;
 
     MagicswapRoute magicswapRoute;
+    MagicswapPool magicswapPool;
 
     void Start()
     {
@@ -31,6 +34,7 @@ public class MagicswapUI : MonoBehaviour
             var magicToTreasuresPoolId = "0x0626699bc82858c16ae557b2eaad03a58cfcc8bd";
             var poolData = await TDK.Magicswap.GetPoolById(magicToTreasuresPoolId);
             InfoText.text = JsonConvert.SerializeObject(poolData, Formatting.Indented);
+            magicswapPool = poolData;
         }
         catch (Exception ex)
         {
@@ -107,7 +111,7 @@ public class MagicswapUI : MonoBehaviour
                 tokenInId = magicswapRoute.tokenIn.id,
                 tokenOutId = magicswapRoute.tokenOut.id,
                 amountIn = magicswapRoute.amountIn,
-                nftsOut = new List<SwapBody.NFTInput> {
+                nftsOut = new List<NFTInput> {
                     new() {
                         id = magicswapRoute.tokenOut.collectionTokenIds[0],
                         quantity = 1,
@@ -132,12 +136,76 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
+    public async void OnAddLiquidityBtn() {
+        if (magicswapPool == null) {
+            InfoText.text = "Must get pool details before adding liquidity!";
+            return;
+        }
+        var bodyJson = "";
+        try
+        {
+            var addLiquidityBody = new AddLiquidityBody {
+                amount0 = "10",
+                amount0Min = "1",
+                nfts1 = new List<NFTInput>() {
+                    // new() {
+                    //     id = magicswapPool.token1.collectionTokenIds[0],
+                    //     quantity = 1,
+                    // }
+                }
+            };
+            bodyJson = JsonConvert.SerializeObject(addLiquidityBody, Formatting.Indented, new JsonSerializerSettings {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+            InfoText.text = $"Adding liquidity...\nRequest body: {bodyJson}";
+            var transaction = await TDK.Magicswap.AddLiquidity(magicswapPool.id, addLiquidityBody);
+            var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
+            InfoText.text = $"Response: {responseJson}\nRequest body: {bodyJson}";
+            RefreshMetadata();
+        }
+        catch (Exception ex)
+        {
+            InfoText.text = $"Error: {ex.Message}\nRequest body: {bodyJson}";
+            throw;
+        }
+    }
+
+    public async void OnRemoveLiquidityBtn() {
+        if (magicswapPool == null) {
+            InfoText.text = "Must get pool details before removing liquidity!";
+            return;
+        }
+        var bodyJson = "";
+        try
+        {
+            var removeLiquidityBody = new RemoveLiquidityBody {
+                amountLP = "1",
+            };
+            bodyJson = JsonConvert.SerializeObject(removeLiquidityBody, Formatting.Indented, new JsonSerializerSettings {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+            InfoText.text = $"Removing liquidity...\nRequest body: {bodyJson}";
+            var transaction = await TDK.Magicswap.RemoveLiquidity(magicswapPool.id, removeLiquidityBody);
+            var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
+            InfoText.text = $"Response: {responseJson}\nRequest body: {bodyJson}";
+            RefreshMetadata();
+        }
+        catch (Exception ex)
+        {
+            InfoText.text = $"Error: {ex.Message}\nRequest body: {bodyJson}";
+            throw;
+        }
+    }
+
     public async void RefreshMetadata() {
         try
         {
             var walletConnected = await TDK.Connect.IsWalletConnected();
             ApproveButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
             SwapButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+            AddLiquidityButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+            RemoveLiquidityButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+
             if (!walletConnected) {
                 MetadataText.text = "Connect Wallet first (Connect tab)";
                 return;
