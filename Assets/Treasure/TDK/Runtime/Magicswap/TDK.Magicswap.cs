@@ -36,5 +36,13 @@ namespace Treasure
         public async Task<Transaction> Swap(SwapBody swapBody) {
             return await TDK.API.Swap(swapBody);
         }
+
+        public async Task<Transaction> AddLiquidity(string poolId, AddLiquidityBody addLiquidityBody) {
+            return await TDK.API.AddLiquidity(poolId, addLiquidityBody);
+        }
+
+        public async Task<Transaction> RemoveLiquidity(string poolId, RemoveLiquidityBody removeLiquidityBody) {
+            return await TDK.API.RemoveLiquidity(poolId, removeLiquidityBody);
+        }
     }
 }

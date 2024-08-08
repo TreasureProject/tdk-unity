@@ -37,6 +37,7 @@ namespace Treasure
         public int decimals;
         public string derivedMAGIC;
         public bool isNFT;
+        public bool isETH;
         public List<VaultCollection> vaultCollections;
         public string type;
         public string image;
@@ -124,13 +125,13 @@ namespace Treasure
     }
 
     [Serializable]
-    public class SwapBody {
-        [Serializable]
-        public class NFTInput {
-            public string id;
-            public int quantity;
-        }
+    public class NFTInput {
+        public string id;
+        public int quantity;
+    }
 
+    [Serializable]
+    public class SwapBody {
         public string tokenInId;
         public string tokenOutId;
         public string amountIn;
@@ -140,7 +141,29 @@ namespace Treasure
         public List<NFTInput> nftsIn = null;
         public List<NFTInput> nftsOut = null;
         public double? slippage = null;
-        public string backendWallet = null;
+        public string backendWallet = null; // TODO should this be set to TDKConfig.GetBackendWallet()?
+    }
+
+    [Serializable]
+    public class AddLiquidityBody {
+        public List<NFTInput> nfts0 = null;
+        public List<NFTInput> nfts1 = null;
+        public string amount0;
+        public string amount1;
+        public string amount0Min;
+        public string amount1Min;
+        public string backendWallet = null; // TODO should this be set to TDKConfig.GetBackendWallet()?
+    }
+
+    [Serializable]
+    public class RemoveLiquidityBody {
+        public List<NFTInput> nfts0 = null;
+        public List<NFTInput> nfts1 = null;
+        public string amountLP;
+        public string amount0Min;
+        public string amount1Min;
+        public bool? swapLeftover = null;
+        public string backendWallet = null; // TODO should this be set to TDKConfig.GetBackendWallet()?
     }
 
     public partial class API
@@ -169,6 +192,26 @@ namespace Treasure
                 NullValueHandling = NullValueHandling.Ignore
             });
             var response = await Post("/magicswap/swap", body);
+            var transaction = JsonConvert.DeserializeObject<Transaction>(response);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
+            return transaction;
+        }
+
+        public async Task<Transaction> AddLiquidity(string poolId, AddLiquidityBody addLiquidityBody) {
+            var body = JsonConvert.SerializeObject(addLiquidityBody, new JsonSerializerSettings {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+            var response = await Post($"/magicswap/pools/{poolId}/add-liquidity", body);
+            var transaction = JsonConvert.DeserializeObject<Transaction>(response);
+            transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
+            return transaction;
+        }
+
+        public async Task<Transaction> RemoveLiquidity(string poolId, RemoveLiquidityBody removeLiquidityBody) {
+            var body = JsonConvert.SerializeObject(removeLiquidityBody, new JsonSerializerSettings {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+            var response = await Post($"/magicswap/pools/{poolId}/remove-liquidity", body);
             var transaction = JsonConvert.DeserializeObject<Transaction>(response);
             transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
             return transaction;
