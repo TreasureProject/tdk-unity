@@ -6,10 +6,7 @@ using System;
 using System.Linq;
 using Nethereum.ABI;
 using Nethereum.Hex.HexConvertors.Extensions;
-
-#if TDK_THIRDWEB
 using Thirdweb;
-#endif
 
 namespace Treasure
 {
@@ -94,18 +91,12 @@ namespace Treasure
 
         public async Task<Transaction> ApproveMagic(BigInteger amount)
         {
-#if TDK_THIRDWEB
             TDKLogger.Log($"Approving {Utils.ToEth(amount.ToString())} MAGIC for transfer to Harvester");
             return await TDK.Common.ApproveERC20(Contract.Magic, id, amount);
-#else
-            TDKLogger.LogError("Unable to approve magic. TDK Identity wallet service not implemented.");
-            return await Task.FromResult<Transaction>(null);
-#endif
         }
 
         public async Task<Transaction> DepositMagic(BigInteger amount)
         {
-#if TDK_THIRDWEB
             TDKLogger.Log($"Depositing {Utils.ToEth(amount.ToString())} MAGIC to Harvester");
             var chainId = await TDK.Connect.GetChainId();
             var transaction = await TDK.API.WriteTransaction(
@@ -125,17 +116,11 @@ namespace Treasure
             );
 
             return transaction;
-#else
-            TDKLogger.LogError("Unable to deposit magic. TDK Identity wallet service not implemented.");
-            return await Task.FromResult<Transaction>(null);
-#endif
         }
 
         public async Task<Transaction> WithdrawMagic(BigInteger amount)
         {
-#if TDK_THIRDWEB
             TDKLogger.Log($"Withdrawing {Utils.ToEth(amount.ToString())} MAGIC from Harvester");
-#endif
             var transaction = await TDK.API.WriteTransaction(
                 address: id,
                 functionName: "withdrawAmountFromAll",
@@ -263,7 +248,6 @@ namespace Treasure
 
         public async Task Deposit(BigInteger amount)
         {
-#if TDK_THIRDWEB
             if (userMagicBalance < amount)
             {
                 throw new UnityException("MAGIC balance too low");
@@ -294,10 +278,6 @@ namespace Treasure
             }
 
             await DepositMagic(amount);
-#else
-            TDKLogger.LogError("Unable to retrieve chain ID. TDK Identity wallet service not implemented.");
-            await Task.FromResult<string>(string.Empty);
-#endif
         }
 
         public async Task<Transaction> StartCorruptionRemovals(List<CorruptionRemovalRequest> requests)

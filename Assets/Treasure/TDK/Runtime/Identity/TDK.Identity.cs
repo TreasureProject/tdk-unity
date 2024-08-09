@@ -4,10 +4,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-
-#if TDK_THIRDWEB
 using Thirdweb;
-#endif
 
 namespace Treasure
 {
@@ -65,7 +62,6 @@ namespace Treasure
         #region private methods
         private async Task<string> SignLoginPayload(AuthPayload payload)
         {
-#if TDK_THIRDWEB
             var payloadToSign =
                 $"{payload.domain} wants you to sign in with your Ethereum account:"
                 + $"\n{payload.address}\n\n"
@@ -78,15 +74,10 @@ namespace Treasure
                 + $"{(string.IsNullOrEmpty(payload.expiration_time) ? "" : $"\nExpiration Time: {payload.expiration_time}")}"
                 + $"{(string.IsNullOrEmpty(payload.invalid_before) ? "" : $"\nNot Before: {payload.invalid_before}")}";
             return await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Sign(payloadToSign);
-#else
-            TDKLogger.LogError("Unable to sign login payload. TDK Identity wallet service not implemented.");
-            return await Task.FromResult<string>(string.Empty);
-#endif
         }
 
         private async Task CreateSessionKey(string backendWallet, List<string> callTargets)
         {
-#if TDK_THIRDWEB
             var permissionStartTimestamp = (decimal)Utils.GetUnixTimeStampNow() - 60 * 60;
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + TDK.Instance.AppConfig.SessionLengthSeconds);
             await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.CreateSessionKey(
@@ -98,10 +89,6 @@ namespace Treasure
                 reqValidityStartTimestamp: permissionStartTimestamp.ToString(),
                 reqValidityEndTimestamp: permissionEndTimestamp.ToString()
             );
-#else
-            TDKLogger.LogError("Unable to create session key. TDK Identity wallet service not implemented.");
-            return await Task.FromResult<string>(string.Empty);
-#endif
         }
 
         private bool ValidateActiveSigner(string backendWallet, List<string> callTargets, string signer, IEnumerable<string> approvedTargets, string endTimestamp)
@@ -178,7 +165,6 @@ namespace Treasure
                 }
             }
 
-#if TDK_THIRDWEB
             // The rest of this flow requires a wallet to be connected
             if (!await TDK.Connect.IsWalletConnected())
             {
@@ -254,10 +240,6 @@ namespace Treasure
             TDKLogger.Log("User session started successfully");
 
             return _authToken;
-#else
-            TDKLogger.LogError("Unable to start user session. TDK Identity wallet service not implemented.");
-            return await Task.FromResult(string.Empty);
-#endif
         }
 
         public async Task EndUserSession()
