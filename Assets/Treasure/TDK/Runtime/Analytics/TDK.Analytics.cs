@@ -31,7 +31,7 @@ namespace Treasure
 
         internal void SetTreasureConnectInfo(string smartWalletAddress, int chainId)
         {
-#if TREASURE_ANALYTICS
+#if !DISABLE_TREASURE_ANALTYICS
             TDKServiceLocator.GetService<TDKAnalyticsService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
 #endif
 
@@ -47,7 +47,7 @@ namespace Treasure
         public void TrackCustomEvent(string eventName, Dictionary<string, object> eventProps = null, bool highPriority = false)
         {
             // send events to treasure analytics
-#if TREASURE_ANALYTICS
+#if !DISABLE_TREASURE_ANALTYICS
             TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(eventName, eventProps, highPriority);
 #endif
 
