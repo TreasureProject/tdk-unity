@@ -30,6 +30,8 @@ namespace Kochava.Editor
                     EnableIosModules(path);
                     break;
 #endif
+                default:
+                    break;
             }
         }
         
