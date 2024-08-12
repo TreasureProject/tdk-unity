@@ -1,4 +1,3 @@
-#if TDK_THIRDWEB
 using System;
 using System.Linq;
 using Thirdweb;
@@ -68,4 +67,3 @@ namespace Treasure
         }
     }
 }
-#endif
