@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -43,6 +44,14 @@ namespace Treasure
 
         public async Task<Transaction> RemoveLiquidity(string poolId, RemoveLiquidityBody removeLiquidityBody) {
             return await TDK.API.RemoveLiquidity(poolId, removeLiquidityBody);
+        }
+
+        public BigInteger GetQuote(BigInteger amountA, BigInteger reserveA, BigInteger reserveB) {
+            return reserveA > 0 ? amountA * reserveB / reserveA : 0;
+        }
+
+        public BigInteger GetAmountMin(BigInteger amount, double slippage) {
+            return amount - amount * new BigInteger(System.Math.Ceiling(slippage * 1000)) / 1000;
         }
     }
 }
