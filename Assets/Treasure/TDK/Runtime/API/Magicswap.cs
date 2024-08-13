@@ -141,7 +141,7 @@ namespace Treasure
         public List<NFTInput> nftsIn = null;
         public List<NFTInput> nftsOut = null;
         public double? slippage = null;
-        public string backendWallet = null; // TODO should this be set to TDKConfig.GetBackendWallet()?
+        public string backendWallet = null;
     }
 
     [Serializable]
@@ -152,7 +152,7 @@ namespace Treasure
         public string amount1;
         public string amount0Min;
         public string amount1Min;
-        public string backendWallet = null; // TODO should this be set to TDKConfig.GetBackendWallet()?
+        public string backendWallet = null;
     }
 
     [Serializable]
@@ -163,7 +163,7 @@ namespace Treasure
         public string amount0Min;
         public string amount1Min;
         public bool? swapLeftover = null;
-        public string backendWallet = null; // TODO should this be set to TDKConfig.GetBackendWallet()?
+        public string backendWallet = null;
     }
 
     public partial class API
@@ -188,6 +188,7 @@ namespace Treasure
         }
 
         public async Task<Transaction> Swap(SwapBody swapBody) {
+            swapBody.backendWallet ??= await TDK.Instance.AppConfig.GetBackendWallet();
             var body = JsonConvert.SerializeObject(swapBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
             });
@@ -198,6 +199,7 @@ namespace Treasure
         }
 
         public async Task<Transaction> AddLiquidity(string poolId, AddLiquidityBody addLiquidityBody) {
+            addLiquidityBody.backendWallet ??= await TDK.Instance.AppConfig.GetBackendWallet();
             var body = JsonConvert.SerializeObject(addLiquidityBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
             });
@@ -208,6 +210,7 @@ namespace Treasure
         }
 
         public async Task<Transaction> RemoveLiquidity(string poolId, RemoveLiquidityBody removeLiquidityBody) {
+            removeLiquidityBody.backendWallet ??= await TDK.Instance.AppConfig.GetBackendWallet();
             var body = JsonConvert.SerializeObject(removeLiquidityBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
             });
