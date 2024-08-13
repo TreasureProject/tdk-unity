@@ -136,7 +136,7 @@ public class MagicswapUI : MonoBehaviour
                     }
                 },
                 path = magicswapRoute.path,
-                isExactOut = false,
+                isExactOut = true,
             };
             bodyJson = JsonConvert.SerializeObject(swapBody, Formatting.Indented, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
