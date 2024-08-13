@@ -162,23 +162,24 @@ public class MagicswapUI : MonoBehaviour
         var bodyJson = "";
         try
         {
-            var magicTokenInfo = magicswapPool.token0;
-            var treasureTokenInfo = magicswapPool.token1;
-            var ratio = BigInteger.Parse(treasureTokenInfo.reserve) / BigInteger.Parse(magicTokenInfo.reserve);
-            var treasuresToAdd = new BigInteger(1);
-            var magicToAdd = TDK.Magicswap.GetQuote(
-                treasuresToAdd.AdjustDecimals(0, treasureTokenInfo.decimals),
-                BigInteger.Parse(treasureTokenInfo.reserve),
-                BigInteger.Parse(magicTokenInfo.reserve)
+            var tokenA = magicswapPool.token1;
+            var tokenB = magicswapPool.token0;
+            var amountA = new BigInteger(1);
+            var reserveA = BigInteger.Parse(tokenA.reserve);
+            var reserveB = BigInteger.Parse(tokenB.reserve);
+            var amountB = TDK.Magicswap.GetQuote(
+                amountA.AdjustDecimals(0, tokenA.decimals),
+                reserveA,
+                reserveB
             );
 
             var addLiquidityBody = new AddLiquidityBody {
-                amount0 = magicToAdd.ToString(),
-                amount0Min = TDK.Magicswap.GetAmountMin(magicToAdd, 0.01).ToString(),
+                amount0 = amountB.ToString(),
+                amount0Min = TDK.Magicswap.GetAmountMin(amountB, 0.01).ToString(),
                 nfts1 = new List<NFTInput>() {
                     new() {
-                        id = treasureTokenInfo.collectionTokenIds[0],
-                        quantity = (int)treasuresToAdd,
+                        id = tokenA.collectionTokenIds[0],
+                        quantity = (int)amountA,
                     }
                 }
             };
