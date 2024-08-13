@@ -162,7 +162,7 @@ namespace Treasure
         public string amountLP;
         public string amount0Min;
         public string amount1Min;
-        public bool? swapLeftover = null;
+        public bool swapLeftover = true;
         public string backendWallet = null;
     }
 
