@@ -13,10 +13,14 @@ public class MagicswapUI : MonoBehaviour
     public TMP_Text InfoText;
     public TMP_Text MetadataText;
     public Button ApproveButton;
+    public Button ApproveTreasuresButton;
     public Button SwapButton;
+    public Button AddLiquidityButton;
+    public Button RemoveLiquidityButton;
     public Button RefreshMetadataButton;
 
     MagicswapRoute magicswapRoute;
+    MagicswapPool magicswapPool;
 
     void Start()
     {
@@ -31,6 +35,7 @@ public class MagicswapUI : MonoBehaviour
             var magicToTreasuresPoolId = "0x0626699bc82858c16ae557b2eaad03a58cfcc8bd";
             var poolData = await TDK.Magicswap.GetPoolById(magicToTreasuresPoolId);
             InfoText.text = JsonConvert.SerializeObject(poolData, Formatting.Indented);
+            magicswapPool = poolData;
         }
         catch (Exception ex)
         {
@@ -77,12 +82,29 @@ public class MagicswapUI : MonoBehaviour
     }
 
     public async void OnApproveBtn() {
-        var amount = BigInteger.Parse("1000000000000000000000"); // 1000 MAGIC
+        var amount = BigInteger.Parse(Utils.ToWei("1000")); // 1000 MAGIC
         var magicswapRouterAddress = await TDK.Common.GetContractAddress(Treasure.Contract.MagicswapV2Router);
         try
         {
             InfoText.text = $"Approving {Utils.ToEth(amount.ToString())} MAGIC for Magicswap...";
             var transaction = await TDK.Common.ApproveERC20(Treasure.Contract.Magic, magicswapRouterAddress, amount);
+            var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
+            InfoText.text = $"Response: {responseJson}";
+            RefreshMetadata();
+        }
+        catch (Exception ex)
+        {
+            InfoText.text = $"Error: {ex.Message}";
+            throw;
+        }
+    }
+
+    public async void OnApproveTreasuresBtn() {
+        var magicswapRouterAddress = await TDK.Common.GetContractAddress(Treasure.Contract.MagicswapV2Router);
+        try
+        {
+            InfoText.text = $"Approving Treasures for Magicswap...";
+            var transaction = await TDK.Common.ApproveERC1155(Treasure.Contract.Treasures, magicswapRouterAddress);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
             InfoText.text = $"Response: {responseJson}";
             RefreshMetadata();
@@ -107,7 +129,7 @@ public class MagicswapUI : MonoBehaviour
                 tokenInId = magicswapRoute.tokenIn.id,
                 tokenOutId = magicswapRoute.tokenOut.id,
                 amountIn = magicswapRoute.amountIn,
-                nftsOut = new List<SwapBody.NFTInput> {
+                nftsOut = new List<NFTInput> {
                     new() {
                         id = magicswapRoute.tokenOut.collectionTokenIds[0],
                         quantity = 1,
@@ -132,12 +154,87 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
+    public async void OnAddLiquidityBtn() {
+        if (magicswapPool == null) {
+            InfoText.text = "Must get pool details before adding liquidity!";
+            return;
+        }
+        var bodyJson = "";
+        try
+        {
+            var magicTokenInfo = magicswapPool.token0;
+            var treasureTokenInfo = magicswapPool.token1;
+            var ratio = BigInteger.Parse(treasureTokenInfo.reserve) / BigInteger.Parse(magicTokenInfo.reserve);
+            var treasuresToAdd = new BigInteger(1);
+            var magicToAdd = TDK.Magicswap.GetQuote(
+                treasuresToAdd.AdjustDecimals(0, treasureTokenInfo.decimals),
+                BigInteger.Parse(treasureTokenInfo.reserve),
+                BigInteger.Parse(magicTokenInfo.reserve)
+            );
+
+            var addLiquidityBody = new AddLiquidityBody {
+                amount0 = magicToAdd.ToString(),
+                amount0Min = TDK.Magicswap.GetAmountMin(magicToAdd, 0.01).ToString(),
+                nfts1 = new List<NFTInput>() {
+                    new() {
+                        id = treasureTokenInfo.collectionTokenIds[0],
+                        quantity = (int)treasuresToAdd,
+                    }
+                }
+            };
+            bodyJson = JsonConvert.SerializeObject(addLiquidityBody, Formatting.Indented, new JsonSerializerSettings {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+            InfoText.text = $"Adding liquidity...\nRequest body: {bodyJson}";
+            var transaction = await TDK.Magicswap.AddLiquidity(magicswapPool.id, addLiquidityBody);
+            var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
+            InfoText.text = $"Response: {responseJson}\nRequest body: {bodyJson}";
+            RefreshMetadata();
+        }
+        catch (Exception ex)
+        {
+            InfoText.text = $"Error: {ex.Message}\nRequest body: {bodyJson}";
+            throw;
+        }
+    }
+
+    public async void OnRemoveLiquidityBtn() {
+        if (magicswapPool == null) {
+            InfoText.text = "Must get pool details before removing liquidity!";
+            return;
+        }
+        var bodyJson = "";
+        try
+        {
+            var removeLiquidityBody = new RemoveLiquidityBody {
+                amountLP = "1", // TODO implement
+            };
+            bodyJson = JsonConvert.SerializeObject(removeLiquidityBody, Formatting.Indented, new JsonSerializerSettings {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+            InfoText.text = $"Removing liquidity...\nRequest body: {bodyJson}";
+            var transaction = await TDK.Magicswap.RemoveLiquidity(magicswapPool.id, removeLiquidityBody);
+            var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
+            InfoText.text = $"Response: {responseJson}\nRequest body: {bodyJson}";
+            RefreshMetadata();
+        }
+        catch (Exception ex)
+        {
+            InfoText.text = $"Error: {ex.Message}\nRequest body: {bodyJson}";
+            throw;
+        }
+    }
+
     public async void RefreshMetadata() {
         try
         {
             var walletConnected = await TDK.Connect.IsWalletConnected();
             ApproveButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
             SwapButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+            AddLiquidityButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+            ApproveTreasuresButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+            RemoveLiquidityButton.interactable = walletConnected && TDK.Identity.IsAuthenticated;
+
             if (!walletConnected) {
                 MetadataText.text = "Connect Wallet first (Connect tab)";
                 return;
@@ -156,11 +253,21 @@ public class MagicswapUI : MonoBehaviour
             var treasuresContract = TDKServiceLocator.GetService<TDKThirdwebService>().SDK.GetContract(treasuresAddress);
             var balance = await magicContract.ERC20.Balance();
             var allowance = await magicContract.ERC20.Allowance(magicswapRouterAddress);
+            var treasuresAreApproved = await treasuresContract.ERC1155.IsApprovedForAll(TDK.Connect.Address, magicswapRouterAddress);
+
             var text = $@"Magic balance:
 {Utils.ToEth(balance.value)}
 Router allowance:
-{Utils.ToEth(allowance.value)}";
+{Utils.ToEth(allowance.value)}
+Treasures allowed:
+{treasuresAreApproved}";
 
+            if (magicswapPool != null) {
+                var lpContract = TDKServiceLocator.GetService<TDKThirdwebService>().SDK.GetContract(magicswapPool.id);
+                var lpBalance = await lpContract.ERC20.Balance();
+                text += $"\nLP balance:\n{Utils.ToEth(lpBalance.value)}";
+            }
+            
             if (magicswapRoute != null) {
                 if (magicswapRoute.tokenOut.isNFT) {
                     var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
