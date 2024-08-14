@@ -9,6 +9,8 @@ namespace Treasure
     {
         public static Action<string> ExternalLogCallback;
 
+        public static bool quitting = false;
+
         public static void LogDebug(string message)
         {
             LogByLevel(TDKConfig.LoggerLevelValue.DEBUG, message);
@@ -36,6 +38,10 @@ namespace Treasure
         }
 
         private static void LogByLevel(TDKConfig.LoggerLevelValue loggerLevelValue, string message) {
+            if (quitting) {
+                UnityEngine.Debug.Log($"[{loggerLevelValue}] {message}");
+                return;
+            }
             if (TDK.Instance.AppConfig.LoggerLevel > loggerLevelValue) {
                 return;
             }

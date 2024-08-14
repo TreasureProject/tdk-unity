@@ -22,6 +22,10 @@ namespace Treasure
             Analytics?.OnApplicationPause_Analytics(isPaused);
         }
 
+        void OnApplicationQuit() {
+            TDKLogger.quitting = true;
+        }
+
         public static TDK Instance
         {
             get
