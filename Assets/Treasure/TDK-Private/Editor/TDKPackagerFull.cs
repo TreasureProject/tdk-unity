@@ -28,7 +28,6 @@ namespace Treasure
                 "Assets/Treasure/TDK/ConnectInternal",
                 "Assets/Treasure/TDK/ConnectPrefabs",
                 "Assets/Treasure/TDK/Editor",
-                "Assets/Treasure/TDK/Resources/TDKConnectSettings.asset",
                 "Assets/Treasure/TDK/Resources/TDKConnectThemeData.asset",
                 "Assets/Treasure/TDK/Runtime",
 
