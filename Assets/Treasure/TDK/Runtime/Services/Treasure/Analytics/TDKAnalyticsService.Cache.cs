@@ -72,7 +72,7 @@ namespace Treasure
                         break;
                     }
                 }
-                await Task.Delay(TimeSpan.FromSeconds(AnalyticsConstants.DISK_CACHE_FLUSH_TIME_SECONDS));
+                await Task.Delay(TimeSpan.FromSeconds(TDK.Instance.AppConfig.AnalyticsDiscFlushFrequencySeconds));
             }
         }
 
@@ -89,8 +89,8 @@ namespace Treasure
         private void ResetFlushTimer()
         {
             _flushCacheTimer?.Change(
-                TimeSpan.FromSeconds(AnalyticsConstants.MEMORY_CACHE_FLUSH_TIME_SECONDS),
-                TimeSpan.FromSeconds(AnalyticsConstants.MEMORY_CACHE_FLUSH_TIME_SECONDS)
+                TimeSpan.FromSeconds(TDK.Instance.AppConfig.AnalyticsMemoryFlushFrequencySeconds),
+                TimeSpan.FromSeconds(TDK.Instance.AppConfig.AnalyticsMemoryFlushFrequencySeconds)
             );
         }
 
