@@ -105,8 +105,13 @@ namespace Treasure
 
             if(memoryCacheCopy.Count > 0)
             {
-                // Send the batch of events for io
-                var success = await SendEventBatch(memoryCacheCopy);
+                var success = false;
+
+                if(!appIsQuitting)
+                {
+                    // Send the batch of events for io
+                    success = await SendEventBatch(memoryCacheCopy);
+                }
 
                 // If the request failed, persist the payload to disk in a separate task
                 if(!success)
