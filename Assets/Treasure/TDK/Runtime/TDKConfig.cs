@@ -53,6 +53,8 @@ namespace Treasure
         {
             public string _devApiUrl = "https://darkmatter.spellcaster.lol/ingress";
             public string _prodApiUrl = "https://darkmatter.treasure.lol/ingress";
+            public int _memoryFlushFrequencySeconds = 10;
+            public int _diskFlushFrequencySeconds = 30;
         }
 
         public enum Env { DEV, PROD }
@@ -95,7 +97,8 @@ namespace Treasure
         public int SessionMinDurationLeftSec => _connect._sessionMinDurationLeftSec;
 
         public string AnalyticsApiUrl => Environment == Env.DEV ? _analytics._devApiUrl : _analytics._prodApiUrl;
-
+        public int AnalyticsMemoryFlushFrequencySeconds => _analytics._memoryFlushFrequencySeconds;
+        public int AnalyticsDiscFlushFrequencySeconds => _analytics._diskFlushFrequencySeconds;
 
         public LoggerLevelValue LoggerLevel
         {
@@ -249,6 +252,8 @@ namespace Treasure
         {
             public string devApiUrl;
             public string prodApiUrl;
+            public int memoryFlushFrequencySeconds;
+            public int diskFlushFrequencySeconds;
         }
 
         [Serializable]

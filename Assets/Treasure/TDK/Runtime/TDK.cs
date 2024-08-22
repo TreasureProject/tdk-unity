@@ -17,9 +17,15 @@ namespace Treasure
 
         public TDKConfig AppConfig { get; private set; }
 
+        internal bool appIsQuitting = false;
+
         void OnApplicationPause(bool isPaused)
         {
             Analytics?.OnApplicationPause_Analytics(isPaused);
+        }
+
+        void OnApplicationQuit() {
+            appIsQuitting = true;
         }
 
         public static TDK Instance

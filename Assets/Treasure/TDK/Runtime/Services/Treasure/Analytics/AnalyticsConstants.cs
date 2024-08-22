@@ -5,8 +5,6 @@ namespace Treasure
         // event cache values
         public const int MAX_CACHE_EVENT_COUNT = 10;
         public const int MAX_CACHE_SIZE_KB = 64;
-        public const int MEMORY_CACHE_FLUSH_TIME_SECONDS = 10;
-        public const int DISK_CACHE_FLUSH_TIME_SECONDS = 60;
         
         // persistent store values
         public const string PERSISTENT_DIRECTORY_NAME = "AnalyticsStore";

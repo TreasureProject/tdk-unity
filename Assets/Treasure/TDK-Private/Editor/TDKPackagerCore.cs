@@ -40,7 +40,6 @@ namespace Treasure
                 "Assets/Treasure/TDK/Runtime/Utils",
 
                 // Resources
-                "Assets/Treasure/TDK/Resources/TDKConnectSettings.asset",
                 "Assets/Treasure/TDK/Resources/TDKConnectThemeData.asset",
 
                 "Assets/package.json",

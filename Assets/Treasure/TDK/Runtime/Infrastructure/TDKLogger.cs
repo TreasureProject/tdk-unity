@@ -1,7 +1,5 @@
 using UnityEngine;
 using System;
-using System.Collections;
-using System.Diagnostics;
 
 namespace Treasure
 {
@@ -36,6 +34,10 @@ namespace Treasure
         }
 
         private static void LogByLevel(TDKConfig.LoggerLevelValue loggerLevelValue, string message) {
+            if (TDK.Instance.appIsQuitting) {
+                Debug.Log($"[{loggerLevelValue}] {message}");
+                return;
+            }
             if (TDK.Instance.AppConfig.LoggerLevel > loggerLevelValue) {
                 return;
             }
@@ -44,13 +46,13 @@ namespace Treasure
             switch (loggerLevelValue)
             {
                 case TDKConfig.LoggerLevelValue.ERROR:
-                    UnityEngine.Debug.LogError(message);
+                    Debug.LogError(message);
                     break;
                 case TDKConfig.LoggerLevelValue.WARNING:
-                    UnityEngine.Debug.LogWarning(message);
+                    Debug.LogWarning(message);
                     break;
                 default:
-                    UnityEngine.Debug.Log(message);
+                    Debug.Log(message);
                     break;
             }
             #else
@@ -61,7 +63,7 @@ namespace Treasure
         private static void LogMessageInternal(string message)
         {
             try {
-                UnityEngine.Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
+                Debug.Log(string.Format("[{0}] {1}", Time.realtimeSinceStartup, message));
             } catch {
                 // no-op
             }
