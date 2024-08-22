@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Treasure/Example/Scripts/MagicswapUI.cs.meta
+guid: 7b6e9ccdbfb074b2dad031370a4dda20
+========
+guid: c479e0d0328d248d496fb9390861e625
+>>>>>>>> main:Assets/Treasure/TDK/Runtime/Services/Treasure/Analytics/TDKAnalyticsService.IO-WebGL.cs.meta
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

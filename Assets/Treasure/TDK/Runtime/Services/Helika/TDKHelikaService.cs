@@ -7,6 +7,7 @@ namespace Treasure
     public class TDKHelikaService : TDKBaseService
     {
         private TDKHelikaConfig _config;
+        private int _chainId = -1;
 
         public override void Awake()
         {
@@ -27,15 +28,23 @@ namespace Treasure
             }
         }
 
-        public void SetPlayerId(string playerId)
+        public void SetTreasureConnectInfo(string smartWalletAddress, int chainId)
         {
-            EventManager.Instance.SetPlayerID(playerId);
+            EventManager.Instance.SetPlayerID(smartWalletAddress);
+            _chainId = chainId;
         }
 
         public void TrackEvent(string eventName, Dictionary<string, object> eventProps = null)
         {
             // helika doesn't handel null event props
             if(eventProps == null) { eventProps = new Dictionary<string, object>();}
+
+            eventProps.Add(AnalyticsConstants.PROP_TDK_VERSION, TDKVersion.version);
+            eventProps.Add(AnalyticsConstants.PROP_TDK_FLAVOUR, TDKVersion.name);
+            eventProps.Add(AnalyticsConstants.PROP_APP_ENVIRONMENT, TDK.Instance.AppConfig.Environment);
+
+            // add chain id (using indexer in case it was added upstream)
+            eventProps[AnalyticsConstants.PROP_CHAIN_ID] = _chainId;
 
             EventManager.Instance.SendEvent(eventName, eventProps);
         }

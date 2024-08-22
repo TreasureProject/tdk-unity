@@ -43,5 +43,9 @@ namespace Treasure
             adressText.text = $"{address[..6]}...{address.Substring(address.Length - 4)}";
             copyButton.SetTextToCopy(address);
         }
+
+        public string GetAddressText() {
+            return adressText.text;
+        }
     }
 }

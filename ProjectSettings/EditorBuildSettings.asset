@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Treasure/Example/Scenes/TDKHarness.unity
+    guid: 25ea1011c51ad42bca7ad50ed331f11f
   m_configObjects: {}

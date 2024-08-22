@@ -1,9 +1,6 @@
 using System.Numerics;
 using System.Threading.Tasks;
-
-#if TDK_THIRDWEB
 using Thirdweb;
-#endif
 
 using TMPro;
 using Treasure;
@@ -29,7 +26,6 @@ public class HarvesterUI : MonoBehaviour
 
     private async void refreshHarvester()
     {
-#if TDK_THIRDWEB
         var harvesterTask = TDK.Bridgeworld.GetHarvester(Treasure.Contract.HarvesterEmberwing);
         var harvesterCorruptionRemovalTask = TDK.Bridgeworld.GetHarvesterCorruptionRemoval(Treasure.Contract.HarvesterEmberwing);
 
@@ -68,9 +64,6 @@ Harvester User Details
     {Utils.ToEth(_harvester.userMagicStaked.ToString())} MAGIC staked
     {Utils.ToEth(_harvester.userMagicRewardsClaimable.ToString())} MAGIC rewards claimable
     {_harvester.userCharactersStaked} character(s) staked";
-#else
-        await Task.FromResult<string>(string.Empty);
-#endif
 
         DepositBtn.interactable = _harvester.userMagicBalance >= _magicAmount;
         WithdrawBtn.interactable = _harvester.userMagicStaked >= _magicAmount;
@@ -80,42 +73,26 @@ Harvester User Details
 
     public async void OnDepositBtn()
     {
-#if TDK_THIRDWEB
         await _harvester.Deposit(_magicAmount);
         refreshHarvester();
-#else
-        await Task.FromResult<string>(string.Empty);
-#endif
     }
 
     public async void OnWithdrawBtn()
     {
-#if TDK_THIRDWEB
         await _harvester.WithdrawMagic(_magicAmount);
         refreshHarvester();
-#else
-        await Task.FromResult<string>(string.Empty);
-#endif
     }
 
     public async void OnStakeCharactersBtn()
     {
-#if TDK_THIRDWEB
         await _harvester.StakeCharacters(_harvester.userInventoryCharacters.ConvertAll(token => token.tokenId));
         refreshHarvester();
-#else
-        await Task.FromResult<string>(string.Empty);
-#endif
     }
 
     public async void OnUnstakeCharactersBtn()
     {
-#if TDK_THIRDWEB
         await _harvester.UnstakeCharacters(_harvester.userStakedCharacters.ConvertAll(token => token.tokenId));
         refreshHarvester();
-#else
-        await Task.FromResult<string>(string.Empty);
-#endif
     }
 
     public void OnRefreshBtn()

@@ -9,22 +9,15 @@ namespace Treasure
 {
     public class HeaderLogo : MonoBehaviour
     {
-        [SerializeField] private AppSettingsData appSettingsData;
-        [Space]
         [SerializeField] private Image iconImage;
         [SerializeField] private AspectRatioFitter iconAspectRatioFitter;
         [SerializeField] private LayoutElement logoLayoutElement;
         [SerializeField] private TMP_Text nameText;
 
-        [Space]
-        public bool UseCache = false;
-
-        private async void Start()
+        private void Start()
         {
-            var project = await TDK.Identity.GetProject();
-
-            StartCoroutine(DownloadImage(project.icon));
-            nameText.text = project.name;
+            nameText.text = TDK.Instance.AppConfig.CartridgeName;
+            ApplySprite(TDK.Instance.AppConfig.CartridgeIcon);
         }
 
         private void ApplySprite(Sprite sprite)
@@ -36,64 +29,8 @@ namespace Treasure
                 logoLayoutElement.preferredHeight, logoLayoutElement.preferredHeight * 2);
         }
 
-        protected IEnumerator DownloadImage(string url)
-        {
-            if (string.IsNullOrEmpty(url))
-                yield break;
-         
-            if (UseCache)
-            {
-                var fileName = Path.GetFileName(url);
-                string filePath = Path.Combine(Application.persistentDataPath, fileName);
-               
-                if (File.Exists(filePath))
-                {
-                    byte[] textureBytes = File.ReadAllBytes(filePath);
-                    Texture2D loadedTexture = new Texture2D(2, 2);
-                    loadedTexture.LoadImage(textureBytes);
-
-                    var sprite = Sprite.Create(loadedTexture, new Rect(0.0f, 0.0f, loadedTexture.width, loadedTexture.height), new Vector2(0.5f, 0.5f), 100.0f);
-                    ApplySprite(sprite);
-                    yield break;
-                } 
-            }
-
-            using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(url))
-            {
-                yield return www.SendWebRequest();
-
-                if (www.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.LogError("Error Downloading Image");
-                }
-                else
-                {
-                    var tex = DownloadHandlerTexture.GetContent(www);
-
-                    if (UseCache)
-                    {
-                        var name = Path.GetFileName(url);
-                        SaveTexture(tex, name);
-                    }
-
-                    if (tex == null)
-                    {
-                        Debug.LogError("Error Downloading Image");
-                    }
-                    else
-                    {
-                        var sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
-                        ApplySprite(sprite);
-                    }
-                }
-            }
-        }
-
-        private void SaveTexture(Texture2D textureToSave, string fileName)
-        {           
-            byte[] textureBytes = textureToSave.EncodeToPNG();
-            string filePath = Path.Combine(Application.persistentDataPath, fileName);
-            File.WriteAllBytes(filePath, textureBytes);
+        public string GetCurrentNameText() {
+            return nameText.text;
         }
     }
 }

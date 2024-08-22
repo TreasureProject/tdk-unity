@@ -28,6 +28,7 @@ namespace Treasure
 #if !UNITY_WEBGL
         void OnApplicationQuit()
         {
+            appIsQuitting = true;
             TerminateCacheFlushing();
         }
 #endif
