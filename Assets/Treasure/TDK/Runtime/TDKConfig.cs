@@ -2,6 +2,8 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Numerics;
+using Thirdweb;
 
 namespace Treasure
 {
@@ -78,7 +80,7 @@ namespace Treasure
         }
 
         public string CartridgeTag => _general._cartridgeTag;
-        public string CartridgeName =>_general. _cartridgeName;
+        public string CartridgeName => _general._cartridgeName;
         public Sprite CartridgeIcon => _general._cartridgeIcon;
 
         public string TDKApiUrl => Environment == Env.DEV ? _general._devApiUrl : _general._prodApiUrl;
@@ -89,7 +91,8 @@ namespace Treasure
         public ChainId DefaultChainId =>
             Environment == Env.DEV ? _connect._devDefaultChainId : _connect._prodDefaultChainId;
 
-        public int SessionLengthSeconds => _connect._sessionDurationSec;
+        public int SessionDurationSec => _connect._sessionDurationSec;
+        public int SessionMinDurationLeftSec => _connect._sessionMinDurationLeftSec;
 
         public string AnalyticsApiUrl => Environment == Env.DEV ? _analytics._devApiUrl : _analytics._prodApiUrl;
 
@@ -118,11 +121,12 @@ namespace Treasure
             return option != null ? option.callTargets.ConvertAll(ct => ct.ToLowerInvariant()) : new List<string>();
         }
 
-        public async Task<double> GetNativeTokenLimitPerTransaction()
+        public async Task<BigInteger> GetNativeTokenLimitPerTransaction()
         {
             var chainId = await TDK.Connect.GetChainId();
             var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
-            return option?.nativeTokenLimitPerTransaction ?? 0;
+            var value = option?.nativeTokenLimitPerTransaction ?? 0;
+            return BigInteger.Parse(Utils.ToWei(value.ToString()));
         }
 
         public T GetModuleConfig<T>()
@@ -152,7 +156,8 @@ namespace Treasure
         public void SetConfig(SerializedTDKConfig config)
         {
             // General
-            _general = new GeneralConfig {
+            _general = new GeneralConfig
+            {
                 _cartridgeTag = config.general.cartridgeTag,
                 _cartridgeName = config.general.cartridgeName,
                 _devApiUrl = config.general.devApiUrl,
@@ -164,7 +169,8 @@ namespace Treasure
             };
 
             // Connect
-            _connect = new ConnectConfig {
+            _connect = new ConnectConfig
+            {
                 _factoryAddress = config.connect.factoryAddress,
                 _devDefaultChainId = Constants.NameToChainId.GetValueOrDefault(
                     config.connect.devDefaultChainIdentifier ?? "",
@@ -194,7 +200,8 @@ namespace Treasure
             }
 
             // Analytics
-            _analytics = new AnalyticsConfig {
+            _analytics = new AnalyticsConfig
+            {
                 _devApiUrl = config.analytics.devApiUrl,
                 _prodApiUrl = config.analytics.prodApiUrl,
             };
