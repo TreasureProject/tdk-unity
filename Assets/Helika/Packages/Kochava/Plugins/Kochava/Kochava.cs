@@ -1,5 +1,5 @@
 //
-//  KochavaTracker (Unity)
+//  KochavaMeasurement (Unity)
 //
 //  Copyright (c) 2013 - 2023 Kochava, Inc. All rights reserved.
 //
@@ -45,7 +45,7 @@ namespace Kochava
     #region PublicAPI
 
     // Log Levels
-    public enum KochavaTrackerLogLevel
+    public enum KochavaMeasurementLogLevel
     {
         None,
         Error,
@@ -57,7 +57,7 @@ namespace Kochava
 
     // Standard event types
     // For samples and expected usage see: https://support.kochava.com/reference-information/post-install-event-examples/
-    public enum KochavaTrackerEventType
+    public enum KochavaMeasurementEventType
     {
         Achievement,
         AddToCart,
@@ -81,7 +81,7 @@ namespace Kochava
     }
 
     // Install Attribution result.
-    public class KochavaTrackerInstallAttribution
+    public class KochavaMeasurementInstallAttribution
     {
         // if attribution has been retrieved from the server.
         public readonly bool Retrieved;
@@ -92,7 +92,7 @@ namespace Kochava
         // if this is the first install on this device.
         public readonly bool FirstInstall;
 
-        internal KochavaTrackerInstallAttribution()
+        internal KochavaMeasurementInstallAttribution()
         {
             Retrieved = false;
             Raw = new JObject();
@@ -100,7 +100,7 @@ namespace Kochava
             FirstInstall = false;
         }
 
-        internal KochavaTrackerInstallAttribution(bool retrieved, JObject raw, bool attributed, bool firstInstall)
+        internal KochavaMeasurementInstallAttribution(bool retrieved, JObject raw, bool attributed, bool firstInstall)
         {
             Retrieved = retrieved;
             Raw = raw ?? new JObject();
@@ -108,7 +108,7 @@ namespace Kochava
             FirstInstall = firstInstall;
         }
 
-        internal KochavaTrackerInstallAttribution(JObject json)
+        internal KochavaMeasurementInstallAttribution(JObject json)
         {
             Retrieved = Util.OptBool(json["retrieved"], false);
             Raw = Util.OptJObject(json["raw"], new JObject());
@@ -118,7 +118,7 @@ namespace Kochava
     }
 
     // Deeplink result.
-    public class KochavaTrackerDeeplink
+    public class KochavaMeasurementDeeplink
     {
         // Destination path or url.
         // Will be empty if no deeplink was passed in and there was no deferred deeplink.
@@ -126,13 +126,13 @@ namespace Kochava
         // The raw response as a dictionary. Will always include "destination" but may include other metadata.
         public readonly JObject Raw;
 
-        internal KochavaTrackerDeeplink(string destination, JObject raw)
+        internal KochavaMeasurementDeeplink(string destination, JObject raw)
         {
             Destination = destination ?? "";
             Raw = raw ?? new JObject();
         }
 
-        internal KochavaTrackerDeeplink(JObject json)
+        internal KochavaMeasurementDeeplink(JObject json)
         {
             Destination = Util.OptString(json["destination"], "");
             Raw = Util.OptJObject(json["raw"], new JObject());
@@ -140,24 +140,24 @@ namespace Kochava
     }
     
     // Init result.
-    public class KochavaTrackerInit
+    public class KochavaMeasurementInit
     {
         // If consent gdpr currently applies.
         public readonly bool ConsentGdprApplies;
 
-        internal KochavaTrackerInit(bool consentGdprApplies)
+        internal KochavaMeasurementInit(bool consentGdprApplies)
         {
             ConsentGdprApplies = consentGdprApplies;
         }
 
-        internal KochavaTrackerInit(JObject json)
+        internal KochavaMeasurementInit(JObject json)
         {
             ConsentGdprApplies = Util.OptBool(json["consentGdprApplies"], false);
         }
     }
 
     // Represents a generic platform event.
-    public class KochavaTrackerPlatformEvent
+    public class KochavaMeasurementPlatformEvent
     {
         // The identifier name of the platform event.
         public readonly string Name;
@@ -165,13 +165,13 @@ namespace Kochava
         // The raw value of the platform event.
         public readonly JObject Value;
 
-        internal KochavaTrackerPlatformEvent(string name, JObject value)
+        internal KochavaMeasurementPlatformEvent(string name, JObject value)
         {
             Name = name;
             Value = value;
         }
 
-        internal KochavaTrackerPlatformEvent(JObject json)
+        internal KochavaMeasurementPlatformEvent(JObject json)
         {
             Name = Util.OptString(json["name"], "");
             Value = Util.OptJObject(json["value"], new JObject());
@@ -179,7 +179,7 @@ namespace Kochava
     }
 
     // Standard Event.
-    public class KochavaTrackerEvent
+    public class KochavaMeasurementEvent
     {
         private readonly string EventName;
         private readonly JObject EventData = new JObject();
@@ -188,65 +188,65 @@ namespace Kochava
         private string AndroidGooglePlayReceiptSignature;
 
         // Creates an Event with a Standard event type.
-        public KochavaTrackerEvent(KochavaTrackerEventType eventType)
+        public KochavaMeasurementEvent(KochavaMeasurementEventType eventType)
         {
             switch (eventType)
             {
-                case KochavaTrackerEventType.Achievement:
+                case KochavaMeasurementEventType.Achievement:
                     EventName = "Achievement";
                     break;
-                case KochavaTrackerEventType.AddToCart:
+                case KochavaMeasurementEventType.AddToCart:
                     EventName = "Add to Cart";
                     break;
-                case KochavaTrackerEventType.AddToWishList:
+                case KochavaMeasurementEventType.AddToWishList:
                     EventName = "Add to Wish List";
                     break;
-                case KochavaTrackerEventType.CheckoutStart:
+                case KochavaMeasurementEventType.CheckoutStart:
                     EventName = "Checkout Start";
                     break;
-                case KochavaTrackerEventType.LevelComplete:
+                case KochavaMeasurementEventType.LevelComplete:
                     EventName = "Level Complete";
                     break;
-                case KochavaTrackerEventType.Purchase:
+                case KochavaMeasurementEventType.Purchase:
                     EventName = "Purchase";
                     break;
-                case KochavaTrackerEventType.Rating:
+                case KochavaMeasurementEventType.Rating:
                     EventName = "Rating";
                     break;
-                case KochavaTrackerEventType.RegistrationComplete:
+                case KochavaMeasurementEventType.RegistrationComplete:
                     EventName = "Registration Complete";
                     break;
-                case KochavaTrackerEventType.Search:
+                case KochavaMeasurementEventType.Search:
                     EventName = "Search";
                     break;
-                case KochavaTrackerEventType.TutorialComplete:
+                case KochavaMeasurementEventType.TutorialComplete:
                     EventName = "Tutorial Complete";
                     break;
-                case KochavaTrackerEventType.View:
+                case KochavaMeasurementEventType.View:
                     EventName = "View";
                     break;
-                case KochavaTrackerEventType.AdView:
+                case KochavaMeasurementEventType.AdView:
                     EventName = "Ad View";
                     break;
-                case KochavaTrackerEventType.PushReceived:
+                case KochavaMeasurementEventType.PushReceived:
                     EventName = "Push Received";
                     break;
-                case KochavaTrackerEventType.PushOpened:
+                case KochavaMeasurementEventType.PushOpened:
                     EventName = "Push Opened";
                     break;
-                case KochavaTrackerEventType.ConsentGranted:
+                case KochavaMeasurementEventType.ConsentGranted:
                     EventName = "Consent Granted";
                     break;
-                case KochavaTrackerEventType.Deeplink:
+                case KochavaMeasurementEventType.Deeplink:
                     EventName = "_Deeplink";
                     break;
-                case KochavaTrackerEventType.AdClick:
+                case KochavaMeasurementEventType.AdClick:
                     EventName = "Ad Click";
                     break;
-                case KochavaTrackerEventType.StartTrial:
+                case KochavaMeasurementEventType.StartTrial:
                     EventName = "Start Trial";
                     break;
-                case KochavaTrackerEventType.Subscribe:
+                case KochavaMeasurementEventType.Subscribe:
                     EventName = "Subscribe";
                     break;
                 default:
@@ -256,7 +256,7 @@ namespace Kochava
         }
 
         // Creates an Event with a custom name.
-        public KochavaTrackerEvent(string eventName)
+        public KochavaMeasurementEvent(string eventName)
         {
             EventName = eventName ?? "";
         }
@@ -264,7 +264,7 @@ namespace Kochava
         // Sends the event.
         public void Send()
         {
-            KochavaTracker.Instance.SendEventWithEvent(this);
+            KochavaMeasurement.Instance.SendEventWithEvent(this);
         }
 
         // Sets a custom key/value to the event of type string.
@@ -394,12 +394,12 @@ namespace Kochava
     }
 
     // Main SDK Entrypoint.
-    public class KochavaTracker
+    public class KochavaMeasurement
     {
         // Version data that is updated via a script. Do not change.
         private const string SdkName = "Unity";
-        private const string SdkVersion = "5.4.0";
-        private const string SdkBuildDate = "2023-09-12T17:41:59Z";
+        private const string SdkVersion = "6.2.0";
+        private const string SdkBuildDate = "2024-07-16T15:13:20Z";
 
         // Native SDK API Handler
         private readonly NativeApi NativeApi;
@@ -417,13 +417,13 @@ namespace Kochava
         private string RegisteredPartnerName = null;
 
         // Initialize with the Native API Handler for the current platform.
-        internal KochavaTracker(NativeApi nativeApi)
+        internal KochavaMeasurement(NativeApi nativeApi)
         {
             NativeApi = nativeApi;
         }
 
         // Singleton instance.
-        public static KochavaTracker Instance => SingletonHandler.Instance.Tracker;
+        public static KochavaMeasurement Instance => SingletonHandler.Instance.Measurement;
 
         // Reserved function, only use if directed to by your Client Success Manager.
         public void ExecuteAdvancedInstruction(string name, string value)
@@ -432,7 +432,7 @@ namespace Kochava
         }
 
         // Sets the log level. This should be set prior to starting the SDK.
-        public void SetLogLevel(KochavaTrackerLogLevel logLevel)
+        public void SetLogLevel(KochavaMeasurementLogLevel logLevel)
         {
             NativeApi.SetLogLevel(logLevel);
         }
@@ -520,9 +520,15 @@ namespace Kochava
         {
             NativeApi.SetPrivacyProfileEnabled(name, enabled);
         }
+
+        // Register a deeplink wrapper domain for enhanced deeplink ESP integrations.
+        public void RegisterDeeplinkWrapperDomain(string domain)
+        {
+            NativeApi.RegisterDeeplinkWrapperDomain(domain);
+        }
         
         // Set the init completed callback listener.
-        public void SetInitCompletedListener(Action<KochavaTrackerInit> callback)
+        public void SetInitCompletedListener(Action<KochavaMeasurementInit> callback)
         {
             NativeApi.SetInitCompletedListener(callback);
         }
@@ -699,8 +705,8 @@ namespace Kochava
             NativeApi.Shutdown(deleteData);
         }
 
-        // Returns the Kochava Device ID via a callback.
-        public void GetDeviceId(Action<string> callback)
+        // Returns the Kochava Install ID via a callback.
+        public void RetrieveInstallId(Action<string> callback)
         {
             if (callback == null)
             {
@@ -708,23 +714,11 @@ namespace Kochava
                 return;
             }
 
-            NativeApi.GetDeviceId(callback);
+            NativeApi.RetrieveInstallId(callback);
         }
-
-        // Returns the currently retrieved install attribution data via a callback.
-        public void GetInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
-        {
-            if (callback == null)
-            {
-                Util.Log("Warn: Invalid Callback");
-                return;
-            }
-
-            NativeApi.GetInstallAttribution(callback);
-        }
-
+        
         // Retrieves the latest install attribution data from the server.
-        public void RetrieveInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
+        public void RetrieveInstallAttribution(Action<KochavaMeasurementInstallAttribution> callback)
         {
             if (callback == null)
             {
@@ -736,7 +730,7 @@ namespace Kochava
         }
 
         // Process a launch deeplink using the default 10 second timeout.
-        public void ProcessDeeplink(string path, Action<KochavaTrackerDeeplink> callback)
+        public void ProcessDeeplink(string path, Action<KochavaMeasurementDeeplink> callback)
         {
             if (callback == null)
             {
@@ -748,7 +742,7 @@ namespace Kochava
         }
 
         // Process a launch deeplink using a custom timeout in seconds.
-        public void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaTrackerDeeplink> callback)
+        public void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaMeasurementDeeplink> callback)
         {
             if (callback == null)
             {
@@ -820,7 +814,7 @@ namespace Kochava
         }
 
         // Send an event object (Called via Event.send().
-        public void SendEventWithEvent(KochavaTrackerEvent standardEvent)
+        public void SendEventWithEvent(KochavaMeasurementEvent standardEvent)
         {
             if (standardEvent == null)
             {
@@ -832,19 +826,19 @@ namespace Kochava
         }
 
         // Build and return an event using a Standard Event Type.
-        public KochavaTrackerEvent BuildEventWithEventType(KochavaTrackerEventType eventType)
+        public KochavaMeasurementEvent BuildEventWithEventType(KochavaMeasurementEventType eventType)
         {
-            return new KochavaTrackerEvent(eventType);
+            return new KochavaMeasurementEvent(eventType);
         }
 
         // Build and return an event using a custom name.
-        public KochavaTrackerEvent BuildEventWithEventName(string eventName)
+        public KochavaMeasurementEvent BuildEventWithEventName(string eventName)
         {
-            return new KochavaTrackerEvent(eventName);
+            return new KochavaMeasurementEvent(eventName);
         }
 
         // Set the platform event handler
-        public void SetPlatformEventHandler(Action<KochavaTrackerPlatformEvent> callback)
+        public void SetPlatformEventHandler(Action<KochavaMeasurementPlatformEvent> callback)
         {
             SingletonHandler.Instance.SetPlatformEventHandler(callback);
         }
@@ -862,28 +856,28 @@ namespace Kochava
             private static readonly object SingletonLock = new object();
             private static volatile SingletonHandler SingletonInstance;
 
-            // Tracker instance.
+            // Measurement instance.
             private NativeApi NativeApi;
-            internal KochavaTracker Tracker;
+            internal KochavaMeasurement Measurement;
 
             // Callbacks
             private static readonly object CallbackLock = new object();
             private readonly Dictionary<string, Action<string>> StringRequests = new Dictionary<string, Action<string>>();
             private readonly Dictionary<string, string> StringResponses = new Dictionary<string, string>();
-            private readonly Dictionary<string, Action<KochavaTrackerInstallAttribution>> InstallAttributionRequests = new Dictionary<string, Action<KochavaTrackerInstallAttribution>>();
-            private readonly Dictionary<string, KochavaTrackerInstallAttribution> InstallAttributionResponses = new Dictionary<string, KochavaTrackerInstallAttribution>();
-            private readonly Dictionary<string, Action<KochavaTrackerDeeplink>> DeeplinkRequests = new Dictionary<string, Action<KochavaTrackerDeeplink>>();
-            private readonly Dictionary<string, KochavaTrackerDeeplink> DeeplinkResponses = new Dictionary<string, KochavaTrackerDeeplink>();
-            private readonly List<KochavaTrackerPlatformEvent> PlatformEvents = new List<KochavaTrackerPlatformEvent>();
-            private Action<KochavaTrackerPlatformEvent> PlatformEventsHandler;
-            private readonly List<KochavaTrackerInit> InitCompletedEvents = new List<KochavaTrackerInit>();
-            private Action<KochavaTrackerInit> InitCompletedHandler;
+            private readonly Dictionary<string, Action<KochavaMeasurementInstallAttribution>> InstallAttributionRequests = new Dictionary<string, Action<KochavaMeasurementInstallAttribution>>();
+            private readonly Dictionary<string, KochavaMeasurementInstallAttribution> InstallAttributionResponses = new Dictionary<string, KochavaMeasurementInstallAttribution>();
+            private readonly Dictionary<string, Action<KochavaMeasurementDeeplink>> DeeplinkRequests = new Dictionary<string, Action<KochavaMeasurementDeeplink>>();
+            private readonly Dictionary<string, KochavaMeasurementDeeplink> DeeplinkResponses = new Dictionary<string, KochavaMeasurementDeeplink>();
+            private readonly List<KochavaMeasurementPlatformEvent> PlatformEvents = new List<KochavaMeasurementPlatformEvent>();
+            private Action<KochavaMeasurementPlatformEvent> PlatformEventsHandler;
+            private readonly List<KochavaMeasurementInit> InitCompletedEvents = new List<KochavaMeasurementInit>();
+            private Action<KochavaMeasurementInit> InitCompletedHandler;
             
 #if KVA_NETSTD
             private readonly List<KochavaNetStd.NativeRequest> NetStdNativeRequests = new List<KochavaNetStd.NativeRequest>();
 #endif
 
-            // Singleton instance. This creates a Unity GameObject called KochavaTracker that is set to survive level loading.
+            // Singleton instance. This creates a Unity GameObject called KochavaMeasurement that is set to survive level loading.
             public static SingletonHandler Instance
             {
                 get
@@ -894,21 +888,21 @@ namespace Kochava
                         if (SingletonInstance != null) return SingletonInstance;
                         
                         // Create the Kochava Game Object.
-                        var kochavaTrackerGameObject = new GameObject("KochavaTracker");
-                        DontDestroyOnLoad(kochavaTrackerGameObject);
+                        var kochavaMeasurementGameObject = new GameObject("KochavaMeasurement");
+                        DontDestroyOnLoad(kochavaMeasurementGameObject);
 
                         // Create Singleton Instance on that game object.
-                        SingletonInstance = kochavaTrackerGameObject.AddComponent<SingletonHandler>();
+                        SingletonInstance = kochavaMeasurementGameObject.AddComponent<SingletonHandler>();
 
                         // Create Native API Handler for the current platform.
 #if KVA_ANDROID
-                        SingletonInstance.NativeApi = kochavaTrackerGameObject.AddComponent<NativeAndroid>();
+                        SingletonInstance.NativeApi = kochavaMeasurementGameObject.AddComponent<NativeAndroid>();
 #elif KVA_IOS
-                        SingletonInstance.NativeApi = kochavaTrackerGameObject.AddComponent<NativeIos>();
+                        SingletonInstance.NativeApi = kochavaMeasurementGameObject.AddComponent<NativeIos>();
 #else
-                        SingletonInstance.NativeApi = kochavaTrackerGameObject.AddComponent<NativeDotNet>();
+                        SingletonInstance.NativeApi = kochavaMeasurementGameObject.AddComponent<NativeDotNet>();
 #endif
-                        SingletonInstance.Tracker = new KochavaTracker(SingletonInstance.NativeApi);
+                        SingletonInstance.Measurement = new KochavaMeasurement(SingletonInstance.NativeApi);
                     }
 
                     return SingletonInstance;
@@ -1004,7 +998,7 @@ namespace Kochava
             }
             
             // Add an install attribution request with callback. Use the returned requestId to match the response.
-            internal string AddInstallAttributionRequest(Action<KochavaTrackerInstallAttribution> callback)
+            internal string AddInstallAttributionRequest(Action<KochavaMeasurementInstallAttribution> callback)
             {
                 var requestId = Guid.NewGuid().ToString();
                 lock (CallbackLock)
@@ -1016,7 +1010,7 @@ namespace Kochava
             }
 
             // Add an install attribution response to callback. Use the generated requestId from the request to match up.
-            internal void AddInstallAttributionResponse(string requestId, KochavaTrackerInstallAttribution value)
+            internal void AddInstallAttributionResponse(string requestId, KochavaMeasurementInstallAttribution value)
             {
                 lock (CallbackLock)
                 {
@@ -1048,14 +1042,14 @@ namespace Kochava
                 var response = JObject.Parse(msg);
                 var id = (string) response["id"] ?? "";
                 var value = JObject.Parse((string) response["value"] ?? "{}");
-                var attribution = new KochavaTrackerInstallAttribution(value);
+                var attribution = new KochavaMeasurementInstallAttribution(value);
 
                 // Queue the response
                 AddInstallAttributionResponse(id, attribution);
             }
             
             // Add a deeplink request with callback. Use the returned requestId to match the response.
-            internal string AddDeeplinkRequest(Action<KochavaTrackerDeeplink> callback)
+            internal string AddDeeplinkRequest(Action<KochavaMeasurementDeeplink> callback)
             {
                 var requestId = Guid.NewGuid().ToString();
                 lock (CallbackLock)
@@ -1067,7 +1061,7 @@ namespace Kochava
             }
 
             // Add a deeplink response to callback. Use the generated requestId from the request to match up.
-            internal void AddDeeplinkResponse(string requestId, KochavaTrackerDeeplink value)
+            internal void AddDeeplinkResponse(string requestId, KochavaMeasurementDeeplink value)
             {
                 lock (CallbackLock)
                 {
@@ -1099,14 +1093,14 @@ namespace Kochava
                 var response = JObject.Parse(msg);
                 var id = (string) response["id"] ?? "";
                 var value = JObject.Parse((string) response["value"] ?? "{}");
-                var deeplink = new KochavaTrackerDeeplink(value);
+                var deeplink = new KochavaMeasurementDeeplink(value);
 
                 // Queue the response
                 AddDeeplinkResponse(id, deeplink);
             }
             
             // Add a platform event response to callback.
-            internal void AddPlatformEventResponse(KochavaTrackerPlatformEvent platformEvent)
+            internal void AddPlatformEventResponse(KochavaMeasurementPlatformEvent platformEvent)
             {
                 lock (CallbackLock)
                 {
@@ -1115,7 +1109,7 @@ namespace Kochava
             }
 
             // Set the platform event handler
-            internal void SetPlatformEventHandler(Action<KochavaTrackerPlatformEvent> callback)
+            internal void SetPlatformEventHandler(Action<KochavaMeasurementPlatformEvent> callback)
             {
                 lock (CallbackLock)
                 {
@@ -1142,14 +1136,14 @@ namespace Kochava
             {
                 // Parse the response
                 var response = JObject.Parse(msg);
-                var platformEvent = new KochavaTrackerPlatformEvent(response);
+                var platformEvent = new KochavaMeasurementPlatformEvent(response);
 
                 // Queue the response
                 AddPlatformEventResponse(platformEvent);
             }
             
             // Add a init completed response to callback.
-            internal void AddInitCompletedResponse(KochavaTrackerInit init)
+            internal void AddInitCompletedResponse(KochavaMeasurementInit init)
             {
                 lock (CallbackLock)
                 {
@@ -1158,7 +1152,7 @@ namespace Kochava
             }
 
             // Set the init completed handler
-            internal void SetInitCompletedHandler(Action<KochavaTrackerInit> callback)
+            internal void SetInitCompletedHandler(Action<KochavaMeasurementInit> callback)
             {
                 lock (CallbackLock)
                 {
@@ -1185,7 +1179,7 @@ namespace Kochava
             {
                 // Parse the response
                 var response = JObject.Parse(msg);
-                var init = new KochavaTrackerInit(response);
+                var init = new KochavaMeasurementInit(response);
 
                 // Queue the response
                 AddInitCompletedResponse(init);
@@ -1552,7 +1546,7 @@ namespace Kochava
             }
 
             // Sets the log level. This should be set prior to starting the SDK.
-            internal virtual void SetLogLevel(KochavaTrackerLogLevel logLevel)
+            internal virtual void SetLogLevel(KochavaMeasurementLogLevel logLevel)
             {
                 LogApiUnavailable("SetLogLevel");
             }
@@ -1640,9 +1634,15 @@ namespace Kochava
             {
                 LogApiUnavailable("SetPrivacyProfileEnabled");
             }
+
+            // Register a deeplink wrapper domain for enhanced deeplink ESP integrations.
+            internal virtual void RegisterDeeplinkWrapperDomain(string domain)
+            {
+                LogApiUnavailable("RegisterDeeplinkWrapperDomain");
+            }
             
             // Set the init completed callback listener.
-            internal virtual void SetInitCompletedListener(Action<KochavaTrackerInit> callback)
+            internal virtual void SetInitCompletedListener(Action<KochavaMeasurementInit> callback)
             {
                 LogApiUnavailable("SetInitCompletedListener");
             }
@@ -1679,32 +1679,26 @@ namespace Kochava
                 LogApiUnavailable("Shutdown");
             }
 
-            // Returns the Kochava Device ID via a callback.
-            internal virtual void GetDeviceId(Action<string> callback)
+            // Returns the Kochava Install ID via a callback.
+            internal virtual void RetrieveInstallId(Action<string> callback)
             {
-                LogApiUnavailable("GetDeviceId");
-            }
-
-            // Returns the currently retrieved install attribution data via a callback.
-            internal virtual void GetInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
-            {
-                LogApiUnavailable("GetInstallAttribution");
+                LogApiUnavailable("RetrieveInstallId");
             }
 
             // Retrieves the latest install attribution data from the server.
-            internal virtual void RetrieveInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
+            internal virtual void RetrieveInstallAttribution(Action<KochavaMeasurementInstallAttribution> callback)
             {
                 LogApiUnavailable("RetrieveInstallAttribution");
             }
 
             // Process a launch deeplink using the default 10 second timeout.
-            internal virtual void ProcessDeeplink(string path, Action<KochavaTrackerDeeplink> callback)
+            internal virtual void ProcessDeeplink(string path, Action<KochavaMeasurementDeeplink> callback)
             {
                 LogApiUnavailable("ProcessDeeplink");
             }
 
             // Process a launch deeplink using a custom timeout in seconds.
-            internal virtual void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaTrackerDeeplink> callback)
+            internal virtual void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaMeasurementDeeplink> callback)
             {
                 LogApiUnavailable("ProcessDeeplinkWithOverrideTimeout");
             }
@@ -1764,27 +1758,27 @@ namespace Kochava
             }
 
             // Send an event object (Called via Event.send().
-            internal virtual void SendEventWithEvent(KochavaTrackerEvent standardEvent)
+            internal virtual void SendEventWithEvent(KochavaMeasurementEvent standardEvent)
             {
                 LogApiUnavailable("SendEventWithEvent");
             }
 
             // Returns the log level as a string.
-            internal string GetLogLevelString(KochavaTrackerLogLevel logLevel)
+            internal string GetLogLevelString(KochavaMeasurementLogLevel logLevel)
             {
                 switch (logLevel)
                 {
-                    case KochavaTrackerLogLevel.None:
+                    case KochavaMeasurementLogLevel.None:
                         return "none";
-                    case KochavaTrackerLogLevel.Error:
+                    case KochavaMeasurementLogLevel.Error:
                         return "error";
-                    case KochavaTrackerLogLevel.Warn:
+                    case KochavaMeasurementLogLevel.Warn:
                         return "warn";
-                    case KochavaTrackerLogLevel.Info:
+                    case KochavaMeasurementLogLevel.Info:
                         return "info";
-                    case KochavaTrackerLogLevel.Debug:
+                    case KochavaMeasurementLogLevel.Debug:
                         return "debug";
-                    case KochavaTrackerLogLevel.Trace:
+                    case KochavaMeasurementLogLevel.Trace:
                         return "trace";
                     default:
                         return "info";
@@ -1804,7 +1798,7 @@ namespace Kochava
             // Log a message with the Kochava prefix.
             public static void Log(string message)
             {
-                Debug.Log("KVA/Tracker: " + message);
+                Debug.Log("KVA/Measurement: " + message);
             }
             
             public static JObject OptJObject(JToken item)
@@ -1846,7 +1840,7 @@ namespace Kochava
         {
             // State
             private AndroidJavaObject AndroidContext;
-            private AndroidJavaObject AndroidTracker;
+            private AndroidJavaObject AndroidMeasurement;
             private AndroidJavaObject AndroidEvents;
             private AndroidJavaObject AndroidEngagement;
 
@@ -1864,7 +1858,7 @@ namespace Kochava
                 void onRetrievedInstallAttribution(AndroidJavaObject attributionJava)
                 {
                     var serializedJson = attributionJava.Call<AndroidJavaObject>("toJson").Call<string>("toString");
-                    var attribution = new KochavaTrackerInstallAttribution(JObject.Parse(serializedJson));
+                    var attribution = new KochavaMeasurementInstallAttribution(JObject.Parse(serializedJson));
                     SingletonHandler.Instance.AddInstallAttributionResponse(RequestId, attribution);
                 }
             }
@@ -1883,7 +1877,7 @@ namespace Kochava
                 void onProcessedDeeplink(AndroidJavaObject deeplinkJava)
                 {
                     var serializedJson = deeplinkJava.Call<AndroidJavaObject>("toJson").Call<string>("toString");
-                    var deeplink = new KochavaTrackerDeeplink(JObject.Parse(serializedJson));
+                    var deeplink = new KochavaMeasurementDeeplink(JObject.Parse(serializedJson));
                     SingletonHandler.Instance.AddDeeplinkResponse(RequestId, deeplink);
                 }
             }
@@ -1899,7 +1893,7 @@ namespace Kochava
                 void onCompletedInit(AndroidJavaObject initJava)
                 {
                     var serializedJson = initJava.Call<AndroidJavaObject>("toJson").Call<string>("toString");
-                    var init = new KochavaTrackerInit(JObject.Parse(serializedJson));
+                    var init = new KochavaMeasurementInit(JObject.Parse(serializedJson));
                     SingletonHandler.Instance.AddInitCompletedResponse(init);
                 }
             }
@@ -1914,10 +1908,10 @@ namespace Kochava
                     AndroidContext = androidActivity.Call<AndroidJavaObject>("getApplicationContext");
                 }
 
-                // Retrieve the Android Tracker Singleton
-                using (var trackerClass = new AndroidJavaClass("com.kochava.tracker.Tracker"))
+                // Retrieve the Android Measurement Singleton
+                using (var measurementClass = new AndroidJavaClass("com.kochava.tracker.Tracker"))
                 {
-                    AndroidTracker = trackerClass.CallStatic<AndroidJavaObject>("getInstance");
+                    AndroidMeasurement = measurementClass.CallStatic<AndroidJavaObject>("getInstance");
                 }
 
                 // Retrieve the Android Events Singleton
@@ -1936,153 +1930,150 @@ namespace Kochava
             // Reserved function, only use if directed to by your Client Success Manager.
             internal override void ExecuteAdvancedInstruction(string name, string value)
             {
-                AndroidTracker.Call("executeAdvancedInstruction", name, value);
+                AndroidMeasurement.Call("executeAdvancedInstruction", name, value);
             }
 
             // Sets the log level. This should be set prior to starting the SDK.
-            internal override void SetLogLevel(KochavaTrackerLogLevel logLevel)
+            internal override void SetLogLevel(KochavaMeasurementLogLevel logLevel)
             {
                 using (var logLevelClass = new AndroidJavaClass("com.kochava.tracker.log.LogLevel"))
                 {
                     var logLevelString = GetLogLevelString(logLevel);
-                    AndroidTracker.Call("setLogLevel", logLevelClass.CallStatic<AndroidJavaObject>("fromString", logLevelString));
+                    AndroidMeasurement.Call("setLogLevel", logLevelClass.CallStatic<AndroidJavaObject>("fromString", logLevelString));
                 }
             }
 
             // Sets the sleep state.
             internal override void SetSleep(bool sleep)
             {
-                AndroidTracker.Call("setSleep", sleep);
+                AndroidMeasurement.Call("setSleep", sleep);
             }
 
             // Sets if app level advertising tracking should be limited.
             internal override void SetAppLimitAdTracking(bool appLimitAdTracking)
             {
-                AndroidTracker.Call("setAppLimitAdTracking", appLimitAdTracking);
+                AndroidMeasurement.Call("setAppLimitAdTracking", appLimitAdTracking);
             }
 
             // Register a custom device identifier for install attribution.
             internal override void RegisterCustomDeviceIdentifier(string name, string value)
             {
-                AndroidTracker.Call("registerCustomDeviceIdentifier", name, value);
+                AndroidMeasurement.Call("registerCustomDeviceIdentifier", name, value);
             }
             
             // Register a custom value to be included in SDK payloads.
             internal override void RegisterCustomStringValue(string name, string value)
             {
-                AndroidTracker.Call("registerCustomStringValue", name, value);
+                AndroidMeasurement.Call("registerCustomStringValue", name, value);
             }
 
             // Register a custom value to be included in SDK payloads.
             internal override void RegisterCustomBoolValue(string name, bool? value)
             {
-                AndroidTracker.Call("registerCustomBoolValue", name, value != null ? new AndroidJavaObject("java.lang.Boolean", (bool) value) : null);
+                AndroidMeasurement.Call("registerCustomBoolValue", name, value != null ? new AndroidJavaObject("java.lang.Boolean", (bool) value) : null);
             }
 
             // Register a custom value to be included in SDK payloads.
             internal override void RegisterCustomNumberValue(string name, double? value)
             {
-                AndroidTracker.Call("registerCustomNumberValue", name, value != null ? new AndroidJavaObject("java.lang.Double", (double) value) : null);
+                AndroidMeasurement.Call("registerCustomNumberValue", name, value != null ? new AndroidJavaObject("java.lang.Double", (double) value) : null);
             }
 
             // Registers an Identity Link that allows linking different identities together in the form of key and value pairs.
             internal override void RegisterIdentityLink(string name, string value)
             {
-                AndroidTracker.Call("registerIdentityLink", name, value);
+                AndroidMeasurement.Call("registerIdentityLink", name, value);
             }
 
             // (Android Only) Enable the Instant App feature by setting the instant app guid.
             internal override void EnableAndroidInstantApps(string instantAppGuid)
             {
-                AndroidTracker.Call("enableInstantApps", instantAppGuid);
+                AndroidMeasurement.Call("enableInstantApps", instantAppGuid);
             }
 
             // Register a privacy profile, creating or overwriting an existing pofile.
             internal override void RegisterPrivacyProfile(string name, string[] keys)
             {
-                AndroidTracker.Call("registerPrivacyProfile", name, keys);
+                AndroidMeasurement.Call("registerPrivacyProfile", name, keys);
             }
 
             // Enable or disable an existing privacy profile.
             internal override void SetPrivacyProfileEnabled(string name, bool enabled)
             {
-                AndroidTracker.Call("setPrivacyProfileEnabled", name, enabled);
+                AndroidMeasurement.Call("setPrivacyProfileEnabled", name, enabled);
+            }
+
+            // Register a deeplink wrapper domain for enhanced deeplink ESP integrations.
+            internal override void RegisterDeeplinkWrapperDomain(string domain)
+            {
+                AndroidMeasurement.Call("registerDeeplinkWrapperDomain", domain);
             }
             
             // Set the init completed callback listener.
-            internal override void SetInitCompletedListener(Action<KochavaTrackerInit> callback)
+            internal override void SetInitCompletedListener(Action<KochavaMeasurementInit> callback)
             {
                 SingletonHandler.Instance.SetInitCompletedHandler(callback);
-                AndroidTracker.Call("setCompletedInitListener", callback != null ? new AndroidInitHandler() : null);
+                AndroidMeasurement.Call("setCompletedInitListener", callback != null ? new AndroidInitHandler() : null);
             }
             
             // Set if consent has been explicitly opted in or out by the user.
             internal override void SetIntelligentConsentGranted(bool granted)
             {
-                AndroidTracker.Call("setIntelligentConsentGranted", granted);
+                AndroidMeasurement.Call("setIntelligentConsentGranted", granted);
             }
 
             // Returns if the SDK is currently started.
             internal override bool GetStarted()
             {
-                return AndroidTracker.Call<bool>("isStarted");
+                return AndroidMeasurement.Call<bool>("isStarted");
             }
 
             // Start the SDK with an App Guid.
             internal override void StartWithAppGuid(string appGuid)
             {
-                AndroidTracker.Call("startWithAppGuid", AndroidContext, appGuid);
+                AndroidMeasurement.Call("startWithAppGuid", AndroidContext, appGuid);
             }
 
             // Start the SDK with a Partner Name.
             internal override void StartWithPartnerName(string partnerName)
             {
-                AndroidTracker.Call("startWithPartnerName", AndroidContext, partnerName);
+                AndroidMeasurement.Call("startWithPartnerName", AndroidContext, partnerName);
             }
 
             // Shuts down the SDK and optionally deletes all local SDK data.
             // NOTE: Care should be taken when using this method as deleting the SDK data will make it reset back to a first install state.
             internal override void Shutdown(bool deleteData)
             {
-                AndroidTracker.Call("shutdown", AndroidContext, deleteData);
+                AndroidMeasurement.Call("shutdown", AndroidContext, deleteData);
             }
 
-            // Returns the Kochava Device ID via a callback.
-            internal override void GetDeviceId(Action<string> callback)
+            // Returns the Kochava Install ID via a callback.
+            internal override void RetrieveInstallId(Action<string> callback)
             {
                 var requestId = SingletonHandler.Instance.AddStringRequest(callback);
-                var value = AndroidTracker.Call<string>("getDeviceId");
+                var value = AndroidMeasurement.Call<string>("getDeviceId");
                 SingletonHandler.Instance.AddStringResponse(requestId, value);
             }
 
-            // Returns the currently retrieved install attribution data via a callback.
-            internal override void GetInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
-            {
-                var requestId = SingletonHandler.Instance.AddInstallAttributionRequest(callback);
-                var attributionJava = AndroidTracker.Call<AndroidJavaObject>("getInstallAttribution");
-                var serializedJson = attributionJava.Call<AndroidJavaObject>("toJson").Call<string>("toString");
-                SingletonHandler.Instance.AddInstallAttributionResponse(requestId, new KochavaTrackerInstallAttribution(JObject.Parse(serializedJson)));
-            }
-
             // Retrieves the latest install attribution data from the server.
-            internal override void RetrieveInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
+            internal override void RetrieveInstallAttribution(Action<KochavaMeasurementInstallAttribution> callback)
             {
                 var requestId = SingletonHandler.Instance.AddInstallAttributionRequest(callback);
-                AndroidTracker.Call("retrieveInstallAttribution", new AndroidInstallAttributionHandler(requestId));
+                AndroidMeasurement.Call("retrieveInstallAttribution", new AndroidInstallAttributionHandler(requestId));
             }
 
             // Process a launch deeplink using the default 10 second timeout.
-            internal override void ProcessDeeplink(string path, Action<KochavaTrackerDeeplink> callback)
+            internal override void ProcessDeeplink(string path, Action<KochavaMeasurementDeeplink> callback)
             {
                 var requestId = SingletonHandler.Instance.AddDeeplinkRequest(callback);
-                AndroidTracker.Call("processDeeplink", path, new AndroidDeeplinkHandler(requestId));
+                AndroidMeasurement.Call("processDeeplink", path, new AndroidDeeplinkHandler(requestId));
             }
 
             // Process a launch deeplink using a custom timeout in seconds.
-            internal override void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaTrackerDeeplink> callback)
+            internal override void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaMeasurementDeeplink> callback)
             {
                 var requestId = SingletonHandler.Instance.AddDeeplinkRequest(callback);
-                AndroidTracker.Call("processDeeplink", path, timeout, new AndroidDeeplinkHandler(requestId));
+                AndroidMeasurement.Call("processDeeplink", path, timeout, new AndroidDeeplinkHandler(requestId));
             }
 
             // (Android and iOS Only) Set the push token.
@@ -2146,7 +2137,7 @@ namespace Kochava
             }
 
             // Send an event object (Called via Event.send().
-            internal override void SendEventWithEvent(KochavaTrackerEvent standardEvent)
+            internal override void SendEventWithEvent(KochavaMeasurementEvent standardEvent)
             {
                 using (var eventClass = new AndroidJavaClass("com.kochava.tracker.events.Event"))
                 {
@@ -2185,7 +2176,7 @@ namespace Kochava
             }
 
             // Sets the log level. This should be set prior to starting the SDK.
-            internal override void SetLogLevel(KochavaTrackerLogLevel logLevel)
+            internal override void SetLogLevel(KochavaMeasurementLogLevel logLevel)
             {
                 iosNativeSetLogLevel(GetLogLevelString(logLevel));
             }
@@ -2273,9 +2264,15 @@ namespace Kochava
             {
                 iosNativeSetPrivacyProfileEnabled(name, enabled);
             }
+
+            // Register a deeplink wrapper domain for enhanced deeplink ESP integrations.
+            internal override void RegisterDeeplinkWrapperDomain(string domain)
+            {
+                iosNativeRegisterDeeplinkWrapperDomain(domain);
+            }
             
             // Set the init completed callback listener.
-            internal override void SetInitCompletedListener(Action<KochavaTrackerInit> callback)
+            internal override void SetInitCompletedListener(Action<KochavaMeasurementInit> callback)
             {
                 SingletonHandler.Instance.SetInitCompletedHandler(callback);
                 iosNativeSetInitCompletedListener(callback != null);
@@ -2312,37 +2309,30 @@ namespace Kochava
                 iosNativeShutdown(deleteData);
             }
 
-            // Returns the Kochava Device ID via a callback.
-            internal override void GetDeviceId(Action<string> callback)
+            // Returns the Kochava Install ID via a callback.
+            internal override void RetrieveInstallId(Action<string> callback)
             {
                 var requestId = SingletonHandler.Instance.AddStringRequest(callback);
-                var value = iosNativeGetDeviceId();
+                var value = iosNativeRetrieveInstallId();
                 SingletonHandler.Instance.AddStringResponse(requestId, value);
             }
 
-            // Returns the currently retrieved install attribution data via a callback.
-            internal override void GetInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
-            {
-                var requestId = SingletonHandler.Instance.AddInstallAttributionRequest(callback);
-                SingletonHandler.Instance.AddInstallAttributionResponse(requestId, new KochavaTrackerInstallAttribution(JObject.Parse(iosNativeGetInstallAttribution())));
-            }
-
             // Retrieves the latest install attribution data from the server.
-            internal override void RetrieveInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
+            internal override void RetrieveInstallAttribution(Action<KochavaMeasurementInstallAttribution> callback)
             {
                 var requestId = SingletonHandler.Instance.AddInstallAttributionRequest(callback);
                 iosNativeRetrieveInstallAttribution(requestId);
             }
 
             // Process a launch deeplink using the default 10 second timeout.
-            internal override void ProcessDeeplink(string path, Action<KochavaTrackerDeeplink> callback)
+            internal override void ProcessDeeplink(string path, Action<KochavaMeasurementDeeplink> callback)
             {
                 var requestId = SingletonHandler.Instance.AddDeeplinkRequest(callback);
                 iosNativeProcessDeeplink(path, requestId);
             }
 
             // Process a launch deeplink using a custom timeout in seconds.
-            internal override void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaTrackerDeeplink> callback)
+            internal override void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaMeasurementDeeplink> callback)
             {
                 var requestId = SingletonHandler.Instance.AddDeeplinkRequest(callback);
                 iosNativeProcessDeeplinkWithOverrideTimeout(path, timeout, requestId);
@@ -2409,7 +2399,7 @@ namespace Kochava
             }
 
             // Send an event object (Called via Event.send().
-            internal override void SendEventWithEvent(KochavaTrackerEvent standardEvent)
+            internal override void SendEventWithEvent(KochavaMeasurementEvent standardEvent)
             {
                 var json = new JObject();
                 json.Add("name", standardEvent.GetEventName());
@@ -2463,6 +2453,9 @@ namespace Kochava
 
             [System.Runtime.InteropServices.DllImport("__Internal")]
             private static extern void iosNativeSetPrivacyProfileEnabled(string name, bool enabled);
+
+            [System.Runtime.InteropServices.DllImport("__Internal")]
+            private static extern void iosNativeRegisterDeeplinkWrapperDomain(string domain);
             
             [System.Runtime.InteropServices.DllImport("__Internal")]
             private static extern void iosNativeSetInitCompletedListener(bool setListener);
@@ -2483,10 +2476,7 @@ namespace Kochava
             private static extern void iosNativeShutdown(bool deleteData);
 
             [System.Runtime.InteropServices.DllImport("__Internal")]
-            private static extern string iosNativeGetDeviceId();
-
-            [System.Runtime.InteropServices.DllImport("__Internal")]
-            private static extern string iosNativeGetInstallAttribution();
+            private static extern string iosNativeRetrieveInstallId();
 
             [System.Runtime.InteropServices.DllImport("__Internal")]
             private static extern void iosNativeRetrieveInstallAttribution(string requestId);
@@ -2537,20 +2527,20 @@ namespace Kochava
         // API access for the native .NET SDK. This is used for all platforms that are not Android, iOS, or WebGL.
         internal class NativeDotNet : NativeApi
         {
-            private KochavaNetStd.Tracker Tracker;
+            private KochavaNetStd.Tracker Measurement;
 
             internal NativeDotNet()
             {
-                InitializeTracker();
+                InitializeMeasurement();
             }
 
-            // Create a new instance of the Tracker and initialize logging.
-            private void InitializeTracker()
+            // Create a new instance of the Measurement and initialize logging.
+            private void InitializeMeasurement()
             {
-                // Create the Tracker instance.
-                if (Tracker == null)
+                // Create the Measurement instance.
+                if (Measurement == null)
                 {
-                    Tracker = new KochavaNetStd.Tracker(nativeRequest =>
+                    Measurement = new KochavaNetStd.Tracker(nativeRequest =>
                     {
                         // Queue known actions to run on the Unity Thread.
                         if (nativeRequest.Action == KochavaNetStd.NativeRequest.NativeRequestType.GatherDatapoint
@@ -2572,43 +2562,43 @@ namespace Kochava
 
                 // Initialize logging.
                 KochavaNetStd.Global.PrettyPrintJson = true;
-                SetLogLevel(KochavaTrackerLogLevel.Info);
+                SetLogLevel(KochavaMeasurementLogLevel.Info);
             }
 
             // Unity update tick
             internal override void Update()
             {
-                Tracker.Update();
+                Measurement.Update();
             }
 
             // Reserved function, only use if directed to by your Client Success Manager.
             internal override void ExecuteAdvancedInstruction(string name, string value)
             {
-                Tracker.ExecuteAdvancedInstruction(name, value);
+                Measurement.ExecuteAdvancedInstruction(name, value);
             }
 
             // Sets the log level. This should be set prior to starting the SDK.
-            internal override void SetLogLevel(KochavaTrackerLogLevel logLevel)
+            internal override void SetLogLevel(KochavaMeasurementLogLevel logLevel)
             {
                 var nativeLogLevel = KochavaNetStd.Global.LogLevel.Info;
                 switch (logLevel)
                 {
-                    case KochavaTrackerLogLevel.None:
+                    case KochavaMeasurementLogLevel.None:
                         nativeLogLevel = KochavaNetStd.Global.LogLevel.None;
                         break;
-                    case KochavaTrackerLogLevel.Error:
+                    case KochavaMeasurementLogLevel.Error:
                         nativeLogLevel = KochavaNetStd.Global.LogLevel.Error;
                         break;
-                    case KochavaTrackerLogLevel.Warn:
+                    case KochavaMeasurementLogLevel.Warn:
                         nativeLogLevel = KochavaNetStd.Global.LogLevel.Warn;
                         break;
-                    case KochavaTrackerLogLevel.Info:
+                    case KochavaMeasurementLogLevel.Info:
                         nativeLogLevel = KochavaNetStd.Global.LogLevel.Info;
                         break;
-                    case KochavaTrackerLogLevel.Debug:
+                    case KochavaMeasurementLogLevel.Debug:
                         nativeLogLevel = KochavaNetStd.Global.LogLevel.Debug;
                         break;
-                    case KochavaTrackerLogLevel.Trace:
+                    case KochavaMeasurementLogLevel.Trace:
                         nativeLogLevel = KochavaNetStd.Global.LogLevel.Trace;
                         break;
                 }
@@ -2619,43 +2609,43 @@ namespace Kochava
             // Sets the sleep state.
             internal override void SetSleep(bool sleep)
             {
-                Tracker.Sleep = sleep;
+                Measurement.Sleep = sleep;
             }
 
             // Sets if app level advertising tracking should be limited.
             internal override void SetAppLimitAdTracking(bool appLimitAdTracking)
             {
-                Tracker.SetAppLimitAdTracking(appLimitAdTracking);
+                Measurement.SetAppLimitAdTracking(appLimitAdTracking);
             }
 
             // Register a custom device identifier for install attribution.
             internal override void RegisterCustomDeviceIdentifier(string name, string value)
             {
-                Tracker.RegisterCustomDeviceIdentifier(name, value);
+                Measurement.RegisterCustomDeviceIdentifier(name, value);
             }
 
             // Registers an Identity Link that allows linking different identities together in the form of key and value pairs.
             internal override void RegisterIdentityLink(string name, string value)
             {
-                Tracker.RegisterIdentityLink(name, value);
+                Measurement.RegisterIdentityLink(name, value);
             }
 
             // Register a privacy profile, creating or overwriting an existing pofile.
             internal override void RegisterPrivacyProfile(string name, string[] keys)
             {
-                Tracker.RegisterPrivacyProfile(name, new List<string>(keys ?? Array.Empty<string>()));
+                Measurement.RegisterPrivacyProfile(name, new List<string>(keys ?? Array.Empty<string>()));
             }
 
             // Enable or disable an existing privacy profile.
             internal override void SetPrivacyProfileEnabled(string name, bool enabled)
             {
-                Tracker.SetPrivacyProfileEnabled(name, enabled);
+                Measurement.SetPrivacyProfileEnabled(name, enabled);
             }
 
             // Returns if the SDK is currently started.
             internal override bool GetStarted()
             {
-                return Tracker.GetStarted();
+                return Measurement.GetStarted();
             }
 
             // Start the SDK with an App Guid.
@@ -2664,7 +2654,7 @@ namespace Kochava
                 var config = new KochavaNetStd.HostConfiguration();
                 config.AppGuid = appGuid;
                 config.AccumulateSessionDurationPassively = true;
-                Tracker.StartWithConfiguration(config);
+                Measurement.StartWithConfiguration(config);
             }
 
             // Start the SDK with an Partner Name.
@@ -2673,64 +2663,54 @@ namespace Kochava
                 var config = new KochavaNetStd.HostConfiguration();
                 config.PartnerName = partnerName;
                 config.AccumulateSessionDurationPassively = true;
-                Tracker.StartWithConfiguration(config);
+                Measurement.StartWithConfiguration(config);
             }
 
             // Shuts down the SDK and optionally deletes all local SDK data.
             // NOTE: Care should be taken when using this method as deleting the SDK data will make it reset back to a first install state.
             internal override void Shutdown(bool deleteData)
             {
-                Tracker.Shutdown(deleteData);
-                InitializeTracker();
+                Measurement.Shutdown(deleteData);
+                InitializeMeasurement();
             }
 
-            // Returns the Kochava Device ID.
-            internal override void GetDeviceId(Action<string> callback)
+            // Returns the Kochava Install ID.
+            internal override void RetrieveInstallId(Action<string> callback)
             {
                 var requestId = SingletonHandler.Instance.AddStringRequest(callback);
-                Tracker.GetDeviceId(value =>
+                Measurement.GetDeviceId(value =>
                 {
                     SingletonHandler.Instance.AddStringResponse(requestId, value ?? "");
                 });
             }
 
-            // Returns the currently retrieved install attribution data. This is only valid if the SDK is started.
-            internal override void GetInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
-            {
-                var requestId = SingletonHandler.Instance.AddInstallAttributionRequest(callback);
-                Tracker.GetAttribution(value =>
-                {
-                    SingletonHandler.Instance.AddInstallAttributionResponse(requestId, new KochavaTrackerInstallAttribution(value.Retrieved, value.RawResults, value.Attributed, value.FirstInstall));
-                });
-            }
-
             // Retrieves the latest install attribution data from the server.
-            internal override void RetrieveInstallAttribution(Action<KochavaTrackerInstallAttribution> callback)
+            internal override void RetrieveInstallAttribution(Action<KochavaMeasurementInstallAttribution> callback)
             {
                 var requestId = SingletonHandler.Instance.AddInstallAttributionRequest(callback);
-                Tracker.RetrieveAttribution(value =>
+                Measurement.RetrieveAttribution(value =>
                 {
-                    SingletonHandler.Instance.AddInstallAttributionResponse(requestId, new KochavaTrackerInstallAttribution(value.Retrieved, value.RawResults, value.Attributed, value.FirstInstall));
+                    SingletonHandler.Instance.AddInstallAttributionResponse(requestId, new KochavaMeasurementInstallAttribution(value.Retrieved, value.RawResults, value.Attributed, value.FirstInstall));
                 });
             }
 
             // Process a launch deeplink using the default 10 second timeout.
-            internal override void ProcessDeeplink(string path, Action<KochavaTrackerDeeplink> callback)
+            internal override void ProcessDeeplink(string path, Action<KochavaMeasurementDeeplink> callback)
             {
                 var requestId = SingletonHandler.Instance.AddDeeplinkRequest(callback);
-                Tracker.ProcessDeeplink(path, value =>
+                Measurement.ProcessDeeplink(path, value =>
                 {
-                    SingletonHandler.Instance.AddDeeplinkResponse(requestId, new KochavaTrackerDeeplink(value.Destination, value.RawResults));
+                    SingletonHandler.Instance.AddDeeplinkResponse(requestId, new KochavaMeasurementDeeplink(value.Destination, value.RawResults));
                 });
             }
 
             // Process a launch deeplink using a custom timeout in seconds.
-            internal override void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaTrackerDeeplink> callback)
+            internal override void ProcessDeeplinkWithOverrideTimeout(string path, double timeout, Action<KochavaMeasurementDeeplink> callback)
             {
                 var requestId = SingletonHandler.Instance.AddDeeplinkRequest(callback);
-                Tracker.ProcessDeeplink(path, value =>
+                Measurement.ProcessDeeplink(path, value =>
                 {
-                    SingletonHandler.Instance.AddDeeplinkResponse(requestId, new KochavaTrackerDeeplink(value.Destination, value.RawResults));
+                    SingletonHandler.Instance.AddDeeplinkResponse(requestId, new KochavaMeasurementDeeplink(value.Destination, value.RawResults));
                 }, timeout);
             }
 
@@ -2738,28 +2718,28 @@ namespace Kochava
             internal override void SendEvent(string name)
             {
                 var myEvent = new KochavaNetStd.StandardEvent(name);
-                Tracker.SendEvent(myEvent);
+                Measurement.SendEvent(myEvent);
             }
 
             // Send an event with string data.
             internal override void SendEventWithString(string name, string data)
             {
                 var myEvent = new KochavaNetStd.StandardEvent(name, data);
-                Tracker.SendEvent(myEvent);
+                Measurement.SendEvent(myEvent);
             }
 
             // Send an event with dictionary data.
             internal override void SendEventWithDictionary(string name, JObject data)
             {
                 var myEvent = new KochavaNetStd.StandardEvent(name, data);
-                Tracker.SendEvent(myEvent);
+                Measurement.SendEvent(myEvent);
             }
 
             // Send an event object (Called via Event.send().
-            internal override void SendEventWithEvent(KochavaTrackerEvent standardEvent)
+            internal override void SendEventWithEvent(KochavaMeasurementEvent standardEvent)
             {
                 var myEvent = new KochavaNetStd.StandardEvent(standardEvent.GetEventName(), standardEvent.GetEventData());
-                Tracker.SendEvent(myEvent);
+                Measurement.SendEvent(myEvent);
             }
         }
 #endif
