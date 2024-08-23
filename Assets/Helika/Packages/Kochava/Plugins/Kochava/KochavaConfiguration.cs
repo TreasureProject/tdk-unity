@@ -1,5 +1,5 @@
 //
-//  KochavaTracker (Unity)
+//  KochavaMeasurement (Unity)
 //
 //  Copyright (c) 2013 - 2023 Kochava, Inc. All rights reserved.
 //
@@ -32,7 +32,7 @@ using System;
 // Kochava SDK
 namespace Kochava
 {
-    // Kochava Tracker SDK Configuration Object
+    // Kochava Measurement SDK Configuration Object
     public class KochavaConfiguration : MonoBehaviour {
 
         // Editor-configurable settings
@@ -60,9 +60,9 @@ namespace Kochava
 
         [Header("Logging")]
         [Tooltip("Log Level used in a Production build.")]
-        public KochavaTrackerLogLevel productionLogLevel;
+        public KochavaMeasurementLogLevel productionLogLevel;
         [Tooltip("Log Level used in a Development build.")]
-        public KochavaTrackerLogLevel developmentLogLevel;
+        public KochavaMeasurementLogLevel developmentLogLevel;
 
         [Header("App Tracking Transparency (iOS)")]
         public IosAttConfig iosATTConfiguration = new IosAttConfig();
@@ -88,25 +88,25 @@ namespace Kochava
             DontDestroyOnLoad(gameObject);
             
             // App GUIDs
-            KochavaTracker.Instance.RegisterEditorAppGuid(editorAppGuid.Get());
-            KochavaTracker.Instance.RegisterAndroidAppGuid(androidAppGuid.Get());
-            KochavaTracker.Instance.RegisterIosAppGuid(iosAppGuid.Get());
-            KochavaTracker.Instance.RegisterWebGlAppGuid(webGlAppGuid.Get());
-            KochavaTracker.Instance.RegisterMacOsAppGuid(macOsAppGuid.Get());
-            KochavaTracker.Instance.RegisterLinuxAppGuid(linuxAppGuid.Get());
-            KochavaTracker.Instance.RegisterWindowsAppGuid(windowsAppGuid.Get());
-            KochavaTracker.Instance.RegisterUwpAppGuid(uwpAppGuid.Get());
-            KochavaTracker.Instance.RegisterFallbackAppGuid(fallbackAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterEditorAppGuid(editorAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterAndroidAppGuid(androidAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterIosAppGuid(iosAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterWebGlAppGuid(webGlAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterMacOsAppGuid(macOsAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterLinuxAppGuid(linuxAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterWindowsAppGuid(windowsAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterUwpAppGuid(uwpAppGuid.Get());
+            KochavaMeasurement.Instance.RegisterFallbackAppGuid(fallbackAppGuid.Get());
 
             // Log Level
-            KochavaTracker.Instance.SetLogLevel(Debug.isDebugBuild ? developmentLogLevel : productionLogLevel);
+            KochavaMeasurement.Instance.SetLogLevel(Debug.isDebugBuild ? developmentLogLevel : productionLogLevel);
 
             // Instant Apps
 #if KVA_ANDROID
             var resolvedAndroidInstantAppGuid = androidAppGuid.Get();
             if (!string.IsNullOrEmpty(resolvedAndroidInstantAppGuid))
             {
-                KochavaTracker.Instance.EnableAndroidInstantApps(resolvedAndroidInstantAppGuid);
+                KochavaMeasurement.Instance.EnableAndroidInstantApps(resolvedAndroidInstantAppGuid);
             }
 #endif
 
@@ -114,7 +114,7 @@ namespace Kochava
 #if KVA_IOS
             if (!string.IsNullOrEmpty(iosAppClipIdentifier))
             {
-                KochavaTracker.Instance.EnableIosAppClips(iosAppClipIdentifier);
+                KochavaMeasurement.Instance.EnableIosAppClips(iosAppClipIdentifier);
             }
 #endif
 
@@ -122,16 +122,16 @@ namespace Kochava
 #if KVA_IOS
             if (iosATTConfiguration.enabled)
             {
-                KochavaTracker.Instance.EnableIosAtt(); 
+                KochavaMeasurement.Instance.EnableIosAtt(); 
             }
-            KochavaTracker.Instance.SetIosAttAuthorizationAutoRequest(iosATTConfiguration.autoRequest);
-            KochavaTracker.Instance.SetIosAttAuthorizationWaitTime(iosATTConfiguration.waitTime);
+            KochavaMeasurement.Instance.SetIosAttAuthorizationAutoRequest(iosATTConfiguration.autoRequest);
+            KochavaMeasurement.Instance.SetIosAttAuthorizationWaitTime(iosATTConfiguration.waitTime);
 #endif
             // Partner Name
-            KochavaTracker.Instance.RegisterPartnerName(kochavaPartnerName);
+            KochavaMeasurement.Instance.RegisterPartnerName(kochavaPartnerName);
 
             // Start
-            KochavaTracker.Instance.Start();
+            KochavaMeasurement.Instance.Start();
         }
 
         // App GUID container for specifying Production and Development App GUIDs.

@@ -1,27 +1,27 @@
 //
-//  KochavaTracker (Unity)
+//  KochavaMeasurement (Unity)
 //
 //  Copyright (c) 2013 - 2023 Kochava, Inc. All rights reserved.
 //
 
 #pragma mark - Import
-
-#import <KochavaTracker/KochavaTracker.h>
+#import <KochavaNetworking/KochavaNetworking.h>
+#import <KochavaMeasurement/KochavaMeasurement.h>
 
 #pragma mark - Util
 
-// Interface for the kochavaTrackerUtil
-@interface KochavaTrackerUtil : NSObject
+// Interface for the kochavaMeasurementUtil
+@interface KochavaMeasurementUtil : NSObject
 
 @end
 
 // Common utility functions used by all of the wrappers.
 // Any changes to the methods in here must be propagated to the other wrappers.
-@implementation KochavaTrackerUtil
+@implementation KochavaMeasurementUtil
 
 // Log a message to the console.
 + (void)log:(nonnull NSString *)message {
-    NSLog(@"KVA/Tracker: %@", message);
+    NSLog(@"KVA/Measurement: %@", message);
 }
 
 // Attempts to read an NSDictionary and returns nil if not one.
@@ -67,14 +67,14 @@
 
 // Converts the deeplink result into an NSDictionary.
 + (nonnull NSDictionary *)convertDeeplinkToDictionary:(nonnull KVADeeplink *)deeplink {
-    NSObject *object = [deeplink kva_asForContext:KVAContext.host];
+    NSObject *object = [deeplink kva_toContext:KVAContext.host];
     return [object isKindOfClass:NSDictionary.class] ? (NSDictionary *)object : @{};
 }
 
 // Converts the install attribution result into an NSDictionary.
-+ (nonnull NSDictionary *)convertInstallAttributionToDictionary:(nonnull KVAAttributionResult *)installAttribution {
-    if (KVATracker.shared.startedBool) {
-        NSObject *object = [installAttribution kva_asForContext:KVAContext.host];
++ (nonnull NSDictionary *)convertInstallAttributionToDictionary:(nonnull KVAMeasurement_Attribution_Result *)installAttribution {
+    if (KVAMeasurement.shared.startedBool) {
+        NSObject *object = [installAttribution kva_toContext:KVAContext.host];
         return [object isKindOfClass:NSDictionary.class] ? (NSDictionary *)object : @{};
     } else {
         return @{
@@ -87,7 +87,7 @@
 }
 
 // Converts the config result into an NSDictionary.
-+ (nonnull NSDictionary *)convertConfigToDictionary:(nonnull KVATrackerConfig *)config {
++ (nonnull NSDictionary *)convertConfigToDictionary:(nonnull KVANetworking_Config *)config {
     return @{
             @"consentGdprApplies": @(config.consentGDPRAppliesBool),
     };
@@ -114,7 +114,7 @@
 + (nullable NSURL *)parseNSURL:(nullable NSString *)string {
     NSURL *url = [NSURL URLWithString:string];
     if (url == nil && string.length > 0) {
-        [KochavaTrackerUtil log:@"Warn: parseNSURL invalid input, not a valid URL"];
+        [KochavaMeasurementUtil log:@"Warn: parseNSURL invalid input, not a valid URL"];
     }
     return url;
 }
@@ -124,9 +124,9 @@
     if(eventInfo == nil) {
         return;
     }
-    NSString *name = [KochavaTrackerUtil readNSString:eventInfo[@"name"]];
-    NSDictionary *data = [KochavaTrackerUtil readNSDictionary:eventInfo[@"data"]];
-    NSString *iosAppStoreReceiptBase64String = [KochavaTrackerUtil readNSString:eventInfo[@"iosAppStoreReceiptBase64String"]];
+    NSString *name = [KochavaMeasurementUtil readNSString:eventInfo[@"name"]];
+    NSDictionary *data = [KochavaMeasurementUtil readNSDictionary:eventInfo[@"data"]];
+    NSString *iosAppStoreReceiptBase64String = [KochavaMeasurementUtil readNSString:eventInfo[@"iosAppStoreReceiptBase64String"]];
     if (name.length > 0) {
         KVAEvent *event = [[KVAEvent alloc] initCustomWithEventName:name];
         if (data != nil) {
@@ -137,7 +137,7 @@
         }
         [event send];
     } else {
-        [KochavaTrackerUtil log:@"Warn: sendEventWithEvent invalid input"];
+        [KochavaMeasurementUtil log:@"Warn: sendEventWithEvent invalid input"];
     }
 }
 
@@ -157,13 +157,13 @@ char *autonomousStringCopy(const char *string) {
     return res;
 }
 
-// Interface for the kochavaTrackerPlugin
-@interface KochavaTrackerPlugin : NSObject
+// Interface for the KochavaMeasurementPlugin
+@interface KochavaMeasurementPlugin : NSObject
 
 @end
 
 // Native Wrapper to use for several methods.
-@implementation KochavaTrackerPlugin
+@implementation KochavaMeasurementPlugin
 
 // Set the logging parameters before any other access to the SDK.
 + (void) initialize {
@@ -185,28 +185,28 @@ char *autonomousStringCopy(const char *string) {
 
 // Subscribe to generic platform events. This should be done prior to starting the SDK.
 void subscribeToPlatformEvents() {
-    KVATracker.shared.adNetwork.conversion.didUpdateValueBlock = ^(KVAAdNetworkConversion *_Nonnull conversion, KVAAdNetworkConversionResult *_Nonnull result) {
-        NSObject *valueObject = [result kva_asForContext:KVAContext.host];
-        NSDictionary *value = [KochavaTrackerUtil readNSDictionary:valueObject] ?: @{};
-        NSString *response = [KochavaTrackerUtil serializeJsonObject:@{
+    KVAMeasurement.shared.adNetwork.conversion.closure_didUpdatePostbackValue = ^(KVAMeasurement_AdNetwork_Conversion *_Nonnull conversion, KVAMeasurement_AdNetwork_Conversion_Result *_Nonnull result) {
+        NSObject *valueObject = [result kva_toContext:KVAContext.host];
+        NSDictionary *value = [KochavaMeasurementUtil readNSDictionary:valueObject] ?: @{};
+        NSString *response = [KochavaMeasurementUtil serializeJsonObject:@{
                 @"name": @"adNetworkConversionDidUpdateValue",
                 @"value": value
         }];
 
         // send this message back to the host app, which must always have a game object and listener method with these names
-        const char *a = "KochavaTracker";
+        const char *a = "KochavaMeasurement";
         const char *b = "NativePlatformEventListener";
         UnitySendMessage(a, b, autonomousStringCopy([response UTF8String]));
     };
 
-    KVATracker.shared.adNetwork.didRegisterAppForAttributionBlock = ^(KVAAdNetwork *_Nonnull adNetwork) {
-        NSString *response = [KochavaTrackerUtil serializeJsonObject:@{
+    KVAMeasurement.shared.adNetwork.closure_didRegisterAppForAttribution = ^(KVAMeasurement_AdNetwork *_Nonnull adNetwork) {
+        NSString *response = [KochavaMeasurementUtil serializeJsonObject:@{
                 @"name": @"adNetworkDidRegisterAppForAttribution",
                 @"value": @{}
         }];
 
         // send this message back to the host app, which must always have a game object and listener method with these names
-        const char *a = "KochavaTracker";
+        const char *a = "KochavaMeasurement";
         const char *b = "NativePlatformEventListener";
         UnitySendMessage(a, b, autonomousStringCopy([response UTF8String]));
     };
@@ -214,48 +214,48 @@ void subscribeToPlatformEvents() {
 
 // void executeAdvancedInstruction(string name, string value)
 void iosNativeExecuteAdvancedInstruction(const char *nameUtf8, const char *valueUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
-    NSString *value = [KochavaTrackerPlugin convertCStringToNSString:valueUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
+    NSString *value = [KochavaMeasurementPlugin convertCStringToNSString:valueUtf8];
 
-    [KVATracker.shared.networking executeAdvancedInstructionWithUniversalIdentifier:name parameter:value prerequisiteTaskIdentifierArray:nil];
+    [KVAMeasurement.shared.networking executeAdvancedInstructionWithUniversalIdentifier:name parameter:value prerequisiteTaskIdentifierArray:nil];
 }
 
 // void setLogLevel(LogLevel logLevel)
 void iosNativeSetLogLevel(const char *logLevelUtf8) {
-    NSString *logLevel = [KochavaTrackerPlugin convertCStringToNSString:logLevelUtf8];
+    NSString *logLevel = [KochavaMeasurementPlugin convertCStringToNSString:logLevelUtf8];
 
-    KVALog.shared.level = [KVALogLevel kva_from:logLevel];
+    KVALog.shared.level = [KVALog_Level from:logLevel];
 }
 
 // void setSleep(bool sleep)
 void iosNativeSetSleep(bool sleep) {
-    KVATracker.shared.sleepBool = sleep;
+    KVAMeasurement.shared.sleepBool = sleep;
 }
 
 // void setAppLimitAdTracking(bool appLimitAdTracking)
 void iosNativeSetAppLimitAdTracking(bool appLimitAdTracking) {
-    KVATracker.shared.appLimitAdTracking.boolean = appLimitAdTracking;
+    KVAMeasurement.shared.appLimitAdTracking.boolean = appLimitAdTracking;
 }
 
 // void registerCustomDeviceIdentifier(string name, string value)
 void iosNativeRegisterCustomDeviceIdentifier(const char *nameUtf8, const char *valueUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
-    NSString *value = [KochavaTrackerPlugin convertCStringToNSString:valueUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
+    NSString *value = [KochavaMeasurementPlugin convertCStringToNSString:valueUtf8];
     
-    [KVATracker.shared.customIdentifiers registerWithName:name identifier:value];
+    [KVACustomIdentifier registerWithName:name identifier:value];
 }
 
 // void registerCustomStringValue(string name, string value)
 void iosNativeRegisterCustomStringValue(const char *nameUtf8, const char *valueUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
-    NSString *value = [KochavaTrackerPlugin convertCStringToNSString:valueUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
+    NSString *value = [KochavaMeasurementPlugin convertCStringToNSString:valueUtf8];
     
     [KVACustomValue registerWithName:name value:value];
 }
 
 // void registerCustomBoolValue(string name, bool value)
 void iosNativeRegisterCustomBoolValue(const char *nameUtf8, bool valueBool, bool isValidValue) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
     NSNumber *value = [NSNumber numberWithBool:valueBool];
     
     [KVACustomValue registerWithName:name value:(isValidValue ? value : nil)];
@@ -263,7 +263,7 @@ void iosNativeRegisterCustomBoolValue(const char *nameUtf8, bool valueBool, bool
 
 // void registerCustomNumberValue(string name, number value)
 void iosNativeRegisterCustomNumberValue(const char *nameUtf8, double valueDouble, bool isValidValue) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
     NSNumber *value = [NSNumber numberWithDouble:valueDouble];
     
     [KVACustomValue registerWithName:name value:(isValidValue ? value : nil)];
@@ -271,133 +271,133 @@ void iosNativeRegisterCustomNumberValue(const char *nameUtf8, double valueDouble
 
 // void registerIdentityLink(string name, string value)
 void iosNativeRegisterIdentityLink(const char *nameUtf8, const char *valueUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
-    NSString *value = [KochavaTrackerPlugin convertCStringToNSString:valueUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
+    NSString *value = [KochavaMeasurementPlugin convertCStringToNSString:valueUtf8];
 
-    [KVATracker.shared.identityLink registerWithName:name identifier:value];
+    [KVAIdentityLink registerWithName:name identifier:value];
 }
 
 // void enableIosAppClips(string identifier)
 void iosNativeEnableIosAppClips(const char *identifierUtf8) {
-    NSString *identifier = [KochavaTrackerPlugin convertCStringToNSString:identifierUtf8];
+    NSString *identifier = [KochavaMeasurementPlugin convertCStringToNSString:identifierUtf8];
 
-    KVAAppGroups.shared.deviceAppGroupIdentifier = identifier;
+    KVAAppGroups.shared.generalAppGroupIdentifier = identifier;
 }
 
 // void enableIosAtt()
 void iosNativeEnableIosAtt() {
-    KVATracker.shared.appTrackingTransparency.enabledBool = true;
+    KVAMeasurement.shared.appTrackingTransparency.enabledBool = true;
 }
 
 // void setIosAttAuthorizationWaitTime(double waitTime)
 void iosNativeSetIosAttAuthorizationWaitTime(double waitTime) {
-    KVATracker.shared.appTrackingTransparency.authorizationStatusWaitTimeInterval = waitTime;
+    KVAMeasurement.shared.appTrackingTransparency.authorizationStatusWaitTimeInterval = waitTime;
 }
 
 // void setIosAttAuthorizationAutoRequest(bool autoRequest)
 void iosNativeSetIosAttAuthorizationAutoRequest(bool autoRequest) {
-    KVATracker.shared.appTrackingTransparency.autoRequestTrackingAuthorizationBool = autoRequest;
+    KVAMeasurement.shared.appTrackingTransparency.autoRequestTrackingAuthorizationBool = autoRequest;
 }
 
 // void registerPrivacyProfile(string name, string[] keys)
 void iosNativeRegisterPrivacyProfile(const char *nameUtf8, const char *keysSerializedUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
-    NSString *keysSerialized = [KochavaTrackerPlugin convertCStringToNSString:keysSerializedUtf8];
-    NSArray *keys = [KochavaTrackerUtil parseJsonArray:keysSerialized];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
+    NSString *keysSerialized = [KochavaMeasurementPlugin convertCStringToNSString:keysSerializedUtf8];
+    NSArray *keys = [KochavaMeasurementUtil parseJsonArray:keysSerialized];
 
-    [KVAPrivacyProfile registerWithName:name payloadKeyStringArray:keys];
+    [KVAPrivacyProfile registerWithName:name datapointKeyArray:keys];
 }
 
 // void setPrivacyProfileEnabled(string name, bool enabled)
 void iosNativeSetPrivacyProfileEnabled(const char *nameUtf8, bool enabled) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
 
-    [KVATracker.shared.privacy setEnabledBoolForProfileName:name enabledBool:enabled];
+    [KVAMeasurement.shared.privacy setEnabledBoolForProfileName:name enabledBool:enabled];
+}
+
+// Register a deeplink wrapper domain for enhanced deeplink ESP integrations.
+void iosNativeRegisterDeeplinkWrapperDomain(const char *domainUtf8) {
+    NSString *domain = [KochavaMeasurementPlugin convertCStringToNSString:domainUtf8];
+
+    [KVADeeplink_Wrapper registerWithDomain:domain];
 }
 
 // void setInitCompletedListener(bool setListener)
 void iosNativeSetInitCompletedListener(bool setListener) {
     if(setListener) {
-        KVATracker.shared.config.closure_didComplete = ^(KVATrackerConfig * _Nonnull config) {
-            NSDictionary *configDictionary = [KochavaTrackerUtil convertConfigToDictionary:config];
-            NSString *configString = [KochavaTrackerUtil serializeJsonObject:configDictionary] ?: @"{}";
+        KVAMeasurement.shared.config.closure_didComplete = ^(KVANetworking_Config * _Nonnull config) {
+            NSDictionary *configDictionary = [KochavaMeasurementUtil convertConfigToDictionary:config];
+            NSString *configString = [KochavaMeasurementUtil serializeJsonObject:configDictionary] ?: @"{}";
 
             // send this message back to the C# layer, which must always have a game object and listener method with these names.
-            const char *a = "KochavaTracker";
+            const char *a = "KochavaMeasurement";
             const char *b = "NativeInitCompletedListener";
             UnitySendMessage(a, b, autonomousStringCopy([configString UTF8String]));
         };
     } else {
-        KVATracker.shared.config.closure_didComplete = nil;
+        KVAMeasurement.shared.config.closure_didComplete = nil;
     }
 }
 
 // void setIntelligentConsentGranted(bool granted)
 void iosNativeSetIntelligentConsentGranted(bool granted) {
-    KVATracker.shared.privacy.intelligentConsent.grantedBoolNumber = [NSNumber numberWithBool:granted];
+    KVAMeasurement.shared.privacy.intelligentConsent.grantedBoolNumber = [NSNumber numberWithBool:granted];
 }
 
 // bool getStarted()
 bool iosNativeGetStarted() {
-    return KVATracker.shared.startedBool;
+    return KVAMeasurement.shared.startedBool;
 }
 
 // void startWithAppGuid(string appGuid)
 void iosNativeStartWithAppGuid(const char *appGuidUtf8) {
-    NSString *appGuid = [KochavaTrackerPlugin convertCStringToNSString:appGuidUtf8];
+    NSString *appGuid = [KochavaMeasurementPlugin convertCStringToNSString:appGuidUtf8];
 
     // Subscribe to various platform events.
     subscribeToPlatformEvents();
 
     // Start
-    [KVATracker.shared startWithAppGUIDString:appGuid];
+    [KVAMeasurement.shared startWithAppGUIDString:appGuid];
 }
 
 // void startWithPartnerName(string partnerName)
 void iosNativeStartWithPartnerName(const char *partnerNameUtf8) {
-    NSString *partnerName = [KochavaTrackerPlugin convertCStringToNSString:partnerNameUtf8];
+    NSString *partnerName = [KochavaMeasurementPlugin convertCStringToNSString:partnerNameUtf8];
 
     // Subscribe to various platform events.
     subscribeToPlatformEvents();
 
     // Start
-    [KVATracker.shared startWithPartnerNameString:partnerName];
+    [KVAMeasurement.shared startWithPartnerNameString:partnerName];
 }
 
 // void shutdown(bool deleteData)
 void iosNativeShutdown(bool deleteData) {
-    [KVATrackerProduct.shared shutdownWithDeleteLocalDataBool:deleteData];
+    [KochavaMeasurement_Product.shared shutdownWithDeleteLocalDataBool:deleteData];
 }
 
-// string getDeviceId()
-char *iosNativeGetDeviceId() {
-    if (KVATracker.shared.startedBool) {
-        return autonomousStringCopy([KVATracker.shared.deviceId.string ?: @"" UTF8String]);
+// string retrieveInstallId()
+char *iosNativeRetrieveInstallId() {
+    if (KVAMeasurement.shared.startedBool) {
+        return autonomousStringCopy([KVAMeasurement.shared.installIdentifier.string ?: @"" UTF8String]);
     } else {
         return autonomousStringCopy([@"" UTF8String]);
     }
 }
 
-// InstallAttribution getInstallAttribution()
-char *iosNativeGetInstallAttribution() {
-    NSDictionary *attributionDictionary = [KochavaTrackerUtil convertInstallAttributionToDictionary:KVATracker.shared.attribution.result];
-    NSString *attributionString = [KochavaTrackerUtil serializeJsonObject:attributionDictionary] ?: @"";
-    return autonomousStringCopy([attributionString UTF8String]);
-}
-
 // void retrieveInstallAttribution(Callback<InstallAttribution> callback)
 void iosNativeRetrieveInstallAttribution(const char *requestIdUtf8) {
-    NSString *requestId = [KochavaTrackerPlugin convertCStringToNSString:requestIdUtf8];
+    NSString *requestId = [KochavaMeasurementPlugin convertCStringToNSString:requestIdUtf8];
 
-    [KVATracker.shared.attribution retrieveResultWithCompletionHandler:^(KVAAttributionResult *attribution) {
-        NSDictionary *attributionDictionary = [KochavaTrackerUtil convertInstallAttributionToDictionary:attribution];
-        NSString *attributionString = [KochavaTrackerUtil serializeJsonObject:attributionDictionary];
-        NSString *response = [KochavaTrackerUtil serializeJsonObject:@{
+    [KVAMeasurement.shared.attribution retrieveResultWithClosure_didComplete:^(KVAMeasurement_Attribution_Result *attribution) {
+        NSDictionary *attributionDictionary = [KochavaMeasurementUtil convertInstallAttributionToDictionary:attribution];
+        NSString *attributionString = [KochavaMeasurementUtil serializeJsonObject:attributionDictionary];
+        NSString *response = [KochavaMeasurementUtil serializeJsonObject:@{
                 @"id": requestId,
                 @"value": attributionString
         }] ?: @"";
         // send this message back to the C# layer, which must always have a game object and listener method with these names.
-        const char *a = "KochavaTracker";
+        const char *a = "KochavaMeasurement";
         const char *b = "NativeInstallAttributionListener";
         UnitySendMessage(a, b, autonomousStringCopy([response UTF8String]));
     }];
@@ -405,18 +405,18 @@ void iosNativeRetrieveInstallAttribution(const char *requestIdUtf8) {
 
 // void processDeeplink(string path, Callback<Deeplink> callback)
 void iosNativeProcessDeeplink(const char *pathUtf8, const char *requestIdUtf8) {
-    NSURL *path = [KochavaTrackerUtil parseNSURL:[KochavaTrackerPlugin convertCStringToNSString:pathUtf8]];
-    NSString *requestId = [KochavaTrackerPlugin convertCStringToNSString:requestIdUtf8];
+    NSURL *path = [KochavaMeasurementUtil parseNSURL:[KochavaMeasurementPlugin convertCStringToNSString:pathUtf8]];
+    NSString *requestId = [KochavaMeasurementPlugin convertCStringToNSString:requestIdUtf8];
 
     [KVADeeplink processWithURL:path closure_didComplete:^(KVADeeplink *_Nonnull deeplink) {
-        NSDictionary *deeplinkDictionary = [KochavaTrackerUtil convertDeeplinkToDictionary:deeplink];
-        NSString *deeplinkString = [KochavaTrackerUtil serializeJsonObject:deeplinkDictionary];
-        NSString *response = [KochavaTrackerUtil serializeJsonObject:@{
+        NSDictionary *deeplinkDictionary = [KochavaMeasurementUtil convertDeeplinkToDictionary:deeplink];
+        NSString *deeplinkString = [KochavaMeasurementUtil serializeJsonObject:deeplinkDictionary];
+        NSString *response = [KochavaMeasurementUtil serializeJsonObject:@{
                 @"id": requestId,
                 @"value": deeplinkString
         }] ?: @"";
         // send this message back to the C# layer, which must always have a game object and listener method with these names.
-        const char *a = "KochavaTracker";
+        const char *a = "KochavaMeasurement";
         const char *b = "NativeDeeplinkListener";
         UnitySendMessage(a, b, autonomousStringCopy([response UTF8String]));
     }];
@@ -424,18 +424,18 @@ void iosNativeProcessDeeplink(const char *pathUtf8, const char *requestIdUtf8) {
 
 // void processDeeplinkWithOverrideTimeout(string path, double timeout, Callback<Deeplink> callback)
 void iosNativeProcessDeeplinkWithOverrideTimeout(const char *pathUtf8, double timeout, const char *requestIdUtf8) {
-    NSURL *path = [KochavaTrackerUtil parseNSURL:[KochavaTrackerPlugin convertCStringToNSString:pathUtf8]];
-    NSString *requestId = [KochavaTrackerPlugin convertCStringToNSString:requestIdUtf8];
+    NSURL *path = [KochavaMeasurementUtil parseNSURL:[KochavaMeasurementPlugin convertCStringToNSString:pathUtf8]];
+    NSString *requestId = [KochavaMeasurementPlugin convertCStringToNSString:requestIdUtf8];
 
     [KVADeeplink processWithURL:path timeoutTimeInterval:timeout closure_didComplete:^(KVADeeplink *_Nonnull deeplink) {
-        NSDictionary *deeplinkDictionary = [KochavaTrackerUtil convertDeeplinkToDictionary:deeplink];
-        NSString *deeplinkString = [KochavaTrackerUtil serializeJsonObject:deeplinkDictionary];
-        NSString *response = [KochavaTrackerUtil serializeJsonObject:@{
+        NSDictionary *deeplinkDictionary = [KochavaMeasurementUtil convertDeeplinkToDictionary:deeplink];
+        NSString *deeplinkString = [KochavaMeasurementUtil serializeJsonObject:deeplinkDictionary];
+        NSString *response = [KochavaMeasurementUtil serializeJsonObject:@{
                 @"id": requestId,
                 @"value": deeplinkString
         }] ?: @"";
         // send this message back to the C# layer, which must always have a game object and listener method with these names.
-        const char *a = "KochavaTracker";
+        const char *a = "KochavaMeasurement";
         const char *b = "NativeDeeplinkListener";
         UnitySendMessage(a, b, autonomousStringCopy([response UTF8String]));
     }];
@@ -443,86 +443,86 @@ void iosNativeProcessDeeplinkWithOverrideTimeout(const char *pathUtf8, double ti
 
 // void registerPushToken(string token)
 void iosNativeRegisterPushToken(const char *tokenUtf8) {
-    NSString *token = [KochavaTrackerPlugin convertCStringToNSString:tokenUtf8];
+    NSString *token = [KochavaMeasurementPlugin convertCStringToNSString:tokenUtf8];
     [KVAPushNotificationsToken registerWithDataHexString:token];
 }
 
 // void setPushEnabled(bool enabled)
 void iosNativeSetPushEnabled(bool enabled) {
-    KVATracker.shared.pushNotifications.enabledBool = enabled;
+    KVAMeasurement.shared.pushNotifications.enabledBool = enabled;
 }
 
 // void registerDefaultEventStringParameter(string name, string value)
 void iosNativeRegisterDefaultEventStringParameter(const char *nameUtf8, const char *valueUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
-    NSString *value = [KochavaTrackerPlugin convertCStringToNSString:valueUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
+    NSString *value = [KochavaMeasurementPlugin convertCStringToNSString:valueUtf8];
     
-    [KVAEventDefaultParameter registerWithName:name value:value];
+    [KVAEvent_DefaultParameter registerWithName:name value:value];
 }
 
 // void registerDefaultEventBoolParameter(string name, bool value)
 void iosNativeRegisterDefaultEventBoolParameter(const char *nameUtf8, bool valueBool, bool isValidValue) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
     NSNumber *value = [NSNumber numberWithBool:valueBool];
     
-    [KVAEventDefaultParameter registerWithName:name value:(isValidValue ? value : nil)];
+    [KVAEvent_DefaultParameter registerWithName:name value:(isValidValue ? value : nil)];
 }
 
 // void registerDefaultEventNumberParameter(string name, number value)
 void iosNativeRegisterDefaultEventNumberParameter(const char *nameUtf8, double valueDouble, bool isValidValue) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
     NSNumber *value = [NSNumber numberWithDouble:valueDouble];
     
-    [KVAEventDefaultParameter registerWithName:name value:(isValidValue ? value : nil)];
+    [KVAEvent_DefaultParameter registerWithName:name value:(isValidValue ? value : nil)];
 }
 
 // void registerDefaultEventUserId(string name, string value)
 void iosNativeRegisterDefaultEventUserId(const char *valueUtf8) {
-    NSString *value = [KochavaTrackerPlugin convertCStringToNSString:valueUtf8];
+    NSString *value = [KochavaMeasurementPlugin convertCStringToNSString:valueUtf8];
     
-    [KVAEventDefaultParameter registerWithUserIdString:value];
+    [KVAEvent_DefaultParameter registerWithUserIdString:value];
 }
 
 // void sendEvent(string name)
 void iosNativeSendEvent(const char *nameUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
 
     if (name.length > 0) {
         [KVAEvent sendCustomWithEventName:name];
     } else {
-        [KochavaTrackerUtil log:@"Warn: sendEvent invalid input"];
+        [KochavaMeasurementUtil log:@"Warn: sendEvent invalid input"];
     }
 }
 
 // void sendEventWithString(string name, string data)
 void iosNativeSendEventWithString(const char *nameUtf8, const char *dataUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
-    NSString *data = [KochavaTrackerPlugin convertCStringToNSString:dataUtf8];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
+    NSString *data = [KochavaMeasurementPlugin convertCStringToNSString:dataUtf8];
 
     if (name.length > 0) {
         [KVAEvent sendCustomWithEventName:name infoString:data];
     } else {
-        [KochavaTrackerUtil log:@"Warn: sendEventWithString invalid input"];
+        [KochavaMeasurementUtil log:@"Warn: sendEventWithString invalid input"];
     }
 }
 
 // void sendEventWithDictionary(string name, object data)
 void iosNativeSendEventWithDictionary(const char *nameUtf8, const char *dataSerializedUtf8) {
-    NSString *name = [KochavaTrackerPlugin convertCStringToNSString:nameUtf8];
-    NSString *dataSerialized = [KochavaTrackerPlugin convertCStringToNSString:dataSerializedUtf8];
-    NSDictionary *data = [KochavaTrackerUtil parseJsonObject:dataSerialized];
+    NSString *name = [KochavaMeasurementPlugin convertCStringToNSString:nameUtf8];
+    NSString *dataSerialized = [KochavaMeasurementPlugin convertCStringToNSString:dataSerializedUtf8];
+    NSDictionary *data = [KochavaMeasurementUtil parseJsonObject:dataSerialized];
 
     if (name.length > 0) {
         [KVAEvent sendCustomWithEventName:name infoDictionary:data];
     } else {
-        [KochavaTrackerUtil log:@"Warn: sendEventWithDictionary invalid input"];
+        [KochavaMeasurementUtil log:@"Warn: sendEventWithDictionary invalid input"];
     }
 }
 
 // void sendEventWithEvent(Event event)
 void iosNativeSendEventWithEvent(const char *eventSerializedUtf8) {
-    NSString *eventSerialized = [KochavaTrackerPlugin convertCStringToNSString:eventSerializedUtf8];
-    NSDictionary *eventInfo = [KochavaTrackerUtil parseJsonObject:eventSerialized];
+    NSString *eventSerialized = [KochavaMeasurementPlugin convertCStringToNSString:eventSerializedUtf8];
+    NSDictionary *eventInfo = [KochavaMeasurementUtil parseJsonObject:eventSerialized];
 
-    [KochavaTrackerUtil buildAndSendEvent:eventInfo];
+    [KochavaMeasurementUtil buildAndSendEvent:eventInfo];
 }
