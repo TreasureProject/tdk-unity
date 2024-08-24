@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Thirdweb;
+using UnityEngine;
 
 namespace Treasure
 {
@@ -28,12 +29,17 @@ namespace Treasure
             base.Awake();
 
             ChainId defaultChainId = TDK.Instance.AppConfig.DefaultChainId;
-            
-            if (defaultChainId != ChainId.Unknown) {
+
+            if (defaultChainId != ChainId.Unknown)
+            {
                 InitializeSDK(Constants.ChainIdToName[defaultChainId]);
-            } else {
-                TDKLogger.LogWarning("[TDKThirdwebService] Invalid default chain in config, skipping initialization.");
-            }            
+            }
+            else
+            {
+                TDKLogger.LogWarning(
+                    "[TDKThirdwebService] Invalid default chain in config, skipping initialization."
+                );
+            }
         }
 
         public void InitializeSDK(string chainIdentifier)
@@ -42,25 +48,36 @@ namespace Treasure
             var tdkConfig = TDK.Instance.AppConfig;
             var supportedChains = ((ChainId[])Enum.GetValues(typeof(ChainId)))
                 .Where(chainId => chainId != ChainId.Unknown)
-                .Select(chainId => new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] })
+                .Select(
+                    chainId =>
+                        new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] }
+                )
                 .ToArray();
 
             // TODO this is copied code from ThirdwebManager.cs, we should refactor it so it wont get outdated
             var smartWalletConfig = new ThirdwebSDK.SmartWalletConfig()
             {
-                factoryAddress = string.IsNullOrEmpty(tdkConfig.FactoryAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS : tdkConfig.FactoryAddress,
+                factoryAddress = string.IsNullOrEmpty(tdkConfig.FactoryAddress)
+                    ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS
+                    : tdkConfig.FactoryAddress,
                 gasless = true,
                 erc20PaymasterAddress = null,
                 erc20TokenAddress = null,
                 bundlerUrl = $"https://{chainIdentifier}.bundler.thirdweb.com",
                 paymasterUrl = $"https://{chainIdentifier}.bundler.thirdweb.com",
-                entryPointAddress = Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS,
+                entryPointAddress = Thirdweb
+                    .AccountAbstraction
+                    .Constants
+                    .DEFAULT_ENTRYPOINT_ADDRESS,
             };
 
             var options = new ThirdwebSDK.Options
             {
                 smartWalletConfig = smartWalletConfig,
                 clientId = tdkConfig.ClientId,
+                bundleId =
+                    Application.identifier
+                    ?? $"com.{Application.companyName}.{Application.productName}",
                 supportedChains = supportedChains
             };
 
