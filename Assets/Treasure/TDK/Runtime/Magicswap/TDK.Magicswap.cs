@@ -15,7 +15,7 @@ namespace Treasure
         }
     }
 
-    public partial class Magicswap
+    public class Magicswap
     {
         public Magicswap() { }
         
