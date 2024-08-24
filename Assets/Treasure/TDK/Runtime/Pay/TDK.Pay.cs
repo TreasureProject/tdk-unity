@@ -46,10 +46,10 @@ namespace Treasure
                 toAmount: amount.ToString(),
                 isTestMode: testMode
             );
-            Debug.Log($"Quote Params: {JsonConvert.SerializeObject(fiatQuoteParams, Formatting.Indented)}");
+            TDKLogger.Log($"Quote Params: {JsonConvert.SerializeObject(fiatQuoteParams, Formatting.Indented)}");
 
             _quote = await TDKServiceLocator.GetService<TDKThirdwebService>().Pay.GetBuyWithFiatQuote(fiatQuoteParams);
-            ThirdwebDebug.Log($"Quote: {JsonConvert.SerializeObject(_quote, Formatting.Indented)}");
+            TDKLogger.Log($"Quote: {JsonConvert.SerializeObject(_quote, Formatting.Indented)}");
         }
         #endregion
     }
