@@ -9,7 +9,7 @@ using UnityEngine.iOS;
 
 public class TDKRunner : MonoBehaviour
 {
-    private List<string> _navOptions = new List<string> { "Connect", "Identity", "Analytics", "Bridgeworld", "Magicswap" };
+    private List<string> _navOptions = new List<string> { "Connect", "Identity", "Analytics", "Bridgeworld", "Magicswap", "Pay" };
     private Text _debugTxt;
     private Text _versionTxt;
 

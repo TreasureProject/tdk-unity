@@ -120,6 +120,7 @@ namespace Treasure
             InitConnect();
             InitBridgeworld();
             InitMagicswap();
+            InitPay();
         }
     }
 }
