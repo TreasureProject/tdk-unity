@@ -48,7 +48,7 @@ namespace Treasure
             );
             Debug.Log($"Quote Params: {JsonConvert.SerializeObject(fiatQuoteParams, Formatting.Indented)}");
 
-            _quote = await TDKServiceLocator.GetService<TDKThirdwebService>().SDK.Pay.GetBuyWithFiatQuote(fiatQuoteParams);
+            _quote = await TDKServiceLocator.GetService<TDKThirdwebService>().Pay.GetBuyWithFiatQuote(fiatQuoteParams);
             ThirdwebDebug.Log($"Quote: {JsonConvert.SerializeObject(_quote, Formatting.Indented)}");
         }
         #endregion

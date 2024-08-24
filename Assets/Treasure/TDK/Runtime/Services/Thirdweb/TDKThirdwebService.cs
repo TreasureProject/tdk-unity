@@ -18,6 +18,11 @@ namespace Treasure
             get { return _sdk.Wallet; }
         }
 
+        public Thirdweb.Pay.ThirdwebPay Pay
+        {
+            get { return _sdk.Pay; }
+        }
+
         public override void Awake()
         {
             base.Awake();
