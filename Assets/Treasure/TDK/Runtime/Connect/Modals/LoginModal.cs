@@ -11,7 +11,7 @@ namespace Treasure
         [SerializeField] private GameObject socialLoginHolder;
         [SerializeField] private GameObject googleLogin;
         [SerializeField] private GameObject appleLogin;
-        [SerializeField] private GameObject facebookLogin;
+        [SerializeField] private GameObject discordLogin;
         [Space]
         [SerializeField] private GameObject loginEmailHolder;
         [SerializeField] private GameObject orSeparatorObject;
@@ -24,7 +24,7 @@ namespace Treasure
         [Header("Inputs")]
         [SerializeField] private Button loginGoogleButton;
         [SerializeField] private Button loginAppleButton;
-        [SerializeField] private Button loginFacebookButton;
+        [SerializeField] private Button loginDiscordButton;
         [Space]
         [SerializeField] private TMP_InputField emailInputField;
         [SerializeField] private TMP_Text errorText;
@@ -73,7 +73,7 @@ namespace Treasure
 
             loginGoogleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Google); });
             loginAppleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Apple); });
-            loginFacebookButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Facebook); });
+            loginDiscordButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Discord); });
         }
 
         private void OnEnable()
@@ -107,7 +107,7 @@ namespace Treasure
             socialLoginHolder.SetActive(true);
             googleLogin.SetActive(true);
             appleLogin.SetActive(true);
-            facebookLogin.SetActive(true);
+            discordLogin.SetActive(true);
 
             loginEmailHolder.SetActive(true);
             loginWalletHolder.SetActive(false);

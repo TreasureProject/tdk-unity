@@ -12,9 +12,9 @@ namespace Treasure
     // Subset of Thirdweb AuthProvider
     public enum SocialAuthProvider
     {
-        Google = 1,
-        Apple = 2,
-        Facebook = 3
+        Google = AuthProvider.Google,
+        Apple = AuthProvider.Apple,
+        Discord = AuthProvider.Discord
     }
 
     public partial class TDK : MonoBehaviour
