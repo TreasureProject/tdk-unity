@@ -34,14 +34,10 @@ namespace Treasure
         }
 
         private static void LogByLevel(TDKConfig.LoggerLevelValue loggerLevelValue, string message) {
-            if (TDK.Instance.appIsQuitting) {
-                Debug.Log($"[{loggerLevelValue}] {message}");
+            if (TDK.AppConfig.LoggerLevel > loggerLevelValue) {
                 return;
             }
-            if (TDK.Instance.AppConfig.LoggerLevel > loggerLevelValue) {
-                return;
-            }
-            TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
+            TDKMainThreadDispatcher.Enqueue(() => ExternalLogCallback?.Invoke(message));
             #if UNITY_EDITOR
             switch (loggerLevelValue)
             {
@@ -56,7 +52,7 @@ namespace Treasure
                     break;
             }
             #else
-            TDKMainThreadDispatcher.Instance.Enqueue(() => LogMessageInternal(message));
+            TDKMainThreadDispatcher.Enqueue(() => LogMessageInternal(message));
             #endif
         }
 

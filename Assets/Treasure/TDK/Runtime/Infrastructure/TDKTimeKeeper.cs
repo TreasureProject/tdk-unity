@@ -23,7 +23,7 @@ namespace Treasure
                 yield return new WaitForSeconds(RETRY_INTERVAL);
             }
 
-            var endpoint = TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD ?
+            var endpoint = TDK.AppConfig.Environment == TDKConfig.Env.PROD ?
                 Constants.SERVER_TIME_ENDPOINT_PROD :
                 Constants.SERVER_TIME_ENDPOINT_DEV;
 

@@ -11,27 +11,29 @@ namespace Treasure
         /// </summary>
         private static TDK _instance = null;
         public static bool Initialized { get; private set; }
+        public static TDKConfig AppConfig { get; private set; }
 
         private IAbstractedEngineApi _abstractedEngineApi;
         private LocalSettings _localsettings;
 
-        public TDKConfig AppConfig { get; private set; }
+        private static bool _appIsQuitting = false;
 
-        internal bool appIsQuitting = false;
+        void OnApplicationQuit() {
+            _appIsQuitting = true;
+        }
 
         void OnApplicationPause(bool isPaused)
         {
             Analytics?.OnApplicationPause_Analytics(isPaused);
         }
 
-        void OnApplicationQuit() {
-            appIsQuitting = true;
-        }
-
         public static TDK Instance
         {
             get
             {
+                if (_appIsQuitting) {
+                    return _instance; // Prevent recreating instance if app is quitting
+                }
                 // setup singleton
                 if (_instance == null)
                 {
@@ -48,10 +50,7 @@ namespace Treasure
                     }
                 }
 
-                TDKMainThreadDispatcher.Instance.Enqueue(() =>
-                {
-                    // no-op; don't add TDKLogger calls here
-                });
+                TDKMainThreadDispatcher.StartProcessing();
 
                 return _instance;
             }
@@ -106,7 +105,7 @@ namespace Treasure
             IAbstractedEngineApi abstractedEngineApi,
             LocalSettings localSettings
         ) {
-            Instance.AppConfig = tdkConfig;
+            AppConfig = tdkConfig;
 
             Instance._abstractedEngineApi = abstractedEngineApi;
             Instance._localsettings = localSettings;

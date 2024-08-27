@@ -28,7 +28,6 @@ namespace Treasure
 #if !UNITY_WEBGL
         void OnApplicationQuit()
         {
-            appIsQuitting = true;
             TerminateCacheFlushing();
         }
 #endif
@@ -57,7 +56,7 @@ namespace Treasure
                 { AnalyticsConstants.PROP_APP_IDENTIFIER, Application.identifier },
                 { AnalyticsConstants.PROP_APP_IS_EDITOR, Application.isEditor },
                 { AnalyticsConstants.PROP_APP_VERSION, Application.version },
-                { AnalyticsConstants.PROP_APP_ENVIRONMENT, TDK.Instance.AppConfig.Environment }
+                { AnalyticsConstants.PROP_APP_ENVIRONMENT, TDK.AppConfig.Environment }
             };
         }
 
@@ -71,7 +70,7 @@ namespace Treasure
             {
                 { AnalyticsConstants.PROP_SMART_ACCOUNT, string.IsNullOrEmpty(_smartAccountAddress) ? string.Empty : _smartAccountAddress }, // smart_account
                 { AnalyticsConstants.PROP_CHAIN_ID, _chainId }, // chain_id
-                { AnalyticsConstants.CARTRIDGE_TAG, TDK.Instance.AppConfig.CartridgeTag }, // cartridgeTag
+                { AnalyticsConstants.CARTRIDGE_TAG, TDK.AppConfig.CartridgeTag }, // cartridgeTag
                 { AnalyticsConstants.PROP_NAME, eventName }, // event_name
                 { AnalyticsConstants.PROP_SESSION_ID, _sessionId }, // session_id
                 { AnalyticsConstants.PROP_ID, Guid.NewGuid().ToString("N") }, // event_id

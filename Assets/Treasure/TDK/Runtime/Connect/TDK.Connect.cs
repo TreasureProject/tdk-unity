@@ -66,7 +66,7 @@ namespace Treasure
                 var isConnected = await IsWalletConnected();
                 if (Utils.IsWebGLBuild() && !isConnected)
                 {
-                    _chainId = TDK.Instance.AppConfig.DefaultChainId;
+                    _chainId = TDK.AppConfig.DefaultChainId;
                 }
                 else
                 {

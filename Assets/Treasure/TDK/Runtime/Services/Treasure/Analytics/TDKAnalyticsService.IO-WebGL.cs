@@ -15,10 +15,10 @@ namespace Treasure
                 eventStr = "[" + eventStr + "]";
             }
 
-            string baseUrl = TDK.Instance.AppConfig.AnalyticsApiUrl;
-            if (!TDK.Instance.AppConfig.AnalyticsApiUrl.EndsWith("/"))
+            string baseUrl = TDK.AppConfig.AnalyticsApiUrl;
+            if (!TDK.AppConfig.AnalyticsApiUrl.EndsWith("/"))
             {
-                baseUrl = TDK.Instance.AppConfig.AnalyticsApiUrl + "/";
+                baseUrl = TDK.AppConfig.AnalyticsApiUrl + "/";
             }
 
             using (UnityWebRequest webRequest = UnityWebRequest.PostWwwForm($"{baseUrl}events", eventStr))
@@ -26,7 +26,7 @@ namespace Treasure
                 webRequest.SetRequestHeader("Content-Type", "application/json");
                 
                 // Set the API key header
-                webRequest.SetRequestHeader("x-api-key", TDK.Instance.AppConfig.ApiKey);
+                webRequest.SetRequestHeader("x-api-key", TDK.AppConfig.ApiKey);
 
                 yield return webRequest.SendWebRequest();
 

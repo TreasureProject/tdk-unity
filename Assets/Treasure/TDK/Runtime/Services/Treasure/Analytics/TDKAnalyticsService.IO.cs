@@ -36,16 +36,16 @@ namespace Treasure
                 TDKLogger.LogDebug("[TDKAnalyticsService.IO:SendEventBatch] Payload:" + payload);
 
                 // Set the base address ensuring trailing slash
-                string baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl;
-                if (!TDK.Instance.AppConfig.AnalyticsApiUrl.EndsWith("/"))
+                string baseAddress = TDK.AppConfig.AnalyticsApiUrl;
+                if (!TDK.AppConfig.AnalyticsApiUrl.EndsWith("/"))
                 {
-                    baseAddress = TDK.Instance.AppConfig.AnalyticsApiUrl + "/";
+                    baseAddress = TDK.AppConfig.AnalyticsApiUrl + "/";
                 }
                 client.BaseAddress = new Uri(baseAddress);
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
 
                 // Set the API key header
-                client.DefaultRequestHeaders.Add("x-api-key", TDK.Instance.AppConfig.ApiKey);
+                client.DefaultRequestHeaders.Add("x-api-key", TDK.AppConfig.ApiKey);
 
                 // send the payload to the analytics backend via HTTP POST request
                 HttpResponseMessage response = await client.PostAsync(

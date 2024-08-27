@@ -22,26 +22,20 @@ namespace Treasure
             }
         }
 
-        public static TDKMainThreadDispatcher Instance
-        {
-            get
-            {
-                if(_instance == null)
+        // create a GameObject to grab stuff from the queue
+        public static void StartProcessing() {
+            if (_instance == null) {
+                _instance = GameObject.FindObjectOfType(typeof(TDKMainThreadDispatcher)) as TDKMainThreadDispatcher;
+                
+                if (_instance == null)
                 {
-                    _instance = GameObject.FindObjectOfType(typeof(TDKMainThreadDispatcher)) as TDKMainThreadDispatcher;
-                        
-                    if(_instance == null )
-                    {
-                        // create a new instance
-                        _instance = new GameObject("TDKMainThreadDispatcher", new Type[] {
-                            typeof(TDKMainThreadDispatcher),
-                        }).GetComponent<TDKMainThreadDispatcher>();
+                    // create a new instance
+                    _instance = new GameObject("TDKMainThreadDispatcher", new Type[] {
+                        typeof(TDKMainThreadDispatcher),
+                    }).GetComponent<TDKMainThreadDispatcher>();
 
-                        DontDestroyOnLoad(_instance.gameObject);
-                    }
+                    DontDestroyOnLoad(_instance.gameObject);
                 }
-
-                return _instance;
             }
         }
 
@@ -49,13 +43,13 @@ namespace Treasure
         /// Locks the queue and adds the IEnumerator to the queue
         /// </summary>
         /// <param name="action">IEnumerator function that will be executed from the main thread.</param>
-        public void Enqueue(IEnumerator action)
+        public static void Enqueue(IEnumerator action)
         {
             // Debug.Log("[TDKMainThreadDispatcher] Enqueuing enumerator");
             lock (_executionQueue)
             {
-                _executionQueue.Enqueue (() => {  
-                    StartCoroutine (action); 
+                _executionQueue.Enqueue(() => {
+                    _instance.StartCoroutine(action);
                 });
             }
         }
@@ -64,12 +58,13 @@ namespace Treasure
         /// Locks the queue and adds the Action to the queue
         /// </summary>
         /// <param name="action">function that will be executed from the main thread.</param>
-        public void Enqueue(Action action)
+        public static void Enqueue(Action action)
         {
             // Debug.Log("[TDKMainThreadDispatcher] Enqueuing action");
             Enqueue(ActionWrapper(action));
         }
-        IEnumerator ActionWrapper(Action a)
+
+        static IEnumerator ActionWrapper(Action a)
         {
             // Debug.Log("[TDKMainThreadDispatcher] Executing action");
             a();

@@ -188,7 +188,7 @@ namespace Treasure
         }
 
         public async Task<Transaction> Swap(SwapBody swapBody) {
-            swapBody.backendWallet ??= await TDK.Instance.AppConfig.GetBackendWallet();
+            swapBody.backendWallet ??= await TDK.AppConfig.GetBackendWallet();
             var body = JsonConvert.SerializeObject(swapBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
             });
@@ -199,7 +199,7 @@ namespace Treasure
         }
 
         public async Task<Transaction> AddLiquidity(string poolId, AddLiquidityBody addLiquidityBody) {
-            addLiquidityBody.backendWallet ??= await TDK.Instance.AppConfig.GetBackendWallet();
+            addLiquidityBody.backendWallet ??= await TDK.AppConfig.GetBackendWallet();
             var body = JsonConvert.SerializeObject(addLiquidityBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
             });
@@ -210,7 +210,7 @@ namespace Treasure
         }
 
         public async Task<Transaction> RemoveLiquidity(string poolId, RemoveLiquidityBody removeLiquidityBody) {
-            removeLiquidityBody.backendWallet ??= await TDK.Instance.AppConfig.GetBackendWallet();
+            removeLiquidityBody.backendWallet ??= await TDK.AppConfig.GetBackendWallet();
             var body = JsonConvert.SerializeObject(removeLiquidityBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
             });

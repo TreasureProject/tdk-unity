@@ -72,7 +72,7 @@ namespace Treasure
                         break;
                     }
                 }
-                await Task.Delay(TimeSpan.FromSeconds(TDK.Instance.AppConfig.AnalyticsDiscFlushFrequencySeconds));
+                await Task.Delay(TimeSpan.FromSeconds(TDK.AppConfig.AnalyticsDiscFlushFrequencySeconds));
             }
         }
 
@@ -83,18 +83,18 @@ namespace Treasure
             _diskFlushCancellationTokenSource = null;
             _flushCacheTimer?.Dispose();
             _flushCacheTimer = null;
-            await FlushMemoryCache();
+            await FlushMemoryCache(appIsQuitting: true);
         }
 
         private void ResetFlushTimer()
         {
             _flushCacheTimer?.Change(
-                TimeSpan.FromSeconds(TDK.Instance.AppConfig.AnalyticsMemoryFlushFrequencySeconds),
-                TimeSpan.FromSeconds(TDK.Instance.AppConfig.AnalyticsMemoryFlushFrequencySeconds)
+                TimeSpan.FromSeconds(TDK.AppConfig.AnalyticsMemoryFlushFrequencySeconds),
+                TimeSpan.FromSeconds(TDK.AppConfig.AnalyticsMemoryFlushFrequencySeconds)
             );
         }
 
-        private async Task FlushMemoryCache()
+        private async Task FlushMemoryCache(bool appIsQuitting = false)
         {
             List<string> memoryCacheCopy;
             lock (_memoryCache)
