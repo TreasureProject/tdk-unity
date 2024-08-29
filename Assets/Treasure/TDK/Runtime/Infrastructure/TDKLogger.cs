@@ -27,6 +27,18 @@ namespace Treasure
             LogByLevel(TDKConfig.LoggerLevelValue.ERROR, message);
         }
 
+        public static void LogException(string message, Exception exception) {
+            if (TDK.AppConfig.LoggerLevel > TDKConfig.LoggerLevelValue.ERROR) {
+                return;
+            }
+            #if UNITY_EDITOR
+            Debug.LogException(exception);
+            LogByLevel(TDKConfig.LoggerLevelValue.ERROR, $"{message} --- check above error in console for full stack trace");
+            #else
+            LogByLevel(TDKConfig.LoggerLevelValue.ERROR, $"{message} ---> {exception.Message}");
+            #endif
+        }
+
         // Alias to LogInfo
         public static void Log(string message)
         {

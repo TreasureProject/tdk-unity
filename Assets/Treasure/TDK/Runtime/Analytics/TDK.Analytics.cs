@@ -32,11 +32,25 @@ namespace Treasure
         internal void SetTreasureConnectInfo(string smartWalletAddress, int chainId)
         {
 #if !DISABLE_TREASURE_ANALTYICS
-            TDKServiceLocator.GetService<TDKAnalyticsService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
+            try
+            {
+                TDKServiceLocator.GetService<TDKAnalyticsService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
+            }
+            catch (System.Exception ex)
+            {
+                TDKLogger.LogException("Error setting connect info for TDKAnalyticsService", ex);
+            }
 #endif
 
 #if TDK_HELIKA
-            TDKServiceLocator.GetService<TDKHelikaService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
+            try
+            {
+                TDKServiceLocator.GetService<TDKHelikaService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
+            }
+            catch (System.Exception ex)
+            {
+                TDKLogger.LogException("Error setting connect info for TDKHelikaService", ex);
+            }
 #endif
             TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_CONNECTED);
         }
@@ -45,12 +59,26 @@ namespace Treasure
         {
             // send events to treasure analytics
 #if !DISABLE_TREASURE_ANALTYICS
-            TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(eventName, eventProps, highPriority);
+            try
+            {
+                TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(eventName, eventProps, highPriority);
+            }
+            catch (System.Exception ex)
+            {
+                TDKLogger.LogException("Error tracking event via TDKAnalyticsService", ex);
+            }
 #endif
 
             // send events to helika
 #if TDK_HELIKA
-            TDKServiceLocator.GetService<TDKHelikaService>().TrackEvent(eventName, eventProps);
+            try
+            {
+                TDKServiceLocator.GetService<TDKHelikaService>().TrackEvent(eventName, eventProps);
+            }
+            catch (System.Exception ex)
+            {
+                TDKLogger.LogException("Error tracking event via TDKHelikaService", ex);
+            }
 #endif
         }
     }
