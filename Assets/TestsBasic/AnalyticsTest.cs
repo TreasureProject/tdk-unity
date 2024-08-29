@@ -16,7 +16,6 @@ using System;
 // to remove/add scripting defines programatically, perhaps a custom editor button can do that + run the tests
 
 // Pending:
-// - integration tests (with actual api calls)
 // - mock unityrequest for webgl
 // - figure out how to make test run consecutively. for now they must be run one by one
 public class AnalyticsTest
@@ -241,6 +240,4 @@ public class AnalyticsTest
         );
         ValidateNextLog("[TDKAnalyticsService.IO:SendEvents] Events sent successfully");
     }
-    
-    // TODO test harness scene and pressing buttons
 }
