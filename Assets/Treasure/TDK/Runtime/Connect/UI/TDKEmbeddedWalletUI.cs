@@ -11,9 +11,6 @@ namespace Treasure
     public class TDKEmbeddedWalletUI : InAppWalletUI
     {
         [Space]
-        [Tooltip("Invoked when the user completes OTP process.")]
-        public UnityEvent OnEmailOTPVerificationSuccess;
-        [Space]
         [SerializeField] private ConfirmLoginModal confirmLoginModal;
 
         public override async Task LoginWithOTP()
@@ -163,7 +160,6 @@ namespace Treasure
                 OTPInput.interactable = true;
                 RecoveryInput.interactable = true;
                 SubmitButton.interactable = true;
-                OnEmailOTPVerificationSuccess?.Invoke();
             }
         }
 
