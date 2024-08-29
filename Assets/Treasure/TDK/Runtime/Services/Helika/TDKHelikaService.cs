@@ -13,15 +13,15 @@ namespace Treasure
         {
             base.Awake();
 
-            _config = TDK.Instance.AppConfig.GetModuleConfig<TDKHelikaConfig>();
+            _config = TDK.AppConfig.GetModuleConfig<TDKHelikaConfig>();
 
             if (_config != null) {
                 EventManager.Instance.Init(
                     _config.ApiKey,
-                    TDK.Instance.AppConfig.CartridgeTag,
-                    TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD ? HelikaEnvironment.Production : HelikaEnvironment.Develop,
+                    TDK.AppConfig.CartridgeTag,
+                    TDK.AppConfig.Environment == TDKConfig.Env.PROD ? HelikaEnvironment.Production : HelikaEnvironment.Develop,
                     TelemetryLevel.All,
-                    TDK.Instance.AppConfig.Environment == TDKConfig.Env.DEV
+                    TDK.AppConfig.Environment == TDKConfig.Env.DEV
                 );
             } else {
                 TDKLogger.LogWarning("[TDKHelikaService] Helika config not found, skipping initialization.");
@@ -41,7 +41,7 @@ namespace Treasure
 
             eventProps.Add(AnalyticsConstants.PROP_TDK_VERSION, TDKVersion.version);
             eventProps.Add(AnalyticsConstants.PROP_TDK_FLAVOUR, TDKVersion.name);
-            eventProps.Add(AnalyticsConstants.PROP_APP_ENVIRONMENT, TDK.Instance.AppConfig.Environment);
+            eventProps.Add(AnalyticsConstants.PROP_APP_ENVIRONMENT, TDK.AppConfig.Environment);
 
             // add chain id (using indexer in case it was added upstream)
             eventProps[AnalyticsConstants.PROP_CHAIN_ID] = _chainId;

@@ -16,8 +16,8 @@ namespace Treasure
 
         private void Start()
         {
-            nameText.text = TDK.Instance.AppConfig.CartridgeName;
-            ApplySprite(TDK.Instance.AppConfig.CartridgeIcon);
+            nameText.text = TDK.AppConfig.CartridgeName;
+            ApplySprite(TDK.AppConfig.CartridgeIcon);
         }
 
         private void ApplySprite(Sprite sprite)

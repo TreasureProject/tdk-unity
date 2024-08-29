@@ -122,7 +122,7 @@ public class MagicswapUI : MonoBehaviour
             InfoText.text = "Must get pool details before approving LP!";
             return;
         }
-        var callTargets = await TDK.Instance.AppConfig.GetCallTargets();
+        var callTargets = await TDK.AppConfig.GetCallTargets();
         if (!callTargets.Contains(magicswapPool.id)) {
             InfoText.text = "`callTargets` in TDKConfig must include the pool id!";
             InfoText.text += "\nPool id: " + magicswapPool.id;

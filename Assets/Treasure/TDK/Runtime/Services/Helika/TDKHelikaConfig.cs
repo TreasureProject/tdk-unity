@@ -17,7 +17,7 @@ namespace Treasure
         public string ApiKey
         {
             get {
-                if(TDK.Instance.AppConfig.Environment == TDKConfig.Env.PROD) {
+                if(TDK.AppConfig.Environment == TDKConfig.Env.PROD) {
                     #if UNITY_IOS
                     return _prodApiKeyIos;
                     #elif UNITY_ANDROID

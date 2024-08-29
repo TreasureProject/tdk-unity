@@ -30,14 +30,14 @@ namespace Treasure
             // Create request
             var req = new UnityWebRequest
             {
-                url = TDK.Instance.AppConfig.TDKApiUrl + path,
+                url = TDK.AppConfig.TDKApiUrl + path,
                 method = "GET",
                 downloadHandler = new DownloadHandlerBuffer()
             };
             req.SetRequestHeader("Content-Type", "application/json");
 
             // Set the API key header
-            req.SetRequestHeader("x-api-key", TDK.Instance.AppConfig.ApiKey);
+            req.SetRequestHeader("x-api-key", TDK.AppConfig.ApiKey);
 
             // Set chain ID with override option
             if (overrides.HasValue && overrides.Value.chainId > 0)
@@ -78,7 +78,7 @@ namespace Treasure
             // Create request
             var req = new UnityWebRequest
             {
-                url = TDK.Instance.AppConfig.TDKApiUrl + path,
+                url = TDK.AppConfig.TDKApiUrl + path,
                 method = "POST",
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body)),
                 downloadHandler = new DownloadHandlerBuffer()
@@ -86,7 +86,7 @@ namespace Treasure
             req.SetRequestHeader("Content-Type", "application/json");
 
             // Set the API key header
-            req.SetRequestHeader("x-api-key", TDK.Instance.AppConfig.ApiKey);
+            req.SetRequestHeader("x-api-key", TDK.AppConfig.ApiKey);
 
             // Set chain ID with override option
             if (overrides.HasValue && overrides.Value.chainId > 0)
