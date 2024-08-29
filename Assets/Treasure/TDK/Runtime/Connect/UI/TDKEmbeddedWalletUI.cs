@@ -123,7 +123,6 @@ namespace Treasure
 
             await new WaitUntil(() => _user != null || _exception != null);
 
-            // TODO need to handle when OTP is wrong 
             // InAppWalletCanvas.SetActive(false);
             if (_exception != null)
             {
