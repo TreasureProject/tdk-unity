@@ -156,6 +156,9 @@ public class AnalyticsTest
     [UnitySetUp]
     public IEnumerator MySetUp()
     {
+        var tdkConfig = TDKConfig.LoadFromResources();
+        Assert.That(tdkConfig.AutoInitialize, Is.False, "TDKConfig AutoInitialize must be false when testing");
+
         Application.logMessageReceivedThreaded += HandleLog;
         logs.Clear();
         

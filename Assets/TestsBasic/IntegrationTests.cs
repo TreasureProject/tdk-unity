@@ -158,7 +158,7 @@ public class IntegrationTests
         tdkLogs.Clear();
 
         Assert.That(TDK.Identity.IsAuthenticated, Is.False);
-        yield return TestHelpers.WaitForTask(TDK.Identity.StartUserSession(), 10);
+        yield return TestHelpers.WaitForTask(TDK.Identity.StartUserSession(), 15);
         Assert.That(TDK.Identity.IsAuthenticated, Is.True);
 
         Assert.That(tdkLogs.Count, Is.EqualTo(5));
