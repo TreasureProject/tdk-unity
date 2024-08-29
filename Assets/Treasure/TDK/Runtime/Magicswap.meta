@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Treasure/TDK/Runtime/Magicswap.meta
 guid: ef6196ced72e349fe8d4600b23e69731
+========
+guid: b98eae95c590a46f4a723088d21eb24e
+>>>>>>>> main:Assets/TestsBasic.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
