@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/TestsBasic/TestHelpers.cs.meta
 guid: 34d0fd79b837f4bf592c783d181b31b5
-========
-guid: ddd8374e02e7b4c229b71e6f26baa8e8
->>>>>>>> main:Assets/TestsBasic/IntegrationTests.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

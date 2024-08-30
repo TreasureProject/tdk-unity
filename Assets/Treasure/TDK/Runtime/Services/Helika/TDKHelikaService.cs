@@ -49,13 +49,6 @@ namespace Treasure
             // add chain id (using indexer in case it was added upstream)
             eventProps[AnalyticsConstants.PROP_CHAIN_ID] = _chainId;
 
-            eventProps.Add(AnalyticsConstants.PROP_TDK_VERSION, TDKVersion.version);
-            eventProps.Add(AnalyticsConstants.PROP_TDK_FLAVOUR, TDKVersion.name);
-            eventProps.Add(AnalyticsConstants.PROP_APP_ENVIRONMENT, TDK.AppConfig.Environment);
-
-            // add chain id (using indexer in case it was added upstream)
-            eventProps[AnalyticsConstants.PROP_CHAIN_ID] = _chainId;
-
             EventManager.Instance.SendEvent(eventName, eventProps);
         }
     }
