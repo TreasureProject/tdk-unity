@@ -72,13 +72,13 @@ namespace Helika
                 // TelemetryOnly means we shouldn't initialize Kochava
                 if (_telemetry > TelemetryLevel.TelemetryOnly &&
                     !string.IsNullOrEmpty(_kochavaApiKey) &&
-                    KochavaTracker.Instance != null)
+                    KochavaMeasurement.Instance != null)
                 {
                     InitializeKochava();
                 }
                 else
                 {
-                    // In case the Kochava key doesn't exist or KochavaTracker fails to initialized
+                    // In case the Kochava key doesn't exist or KochavaMeasurement fails to initialized
                     CreateSession();
                 }
             }
@@ -92,7 +92,7 @@ namespace Helika
             }
 
             Dictionary<string, object> finalEvent = new Dictionary<string, object>();
-            finalEvent["id"] = _sessionID;
+            finalEvent["id"] = Guid.NewGuid().ToString();
             finalEvent["events"] = new Dictionary<string, object>[] { AppendAttributesToDictionary(eventName, eventProps) };
 
             JObject serializedEvt = JObject.FromObject(finalEvent);
@@ -114,7 +114,7 @@ namespace Helika
             }
 
             Dictionary<string, object> finalEvent = new Dictionary<string, object>();
-            finalEvent["id"] = _sessionID;
+            finalEvent["id"] = Guid.NewGuid().ToString();
             finalEvent["events"] = events.ToArray();
 
             JObject serializedEvt = JObject.FromObject(finalEvent);
@@ -129,7 +129,7 @@ namespace Helika
             }
 
             JObject newEvent = new JObject(
-                new JProperty("id", _sessionID),
+                new JProperty("id", Guid.NewGuid().ToString()),
                 new JProperty("events", new JArray() { AppendAttributesToJObject(eventProps) })
             );
             PostAsync("/game/game-event", newEvent.ToString());
@@ -150,7 +150,7 @@ namespace Helika
             }
 
             JObject newEvent = new JObject(
-                new JProperty("id", _sessionID),
+                new JProperty("id", Guid.NewGuid().ToString()),
                 new JProperty("events", jarrayObj)
             );
             PostAsync("/game/game-event", newEvent.ToString());
@@ -265,7 +265,7 @@ namespace Helika
             );
 
             JObject evt = new JObject(
-                new JProperty("id", _sessionID),
+                new JProperty("id", Guid.NewGuid().ToString()),
                 new JProperty("events", new JArray() { createSessionEvent })
             );
 
@@ -317,21 +317,21 @@ namespace Helika
 
         private void InitializeKochava()
         {
-            KochavaTracker.Instance.RegisterEditorAppGuid(_kochavaApiKey);
+            KochavaMeasurement.Instance.RegisterEditorAppGuid(_kochavaApiKey);
 #if UNITY_ANDROID
-            KochavaTracker.Instance.RegisterAndroidAppGuid(_kochavaApiKey);
+            KochavaMeasurement.Instance.RegisterAndroidAppGuid(_kochavaApiKey);
 #endif
 
 #if UNITY_IOS
-            KochavaTracker.Instance.RegisterIosAppGuid(_kochavaApiKey);
-            KochavaTracker.Instance.SetIosAttAuthorizationAutoRequest(iosAttAuthorizationAutoRequest);
-            KochavaTracker.Instance.SetIosAttAuthorizationWaitTime(iosAttAuthorizationWaitTime);
+            KochavaMeasurement.Instance.RegisterIosAppGuid(_kochavaApiKey);
+            KochavaMeasurement.Instance.SetIosAttAuthorizationAutoRequest(iosAttAuthorizationAutoRequest);
+            KochavaMeasurement.Instance.SetIosAttAuthorizationWaitTime(iosAttAuthorizationWaitTime);
 #endif
 
-            KochavaTracker.Instance.Start();
+            KochavaMeasurement.Instance.Start();
 
             // Send an event to store the Kochava device id
-            KochavaTracker.Instance.GetDeviceId((deviceId) =>
+            KochavaMeasurement.Instance.RetrieveInstallId((deviceId) =>
             {
                 this._deviceId = deviceId;
 

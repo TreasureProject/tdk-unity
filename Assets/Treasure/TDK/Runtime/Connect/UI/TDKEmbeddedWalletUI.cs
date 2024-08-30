@@ -11,9 +11,6 @@ namespace Treasure
     public class TDKEmbeddedWalletUI : InAppWalletUI
     {
         [Space]
-        [Tooltip("Invoked when the user completes OTP process.")]
-        public UnityEvent OnEmailOTPVerificationSuccess;
-        [Space]
         [SerializeField] private ConfirmLoginModal confirmLoginModal;
 
         public override async Task LoginWithOTP()
@@ -68,6 +65,7 @@ namespace Treasure
                     AuthProvider.Facebook => "Facebook",
                     AuthProvider.JWT => "CustomAuth",
                     AuthProvider.PhoneOTP => "PhoneOTP",
+                    AuthProvider.Discord => "Discord",
                     _ => throw new UnityException($"Unsupported auth provider: {authOptions.authProvider}"),
                 };
                 return await _embeddedWallet.GetUserAsync(_email, authProvider);
@@ -99,6 +97,9 @@ namespace Treasure
                     case AuthProvider.Facebook:
                         await LoginWithOauth("Facebook");
                         break;
+                    case AuthProvider.Discord:
+                        await LoginWithOauth("Discord");
+                        break;
                     case AuthProvider.JWT:
                         await LoginWithJWT(authOptions.jwtOrPayload, authOptions.encryptionKey);
                         break;
@@ -119,7 +120,6 @@ namespace Treasure
 
             await new WaitUntil(() => _user != null || _exception != null);
 
-            // TODO need to handle when OTP is wrong 
             // InAppWalletCanvas.SetActive(false);
             if (_exception != null)
             {
@@ -160,7 +160,6 @@ namespace Treasure
                 OTPInput.interactable = true;
                 RecoveryInput.interactable = true;
                 SubmitButton.interactable = true;
-                OnEmailOTPVerificationSuccess?.Invoke();
             }
         }
 

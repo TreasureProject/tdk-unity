@@ -1,5 +1,5 @@
 ﻿//
-//  KochavaTracker (Unity)
+//  KochavaMeasurement (Unity)
 //
 //  Copyright (c) 2020 - 2023 Kochava, Inc. All rights reserved.
 //
@@ -24,8 +24,8 @@ namespace Kochava.Editor
 #if UNITY_IOS
                 case BuildTarget.iOS:
                     // Add the iOS Frameworks contained by the XCFramework.
-                    AddIosFramework(path, "KochavaCore");
-                    AddIosFramework(path, "KochavaTracker");
+                    AddIosFramework("Kochava", path, "KochavaNetworking");
+                    AddIosFramework("Kochava", path, "KochavaMeasurement");
                     // Enable Module support.
                     EnableIosModules(path);
                     break;
@@ -62,10 +62,10 @@ namespace Kochava.Editor
 
         // Add an iOS Framework from an XCFramework to the Xcode Project.
         // See https://forum.unity.com/threads/how-do-i-add-xcframwork-from-code.840163/#post-6904331
-        private static void AddIosFramework(string path, string frameworkName)
+        public static void AddIosFramework(string module, string path, string frameworkName)
         {
             // Build paths.
-            var xcFrameworkPath = Path.Combine("Assets", "Helika", "Packages", "Kochava", "Plugins", "iOS", frameworkName + ".xcframework");
+            var xcFrameworkPath = Path.Combine("Assets", module, "Plugins", "iOS", frameworkName + ".xcframework");
             var deviceFrameworkPath = Path.Combine(xcFrameworkPath, "ios-arm64", frameworkName + ".framework");
             var simulatorFrameworkPath = Path.Combine(xcFrameworkPath, "ios-arm64_x86_64-simulator", frameworkName + ".framework");
             var destFrameworkPath = Path.Combine("Frameworks", "Kochava", frameworkName + ".framework");

@@ -27,6 +27,18 @@ namespace Treasure
             LogByLevel(TDKConfig.LoggerLevelValue.ERROR, message);
         }
 
+        public static void LogException(string message, Exception exception) {
+            if (TDK.AppConfig.LoggerLevel > TDKConfig.LoggerLevelValue.ERROR) {
+                return;
+            }
+            #if UNITY_EDITOR
+            Debug.LogException(exception);
+            LogByLevel(TDKConfig.LoggerLevelValue.ERROR, $"{message} --- check above error in console for full stack trace");
+            #else
+            LogByLevel(TDKConfig.LoggerLevelValue.ERROR, $"{message} ---> {exception.Message}");
+            #endif
+        }
+
         // Alias to LogInfo
         public static void Log(string message)
         {
@@ -34,14 +46,10 @@ namespace Treasure
         }
 
         private static void LogByLevel(TDKConfig.LoggerLevelValue loggerLevelValue, string message) {
-            if (TDK.Instance.appIsQuitting) {
-                Debug.Log($"[{loggerLevelValue}] {message}");
+            if (TDK.AppConfig.LoggerLevel > loggerLevelValue) {
                 return;
             }
-            if (TDK.Instance.AppConfig.LoggerLevel > loggerLevelValue) {
-                return;
-            }
-            TDKMainThreadDispatcher.Instance.Enqueue(() => ExternalLogCallback?.Invoke(message));
+            TDKMainThreadDispatcher.Enqueue(() => ExternalLogCallback?.Invoke(message));
             #if UNITY_EDITOR
             switch (loggerLevelValue)
             {
@@ -56,7 +64,7 @@ namespace Treasure
                     break;
             }
             #else
-            TDKMainThreadDispatcher.Instance.Enqueue(() => LogMessageInternal(message));
+            TDKMainThreadDispatcher.Enqueue(() => LogMessageInternal(message));
             #endif
         }
 

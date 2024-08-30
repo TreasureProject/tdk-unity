@@ -44,7 +44,7 @@ namespace Treasure
             public ChainId _devDefaultChainId;
             public ChainId _prodDefaultChainId;
             public int _sessionDurationSec;
-            public int _sessionMinDurationLeftSec; // TODO use in ValidateActiveSigner
+            public int _sessionMinDurationLeftSec;
             public List<SessionOption> _sessionOptions;
         }
 

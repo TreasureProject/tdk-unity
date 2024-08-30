@@ -79,7 +79,7 @@ namespace Treasure
         private async Task CreateSessionKey(string backendWallet, List<string> callTargets, BigInteger nativeTokenLimitPerTransaction)
         {
             var permissionStartTimestamp = (decimal)Utils.GetUnixTimeStampNow() - 60 * 60;
-            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + TDK.Instance.AppConfig.SessionDurationSec);
+            var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + TDK.AppConfig.SessionDurationSec);
             await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.CreateSessionKey(
                 signerAddress: backendWallet,
                 approvedTargets: callTargets,
@@ -110,7 +110,7 @@ namespace Treasure
             var requestedCallTargets = callTargets.Select(callTarget => callTarget.ToLowerInvariant());
             var signerApprovedTargets = signer.approvedTargets.Select(approvedTarget => approvedTarget.ToLowerInvariant());
             var nowDate = Utils.GetUnixTimeStampNow();
-            var minEndDate = Utils.GetUnixTimeStampNow() + TDK.Instance.AppConfig.SessionMinDurationLeftSec;
+            var minEndDate = Utils.GetUnixTimeStampNow() + TDK.AppConfig.SessionMinDurationLeftSec;
             var maxEndDate = Utils.GetUnixTimeStampIn10Years();
             return
                 // Expected backend wallet is signer
@@ -146,12 +146,12 @@ namespace Treasure
                     chainId = chainId
                 });
 
-                var backendWallet = await TDK.Instance.AppConfig.GetBackendWallet();
-                var callTargets = await TDK.Instance.AppConfig.GetCallTargets();
+                var backendWallet = await TDK.AppConfig.GetBackendWallet();
+                var callTargets = await TDK.AppConfig.GetCallTargets();
                 var requiresSession = !string.IsNullOrEmpty(backendWallet) && callTargets.Count > 0;
                 if (requiresSession)
                 {
-                    var nativeTokenLimitPerTransaction = await TDK.Instance.AppConfig.GetNativeTokenLimitPerTransaction();
+                    var nativeTokenLimitPerTransaction = await TDK.AppConfig.GetNativeTokenLimitPerTransaction();
 
                     // Check if any active signers match the call targets
                     var hasActiveSession = user.allActiveSigners.Any((signer) =>
@@ -215,9 +215,9 @@ namespace Treasure
                 await TDK.Connect.SetChainId(chainId);
             }
 
-            var backendWallet = await TDK.Instance.AppConfig.GetBackendWallet();
-            var callTargets = await TDK.Instance.AppConfig.GetCallTargets();
-            var nativeTokenLimitPerTransaction = await TDK.Instance.AppConfig.GetNativeTokenLimitPerTransaction();
+            var backendWallet = await TDK.AppConfig.GetBackendWallet();
+            var callTargets = await TDK.AppConfig.GetCallTargets();
+            var nativeTokenLimitPerTransaction = await TDK.AppConfig.GetNativeTokenLimitPerTransaction();
             var requiresSession = !string.IsNullOrEmpty(backendWallet) && callTargets.Count > 0;
             var didCreateSession = false;
 

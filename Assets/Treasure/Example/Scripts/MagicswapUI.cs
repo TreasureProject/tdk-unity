@@ -122,7 +122,7 @@ public class MagicswapUI : MonoBehaviour
             InfoText.text = "Must get pool details before approving LP!";
             return;
         }
-        var callTargets = await TDK.Instance.AppConfig.GetCallTargets();
+        var callTargets = await TDK.AppConfig.GetCallTargets();
         if (!callTargets.Contains(magicswapPool.id)) {
             InfoText.text = "`callTargets` in TDKConfig must include the pool id!";
             InfoText.text += "\nPool id: " + magicswapPool.id;
@@ -317,7 +317,7 @@ public class MagicswapUI : MonoBehaviour
             var treasuresContract = TDKServiceLocator.GetService<TDKThirdwebService>().SDK.GetContract(treasuresAddress);
             var magicBalance = await magicContract.ERC20.Balance();
             var magicAllowance = await magicContract.ERC20.Allowance(magicswapRouterAddress);
-            var treasuresAreApproved = await treasuresContract.ERC1155.IsApprovedForAll(TDK.Connect.Address, magicswapRouterAddress);
+            var treasuresAreApproved = await treasuresContract.Read<bool>("isApprovedForAll", TDK.Connect.Address, magicswapRouterAddress);
 
             var text = $@"<b>- Magic -</b>
 Balance: {Utils.ToEth(magicBalance.value)}
@@ -330,7 +330,7 @@ Approved for all: {treasuresAreApproved}";
                     var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
                     var treasures = new List<(string id, BigInteger balance)>();
                     foreach (var tokenId in tokenIds) {
-                        var treasureBalance = await treasuresContract.ERC1155.Balance(tokenId);
+                        var treasureBalance = await treasuresContract.Read<BigInteger>("balanceOf", TDK.Connect.Address, tokenId);
                         if (treasureBalance > 0) {
                             treasures.Add((tokenId, treasureBalance));
                         }
