@@ -145,17 +145,24 @@ namespace Treasure
                     authToken = authToken,
                     chainId = chainId
                 });
+                TDKLogger.Log("After user fetch");
 
                 var backendWallet = await TDK.AppConfig.GetBackendWallet();
                 var callTargets = await TDK.AppConfig.GetCallTargets();
                 var requiresSession = !string.IsNullOrEmpty(backendWallet) && callTargets.Count > 0;
                 if (requiresSession)
                 {
+                    TDKLogger.Log(user.smartAccountAddress);
+                    TDKLogger.Log(user.email);
                     var nativeTokenLimitPerTransaction = await TDK.AppConfig.GetNativeTokenLimitPerTransaction();
 
                     // Check if any active signers match the call targets
                     var hasActiveSession = user.allActiveSigners.Any((signer) =>
                     {
+                        TDKLogger.Log(signer.signer);
+                        TDKLogger.Log(signer.approvedTargets.Length.ToString());
+                        TDKLogger.Log(signer.nativeTokenLimitPerTransaction);
+                        TDKLogger.Log(signer.endTimestamp);
                         return ValidateActiveSigner(
                             backendWallet,
                             callTargets,
