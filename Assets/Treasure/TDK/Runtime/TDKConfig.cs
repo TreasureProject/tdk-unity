@@ -34,6 +34,8 @@ namespace Treasure
             public string _prodApiKey;
             public string _devClientId;
             public string _prodClientId;
+            public string _ecosystemId;
+            public string _ecosystemPartnerId;
         }
 
         [Serializable]
@@ -86,6 +88,8 @@ namespace Treasure
 
         public string TDKApiUrl => Environment == Env.DEV ? _general._devApiUrl : _general._prodApiUrl;
         public string ClientId => Environment == Env.DEV ? _general._devClientId : _general._prodClientId;
+        public string EcosystemId => _general._ecosystemId;
+        public string EcosystemPartnerId => _general._ecosystemPartnerId;
 
         public string FactoryAddress => _connect._factoryAddress != "" ? _connect._factoryAddress : null;
 
@@ -168,6 +172,8 @@ namespace Treasure
                 _prodApiKey = config.general.prodApiKey,
                 _devClientId = config.general.devClientId,
                 _prodClientId = config.general.prodClientId,
+                _ecosystemId = config.general.ecosystemId,
+                _ecosystemPartnerId = config.general.ecosystemPartnerId
             };
 
             // Connect
@@ -224,6 +230,8 @@ namespace Treasure
             public string prodApiKey;
             public string devClientId;
             public string prodClientId;
+            public string ecosystemId;
+            public string ecosystemPartnerId;
         }
 
         [Serializable]
