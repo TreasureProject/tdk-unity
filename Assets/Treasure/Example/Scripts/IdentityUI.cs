@@ -37,7 +37,7 @@ public class IdentityUI : MonoBehaviour
     {
         try
         {
-            var chainId = await TDK.Connect.GetChainId();
+            var chainId = TDK.Connect.GetChainId();
             await TDK.Identity.ValidateUserSession(chainId, value);
         }
         catch (Exception e)

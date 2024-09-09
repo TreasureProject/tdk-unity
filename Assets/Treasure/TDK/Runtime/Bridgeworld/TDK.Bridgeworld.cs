@@ -98,7 +98,7 @@ namespace Treasure
         public async Task<Transaction> DepositMagic(BigInteger amount)
         {
             TDKLogger.Log($"Depositing {Utils.ToEth(amount.ToString())} MAGIC to Harvester");
-            var chainId = await TDK.Connect.GetChainId();
+            var chainId = TDK.Connect.GetChainId();
             var transaction = await TDK.API.WriteTransaction(
                 address: id,
                 functionName: "deposit",
@@ -293,7 +293,7 @@ namespace Treasure
                 args[i, 2] = new string[] { customData };
             }
 
-            var contractAddress = await TDK.Common.GetContractAddress(Contract.CorruptionRemoval);
+            var contractAddress = TDK.Common.GetContractAddress(Contract.CorruptionRemoval);
             var transaction = await TDK.API.WriteTransaction(
                 address: contractAddress,
                 functionName: "startRemovingCorruption",
@@ -316,7 +316,7 @@ namespace Treasure
         public async Task<Transaction> EndCorruptionRemovals(List<string> requestIds)
         {
             TDKLogger.Log($"Ending {requestIds.Count} Corruption removals");
-            var contractAddress = await TDK.Common.GetContractAddress(Contract.CorruptionRemoval);
+            var contractAddress = TDK.Common.GetContractAddress(Contract.CorruptionRemoval);
             var transaction = await TDK.API.WriteTransaction(
                 address: contractAddress,
                 functionName: "endRemovingCorruption",

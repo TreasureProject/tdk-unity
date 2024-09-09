@@ -1,35 +1,21 @@
-using System;
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Thirdweb;
 using Thirdweb.Unity;
 using Thirdweb.Unity.Helpers;
+using System.Threading.Tasks;
+using System;
 
 namespace Treasure
 {
     public class TDKThirdwebService : TDKBaseService
     {
-        // v5.0.0 --->>>
         public ThirdwebClient Client { get; private set; }
-        public IThirdwebWallet ActiveWallet { get; private set; }
-        public bool Initialized { get; private set;};
+        public SmartWallet ActiveWallet { get; private set; }
+        public bool Initialized { get; private set; }
         
-        private string BundleId { get; set; }
+        private string bundleId;
         private Dictionary<string, IThirdwebWallet> _walletMapping;
-        // v5.0.0 <<<---
-
-        // private ThirdwebSDK _sdk;
-
-        // public ThirdwebSDK SDK
-        // {
-        //     get { return _sdk; }
-        // }
-
-        // public Wallet Wallet
-        // {
-        //     get { return _sdk.Wallet; }
-        // }
 
         public override void Awake()
         {
@@ -44,18 +30,18 @@ namespace Treasure
             }            
         }
 
+        // TODO make this private if possible
         public void InitializeSDK(string chainIdentifier)
         {
             TDKLogger.LogDebug("Initializing Thirdweb SDK for chain: " + chainIdentifier);
 
-            var tdkConfig = TDK.AppConfig;
+            var clientId = TDK.AppConfig.ClientId;
 
-            // v5.0.0 --->>>
-            BundleId ??= Application.identifier ?? $"com.{Application.companyName}.{Application.productName}";
+            bundleId ??= Application.identifier ?? $"com.{Application.companyName}.{Application.productName}";
 
             Client = ThirdwebClient.Create(
-                clientId: tdkConfig.ClientId,
-                bundleId: BundleId,
+                clientId: clientId,
+                bundleId: bundleId,
                 httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new UnityThirdwebHttpClient() : new ThirdwebHttpClient(),
                 headers: new Dictionary<string, string>
                 {
@@ -63,8 +49,8 @@ namespace Treasure
                     { "x-sdk-os", Application.platform.ToString() },
                     { "x-sdk-platform", "unity" },
                     { "x-sdk-version", ThirdwebManager.THIRDWEB_UNITY_SDK_VERSION },
-                    { "x-client-id", tdkConfig.ClientId },
-                    { "x-bundle-id", BundleId }
+                    { "x-client-id", clientId },
+                    { "x-bundle-id", bundleId }
                 }
             );
 
@@ -73,37 +59,74 @@ namespace Treasure
             _walletMapping = new Dictionary<string, IThirdwebWallet>();
 
             Initialized = true;
-            // v5.0.0 <<<---
+        }
+        
+        public async Task ConnectWallet(InAppWalletOptions inAppWalletOptions, int chainId) {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            var inAppWallet = await InAppWallet.Create(
+                client: thirdwebService.Client,
+                email: inAppWalletOptions.Email,
+                phoneNumber: inAppWalletOptions.PhoneNumber,
+                authProvider: inAppWalletOptions.AuthProvider,
+                storageDirectoryPath: inAppWalletOptions.StorageDirectoryPath
+            );
+            if (!await inAppWallet.IsConnected()) {
+                ThirdwebDebug.Log("Session does not exist or is expired, proceeding with InAppWallet authentication.");
 
-            // var supportedChains = ((ChainId[])Enum.GetValues(typeof(ChainId)))
-            //     .Where(chainId => chainId != ChainId.Unknown)
-            //     .Select(chainId => new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] })
-            //     .ToArray();
+                if (inAppWalletOptions.AuthProvider == AuthProvider.Default)
+                {
+                    await inAppWallet.SendOTP();
+                    var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(inAppWalletOptions.Email);
+                    _ = await otpModal.LoginWithOtp(inAppWallet);
+                }
+                else
+                {
+                    _ = await inAppWallet.LoginWithOauth(
+                        isMobile: Application.isMobilePlatform,
+                        browserOpenAction: (url) => Application.OpenURL(url),
+                        mobileRedirectScheme: bundleId + "://",
+                        browser: new CrossPlatformUnityBrowser()
+                    );
+                }
+            }
+            var smartWallet = await SmartWallet.Create(
+                personalWallet: inAppWallet,
+                chainId: chainId,
+                gasless: true,
+                factoryAddress: TDK.AppConfig.FactoryAddress
+            );
 
-            // // TODO this is copied code from ThirdwebManager.cs, we should refactor it so it wont get outdated
-            // var smartWalletConfig = new ThirdwebSDK.SmartWalletConfig()
-            // {
-            //     factoryAddress = string.IsNullOrEmpty(tdkConfig.FactoryAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS : tdkConfig.FactoryAddress,
-            //     gasless = true,
-            //     erc20PaymasterAddress = null,
-            //     erc20TokenAddress = null,
-            //     bundlerUrl = $"https://{chainIdentifier}.bundler.thirdweb.com",
-            //     paymasterUrl = $"https://{chainIdentifier}.bundler.thirdweb.com",
-            //     entryPointAddress = Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS,
-            // };
+            ActiveWallet = smartWallet;
+            // TODO add to _walletMapping?
+        }
 
-            // var options = new ThirdwebSDK.Options
-            // {
-            //     smartWalletConfig = smartWalletConfig,
-            //     clientId = tdkConfig.ClientId,
-            //     supportedChains = supportedChains
-            // };
+        public async Task<bool> IsWalletConnected()
+        {
+            return ActiveWallet != null && await ActiveWallet.IsConnected();
+        }
 
-            // _sdk = new ThirdwebSDK(
-            //     chainIdentifier,
-            //     (int)Constants.NameToChainId[chainIdentifier],
-            //     options
-            // );
+        public async Task DisconnectWallets(bool endSession = false)
+        {
+            // TODO check if endSession is still needed
+            // TODO check _walletMapping?
+            if (ActiveWallet != null)
+            {
+                // TODO InAppWalletUI.Instance.Cancel(); // cancel any in progress connect operations
+                if (await ActiveWallet.IsConnected()) {
+                    var personalWallet = await ActiveWallet.GetPersonalWallet();
+                    await personalWallet.Disconnect();
+                    await ActiveWallet.Disconnect();
+                }
+                await new WaitForEndOfFrame();
+                ActiveWallet = null;
+            }
+        }
+
+        public async Task SwitchNetwork(int chainId)
+        {
+            if (ActiveWallet != null && await ActiveWallet.IsConnected()) {
+                await ActiveWallet.SwitchNetwork(chainId);
+            }
         }
     }
 }

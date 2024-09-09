@@ -64,7 +64,7 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_LOGIN);
         }
 
-        public void ShowConfirmLoginModal(string email)
+        public ConfirmLoginModal ShowOtpModal(string email)
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
@@ -74,6 +74,8 @@ namespace Treasure
             currentModalOpended = confirmLoginModal;
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_CONFIRM);
+
+            return confirmLoginModal;
         }
 
         public void ShowAccountModal()

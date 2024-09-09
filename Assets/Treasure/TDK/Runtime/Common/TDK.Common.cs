@@ -18,9 +18,9 @@ namespace Treasure
     {
         public Common() { }
 
-        public async Task<string> GetContractAddress(Contract contract)
+        public string GetContractAddress(Contract contract)
         {
-            var chainId = await TDK.Connect.GetChainId();
+            var chainId = TDK.Connect.GetChainId();
             return Constants.ContractAddresses[chainId][contract];
         }
 
