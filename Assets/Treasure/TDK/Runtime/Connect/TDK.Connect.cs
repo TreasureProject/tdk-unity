@@ -42,7 +42,7 @@ namespace Treasure
         #region private vars
         private Options? _options;
         private ChainId _chainId = ChainId.Unknown;
-        private InAppWalletOptions _lastWalletOptions;
+        private EcosystemWalletOptions _lastWalletOptions;
         private string _address;
         #endregion
 
@@ -86,26 +86,26 @@ namespace Treasure
         #endregion
 
         #region private methods
-        private async Task ConnectWallet(InAppWalletOptions inAppWalletOptions) {
-            TDKLogger.Log($"[TDK.Connect:Connect] Connecting to {inAppWalletOptions.AuthProvider}...");
+        private async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions) {
+            TDKLogger.Log($"[TDK.Connect:Connect] Connecting to {ecosystemWalletOptions.AuthProvider}...");
             
             var chainId = GetChainIdAsInt();
 
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            await thirdwebService.ConnectWallet(inAppWalletOptions, chainId);
+            await thirdwebService.ConnectWallet(ecosystemWalletOptions, chainId);
             
             _address = await thirdwebService.ActiveWallet.GetAddress();
-            _lastWalletOptions = inAppWalletOptions; // TODO figure out chain switching, _lastWalletOptions might be unnecessary
+            _lastWalletOptions = ecosystemWalletOptions; // TODO figure out chain switching, _lastWalletOptions might be unnecessary
             OnConnected?.Invoke(_address);
             
             TDK.Analytics.SetTreasureConnectInfo(_address, chainId);
             TDKLogger.LogDebug($"[TDK.Connect:ConnectWallet] Connection success!");
         }
 
-        private async Task Reconnect(InAppWalletOptions inAppWalletOptions)
+        private async Task Reconnect(EcosystemWalletOptions ecosystemWalletOptions)
         {
             _options = new Options { isSilent = true };
-            await ConnectWallet(inAppWalletOptions);
+            await ConnectWallet(ecosystemWalletOptions);
         }
         #endregion
 
@@ -151,20 +151,20 @@ namespace Treasure
         public async Task ConnectEmail(string email)
         {
             _options = null;
-            var inAppWalletOptions = new InAppWalletOptions(email: email);
-            await ConnectWallet(inAppWalletOptions);
+            var ecosystemWalletOptions = new EcosystemWalletOptions(email: email);
+            await ConnectWallet(ecosystemWalletOptions);
         }
 
         public async Task ConnectSocial(SocialAuthProvider provider)
         {
             _options = null;
-            var inAppWalletOptions = new InAppWalletOptions(authprovider: (AuthProvider)provider);
-            await ConnectWallet(inAppWalletOptions);
+            var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: (AuthProvider)provider);
+            await ConnectWallet(ecosystemWalletOptions);
         }
 
         public async Task Reconnect(string email) {
-            var inAppWalletOptions = new InAppWalletOptions(email: email);
-            await Reconnect(inAppWalletOptions);
+            var ecosystemWalletOptions = new EcosystemWalletOptions(email: email);
+            await Reconnect(ecosystemWalletOptions);
         }
 
         public async Task Disconnect(bool endSession = false)

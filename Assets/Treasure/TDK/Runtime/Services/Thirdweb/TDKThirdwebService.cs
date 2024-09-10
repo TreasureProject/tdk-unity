@@ -61,27 +61,28 @@ namespace Treasure
             Initialized = true;
         }
         
-        public async Task ConnectWallet(InAppWalletOptions inAppWalletOptions, int chainId) {
-            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            var inAppWallet = await InAppWallet.Create(
-                client: thirdwebService.Client,
-                email: inAppWalletOptions.Email,
-                phoneNumber: inAppWalletOptions.PhoneNumber,
-                authProvider: inAppWalletOptions.AuthProvider,
-                storageDirectoryPath: inAppWalletOptions.StorageDirectoryPath
+        public async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, int chainId) {
+            var ecosystemWallet = await EcosystemWallet.Create(
+                ecosystemId: TDK.AppConfig.EcosystemId,
+                ecosystemPartnerId: TDK.AppConfig.EcosystemPartnerId,
+                client: Client,
+                email: ecosystemWalletOptions.Email,
+                phoneNumber: ecosystemWalletOptions.PhoneNumber,
+                authProvider: ecosystemWalletOptions.AuthProvider,
+                storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
             );
-            if (!await inAppWallet.IsConnected()) {
-                ThirdwebDebug.Log("Session does not exist or is expired, proceeding with InAppWallet authentication.");
+            if (!await ecosystemWallet.IsConnected()) {
+                ThirdwebDebug.Log("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
 
-                if (inAppWalletOptions.AuthProvider == AuthProvider.Default)
+                if (ecosystemWalletOptions.AuthProvider == AuthProvider.Default)
                 {
-                    await inAppWallet.SendOTP();
-                    var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(inAppWalletOptions.Email);
-                    _ = await otpModal.LoginWithOtp(inAppWallet);
+                    await ecosystemWallet.SendOTP();
+                    var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(ecosystemWalletOptions.Email);
+                    _ = await otpModal.LoginWithOtp(ecosystemWallet);
                 }
                 else
                 {
-                    _ = await inAppWallet.LoginWithOauth(
+                    _ = await ecosystemWallet.LoginWithOauth(
                         isMobile: Application.isMobilePlatform,
                         browserOpenAction: (url) => Application.OpenURL(url),
                         mobileRedirectScheme: bundleId + "://",
@@ -90,7 +91,7 @@ namespace Treasure
                 }
             }
             var smartWallet = await SmartWallet.Create(
-                personalWallet: inAppWallet,
+                personalWallet: ecosystemWallet,
                 chainId: chainId,
                 gasless: true,
                 factoryAddress: TDK.AppConfig.FactoryAddress

@@ -90,7 +90,7 @@ namespace Treasure
             return Regex.IsMatch(str, "^[0-9]+$");
         }
 
-        public Task<bool> LoginWithOtp(InAppWallet wallet)
+        public Task<bool> LoginWithOtp(EcosystemWallet wallet)
         {
             confirmCode.onClick.RemoveAllListeners();
             codeInput.text = string.Empty;
@@ -112,31 +112,23 @@ namespace Treasure
                     SetConfirmLoading(true);
                     
                     var otp = codeInput.text;
-                    (var address, var canRetry) = await wallet.LoginWithOtp(otp);
-                    if (address != null)
-                    {
-                        tcs.SetResult(true);
-                    }
-                    else if (!canRetry)
-                    {
-                        // TODO figure out why it never enters here when you typo the OTP
-                        TDKConnectUIManager.Instance.ShowLoginModal();
-                        tcs.SetException(new UnityException("Failed to verify OTP."));
-                    }
-                    else
-                    {
-                        TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
-                        TDKLogger.LogError("Login with OTP failed");
-                        SetErrorText("OTP code is wrong");
-                        codeInput.text = string.Empty;
-                        codeInput.interactable = true;
-                        confirmCode.interactable = true;
-                    }
+                    var address = await wallet.LoginWithOtp(otp);
+                    tcs.SetResult(true);
                 }
                 catch (System.Exception e)
                 {
-                    TDKConnectUIManager.Instance.ShowLoginModal();
-                    tcs.SetException(e);
+                    if (e.Message.Contains("try again")) {
+                        SetErrorText(e.Message);
+                        TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
+                        TDKLogger.LogError("Login with OTP failed");
+                        codeInput.text = string.Empty;
+                        codeInput.interactable = true;
+                        SetConfirmLoading(false);
+                    } else {
+                        TDKLogger.LogException("OTP error", e);
+                        TDKConnectUIManager.Instance.ShowLoginModal();
+                        tcs.SetException(e);
+                    }
                 }
             });
 

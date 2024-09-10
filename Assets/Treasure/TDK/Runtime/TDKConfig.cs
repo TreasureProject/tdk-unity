@@ -88,10 +88,10 @@ namespace Treasure
 
         public string TDKApiUrl => Environment == Env.DEV ? _general._devApiUrl : _general._prodApiUrl;
         public string ClientId => Environment == Env.DEV ? _general._devClientId : _general._prodClientId;
-        public string EcosystemId => _general._ecosystemId;
+        public string EcosystemId => string.IsNullOrEmpty(_general._ecosystemId) ? "ecosystem.treasure" : _general._ecosystemId;
         public string EcosystemPartnerId => _general._ecosystemPartnerId;
 
-        public string FactoryAddress => _connect._factoryAddress != "" ? _connect._factoryAddress : null;
+        public string FactoryAddress => string.IsNullOrEmpty(_connect._factoryAddress) ? null : _connect._factoryAddress;
 
         public ChainId DefaultChainId =>
             Environment == Env.DEV ? _connect._devDefaultChainId : _connect._prodDefaultChainId;
