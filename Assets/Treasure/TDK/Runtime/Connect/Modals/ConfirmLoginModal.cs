@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -22,6 +23,7 @@ namespace Treasure
 
         private string _email;
         private string _enteredCode = "aaaaaa";
+        private TaskCompletionSource<bool> _currentOtpTaskCompletionSource;
 
         private void Start()
         {
@@ -97,8 +99,7 @@ namespace Treasure
             codeInput.interactable = true;
             SetConfirmLoading(false);
 
-            // TODO cancel this when backGroundButton is clicked
-            var tcs = new TaskCompletionSource<bool>();
+            _currentOtpTaskCompletionSource = new TaskCompletionSource<bool>();
 
             confirmCode.onClick.AddListener(async () =>
             {
@@ -113,9 +114,9 @@ namespace Treasure
                     
                     var otp = codeInput.text;
                     var address = await wallet.LoginWithOtp(otp);
-                    tcs.SetResult(true);
+                    _currentOtpTaskCompletionSource.SetResult(true);
                 }
-                catch (System.Exception e)
+                catch (Exception e)
                 {
                     if (e.Message.Contains("try again")) {
                         SetErrorText(e.Message);
@@ -127,12 +128,16 @@ namespace Treasure
                     } else {
                         TDKLogger.LogException("OTP error", e);
                         TDKConnectUIManager.Instance.ShowLoginModal();
-                        tcs.SetException(e);
+                        _currentOtpTaskCompletionSource.SetException(e);
                     }
                 }
             });
 
-            return tcs.Task;
+            return _currentOtpTaskCompletionSource.Task;
+        }
+
+        public void CancelCurrentLoginAttempt() {
+            _currentOtpTaskCompletionSource?.TrySetException(new Exception("User closed modal"));
         }
     }
 }

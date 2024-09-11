@@ -4,7 +4,7 @@ using Thirdweb;
 using Thirdweb.Unity;
 using Thirdweb.Unity.Helpers;
 using System.Threading.Tasks;
-using System;
+using System.Threading;
 
 namespace Treasure
 {
@@ -15,7 +15,7 @@ namespace Treasure
         public bool Initialized { get; private set; }
         
         private string bundleId;
-        private Dictionary<string, IThirdwebWallet> _walletMapping;
+        private CancellationTokenSource _connectionCancelationTokenSource;
 
         public override void Awake()
         {
@@ -30,8 +30,7 @@ namespace Treasure
             }            
         }
 
-        // TODO make this private if possible
-        public void InitializeSDK(string chainIdentifier)
+        private void InitializeSDK(string chainIdentifier)
         {
             TDKLogger.LogDebug("Initializing Thirdweb SDK for chain: " + chainIdentifier);
 
@@ -56,49 +55,70 @@ namespace Treasure
 
             ThirdwebDebug.Log("ThirdwebManager initialized.");
 
-            _walletMapping = new Dictionary<string, IThirdwebWallet>();
-
             Initialized = true;
         }
         
         public async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, int chainId) {
-            var ecosystemWallet = await EcosystemWallet.Create(
-                ecosystemId: TDK.AppConfig.EcosystemId,
-                ecosystemPartnerId: TDK.AppConfig.EcosystemPartnerId,
-                client: Client,
-                email: ecosystemWalletOptions.Email,
-                phoneNumber: ecosystemWalletOptions.PhoneNumber,
-                authProvider: ecosystemWalletOptions.AuthProvider,
-                storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
-            );
-            if (!await ecosystemWallet.IsConnected()) {
-                ThirdwebDebug.Log("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
+            // Allow only one attempt to connect at a time, a new one will cancel any previous
+            _connectionCancelationTokenSource?.Cancel();
+            _connectionCancelationTokenSource = new CancellationTokenSource();
+            var cancellationToken = _connectionCancelationTokenSource.Token;
+            
+            EcosystemWallet ecosystemWallet = null;
+            SmartWallet smartWallet = null;
+            try
+            {
+                ecosystemWallet = await EcosystemWallet.Create(
+                    ecosystemId: TDK.AppConfig.EcosystemId,
+                    ecosystemPartnerId: TDK.AppConfig.EcosystemPartnerId,
+                    client: Client,
+                    email: ecosystemWalletOptions.Email,
+                    phoneNumber: ecosystemWalletOptions.PhoneNumber,
+                    authProvider: ecosystemWalletOptions.AuthProvider,
+                    storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
+                );
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!await ecosystemWallet.IsConnected()) {
+                    ThirdwebDebug.Log("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
 
-                if (ecosystemWalletOptions.AuthProvider == AuthProvider.Default)
-                {
-                    await ecosystemWallet.SendOTP();
-                    var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(ecosystemWalletOptions.Email);
-                    _ = await otpModal.LoginWithOtp(ecosystemWallet);
+                    if (ecosystemWalletOptions.AuthProvider == AuthProvider.Default)
+                    {
+                        await ecosystemWallet.SendOTP();
+                        cancellationToken.ThrowIfCancellationRequested();
+                        var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(ecosystemWalletOptions.Email);
+                        _ = await otpModal.LoginWithOtp(ecosystemWallet);
+                    }
+                    else
+                    {
+                        _ = await ecosystemWallet.LoginWithOauth(
+                            isMobile: Application.isMobilePlatform,
+                            browserOpenAction: (url) => Application.OpenURL(url),
+                            mobileRedirectScheme: bundleId + "://",
+                            browser: new CrossPlatformUnityBrowser(),
+                            cancellationToken: cancellationToken
+                        );
+                    }
                 }
-                else
-                {
-                    _ = await ecosystemWallet.LoginWithOauth(
-                        isMobile: Application.isMobilePlatform,
-                        browserOpenAction: (url) => Application.OpenURL(url),
-                        mobileRedirectScheme: bundleId + "://",
-                        browser: new CrossPlatformUnityBrowser()
-                    );
-                }
+                cancellationToken.ThrowIfCancellationRequested();
+                smartWallet = await SmartWallet.Create(
+                    personalWallet: ecosystemWallet,
+                    chainId: chainId,
+                    gasless: true,
+                    factoryAddress: TDK.AppConfig.FactoryAddress
+                );
+                cancellationToken.ThrowIfCancellationRequested();
+
+                TDKLogger.LogInfo("[TDKThirdwebService:ConnectWallet] Smart wallet successfully connected!");
+
+                ActiveWallet = smartWallet;
             }
-            var smartWallet = await SmartWallet.Create(
-                personalWallet: ecosystemWallet,
-                chainId: chainId,
-                gasless: true,
-                factoryAddress: TDK.AppConfig.FactoryAddress
-            );
-
-            ActiveWallet = smartWallet;
-            // TODO add to _walletMapping?
+            catch
+            {
+                if (cancellationToken.IsCancellationRequested) {
+                    TDKLogger.LogInfo("[TDKThirdwebService:ConnectWallet] New connection attempt has been made, ignoring previous connection...");
+                }
+                throw;
+            }
         }
 
         public async Task<bool> IsWalletConnected()
@@ -106,17 +126,18 @@ namespace Treasure
             return ActiveWallet != null && await ActiveWallet.IsConnected();
         }
 
-        public async Task DisconnectWallets(bool endSession = false)
+        public async Task DisconnectWallet(bool endSession = false)
         {
             // TODO check if endSession is still needed
-            // TODO check _walletMapping?
             if (ActiveWallet != null)
             {
-                // TODO InAppWalletUI.Instance.Cancel(); // cancel any in progress connect operations
+                _connectionCancelationTokenSource?.Cancel(); // cancel any in progress connect operations
+                TDKLogger.LogInfo("[TDKThirdwebService:DisconnectWallet] Clearing active wallet");
                 if (await ActiveWallet.IsConnected()) {
                     var personalWallet = await ActiveWallet.GetPersonalWallet();
                     await personalWallet.Disconnect();
                     await ActiveWallet.Disconnect();
+                    TDKLogger.LogInfo("[TDKThirdwebService:DisconnectWallet] Active wallet disconnected");
                 }
                 await new WaitForEndOfFrame();
                 ActiveWallet = null;

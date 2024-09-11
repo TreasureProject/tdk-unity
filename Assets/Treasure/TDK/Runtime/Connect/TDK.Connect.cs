@@ -125,6 +125,7 @@ namespace Treasure
             
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.SwitchNetwork(GetChainIdAsInt());
+            // TODO recreate user session?
 
             TDKLogger.Log($"Switched chain to {chainId}");
         }
@@ -168,7 +169,7 @@ namespace Treasure
         public async Task Disconnect(bool endSession = false)
         {
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            await thirdwebService.DisconnectWallets(endSession);
+            await thirdwebService.DisconnectWallet(endSession);
             OnDisconnected?.Invoke();
             _address = null;
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);

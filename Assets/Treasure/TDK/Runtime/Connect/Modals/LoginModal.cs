@@ -98,7 +98,7 @@ namespace Treasure
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex);
+                TDKLogger.LogException($"[LoginModal:ConnectSocial] Error connecting", ex);
             }
         }
 

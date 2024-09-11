@@ -94,6 +94,9 @@ namespace Treasure
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
+            
+            if (currentModalOpended == confirmLoginModal)
+                confirmLoginModal.CancelCurrentLoginAttempt();
 
             currentModalOpended = null;
 
