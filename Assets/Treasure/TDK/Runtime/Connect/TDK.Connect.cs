@@ -42,7 +42,6 @@ namespace Treasure
         #region private vars
         private Options? _options;
         private ChainId _chainId = ChainId.Unknown;
-        private EcosystemWalletOptions _lastWalletOptions;
         private string _address;
         #endregion
 
@@ -95,7 +94,6 @@ namespace Treasure
             await thirdwebService.ConnectWallet(ecosystemWalletOptions, chainId);
             
             _address = await thirdwebService.ActiveWallet.GetAddress();
-            _lastWalletOptions = ecosystemWalletOptions; // TODO figure out chain switching, _lastWalletOptions might be unnecessary
             OnConnected?.Invoke(_address);
             
             TDK.Analytics.SetTreasureConnectInfo(_address, chainId);
@@ -173,7 +171,6 @@ namespace Treasure
             await thirdwebService.DisconnectWallets(endSession);
             OnDisconnected?.Invoke();
             _address = null;
-            _lastWalletOptions = null;
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);
         }
         #endregion
