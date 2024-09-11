@@ -59,7 +59,7 @@ namespace Treasure
 
         public async Task<Transaction> WriteTransaction(WriteTransactionBody body)
         {
-            body.backendWallet ??= await TDK.AppConfig.GetBackendWallet();
+            body.backendWallet ??= TDK.AppConfig.GetBackendWallet();
             var response = await Post("/transactions", JsonConvert.SerializeObject(body));
             return JsonConvert.DeserializeObject<Transaction>(response);
         }
@@ -86,7 +86,7 @@ namespace Treasure
 
         public async Task<Transaction> SendRawTransaction(SendRawTransactionBody body)
         {
-            body.backendWallet ??= await TDK.AppConfig.GetBackendWallet();
+            body.backendWallet ??= TDK.AppConfig.GetBackendWallet();
             var response = await Post("/transactions/raw", JsonConvert.SerializeObject(body));
             return JsonConvert.DeserializeObject<Transaction>(response);
         }
