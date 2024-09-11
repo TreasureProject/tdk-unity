@@ -34,13 +34,7 @@ namespace Treasure
 
     public class Connect
     {
-        public struct Options
-        {
-            public bool isSilent;
-        }
-
         #region private vars
-        private Options? _options;
         private ChainId _chainId = ChainId.Unknown;
         private string _address;
         #endregion
@@ -52,11 +46,6 @@ namespace Treasure
         #endregion
 
         #region accessors / mutators
-        public bool IsSilent // TODO ensure this still works
-        {
-            get { return _options.HasValue && _options.Value.isSilent; }
-        }
-
         public ChainId GetChainId()
         {
             return _chainId;
@@ -85,13 +74,17 @@ namespace Treasure
         #endregion
 
         #region private methods
-        private async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions) {
-            TDKLogger.Log($"[TDK.Connect:Connect] Connecting to {ecosystemWalletOptions.AuthProvider}...");
+        private async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, bool isSilentReconnect = false) {
+            if (!isSilentReconnect) {
+                var authMethod = ecosystemWalletOptions.AuthProvider.ToString();
+                if (authMethod == AuthProvider.Default.ToString()) authMethod = "Email/Phone";
+                TDKLogger.Log($"[TDK.Connect:ConnectWallet] Connecting to {authMethod}...");
+            }
             
             var chainId = GetChainIdAsInt();
 
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            await thirdwebService.ConnectWallet(ecosystemWalletOptions, chainId);
+            await thirdwebService.ConnectWallet(ecosystemWalletOptions, chainId, isSilentReconnect);
             
             _address = await thirdwebService.ActiveWallet.GetAddress();
             OnConnected?.Invoke(_address);
@@ -102,8 +95,7 @@ namespace Treasure
 
         private async Task Reconnect(EcosystemWalletOptions ecosystemWalletOptions)
         {
-            _options = new Options { isSilent = true };
-            await ConnectWallet(ecosystemWalletOptions);
+            await ConnectWallet(ecosystemWalletOptions, isSilentReconnect: true);
         }
         #endregion
 
@@ -149,19 +141,18 @@ namespace Treasure
 
         public async Task ConnectEmail(string email)
         {
-            _options = null;
             var ecosystemWalletOptions = new EcosystemWalletOptions(email: email);
             await ConnectWallet(ecosystemWalletOptions);
         }
 
         public async Task ConnectSocial(SocialAuthProvider provider)
         {
-            _options = null;
             var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: (AuthProvider)provider);
             await ConnectWallet(ecosystemWalletOptions);
         }
 
         public async Task Reconnect(string email) {
+            TDKLogger.LogDebug($"[TDK.Connect:Reconnect] Reconnecting email ({email})...");
             var ecosystemWalletOptions = new EcosystemWalletOptions(email: email);
             await Reconnect(ecosystemWalletOptions);
         }

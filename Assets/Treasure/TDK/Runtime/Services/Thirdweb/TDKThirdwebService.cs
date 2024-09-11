@@ -53,12 +53,19 @@ namespace Treasure
                 }
             );
 
-            ThirdwebDebug.Log("ThirdwebManager initialized.");
+            TDKLogger.LogInfo("TDKThirdwebService initialized.");
 
             Initialized = true;
+
+            // ReconnectTest();
         }
+
+        // public async void ReconnectTest() {
+        //     await Task.Delay(1000);
+        //     _ = TDK.Connect.Reconnect("farchi@treasure.lol");
+        // }
         
-        public async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, int chainId) {
+        public async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, int chainId, bool isSilentReconnect) {
             // Allow only one attempt to connect at a time, a new one will cancel any previous
             _connectionCancelationTokenSource?.Cancel();
             _connectionCancelationTokenSource = new CancellationTokenSource();
@@ -78,8 +85,14 @@ namespace Treasure
                     storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
                 );
                 cancellationToken.ThrowIfCancellationRequested();
-                if (!await ecosystemWallet.IsConnected()) {
-                    ThirdwebDebug.Log("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
+                var isConnected = await ecosystemWallet.IsConnected();
+                if (!isConnected) {
+                    if (isSilentReconnect) {
+                        TDKLogger.LogDebug($"Could not recreate user automatically, skipping silent reconnect");
+                        return;
+                    }
+
+                    TDKLogger.LogDebug("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
 
                     if (ecosystemWalletOptions.AuthProvider == AuthProvider.Default)
                     {
@@ -108,7 +121,7 @@ namespace Treasure
                 );
                 cancellationToken.ThrowIfCancellationRequested();
 
-                TDKLogger.LogInfo("[TDKThirdwebService:ConnectWallet] Smart wallet successfully connected!");
+                TDKLogger.LogDebug("[TDKThirdwebService:ConnectWallet] Smart wallet successfully connected!");
 
                 ActiveWallet = smartWallet;
             }
