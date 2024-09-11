@@ -8,7 +8,6 @@ using Thirdweb;
 
 namespace Treasure
 {
-    // TODO test portrait prefab
     public class ConfirmLoginModal : ModalBase
     {
         [SerializeField] private TMP_Text infoText;

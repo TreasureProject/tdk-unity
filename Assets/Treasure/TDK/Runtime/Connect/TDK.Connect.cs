@@ -78,7 +78,7 @@ namespace Treasure
             if (!isSilentReconnect) {
                 var authMethod = ecosystemWalletOptions.AuthProvider.ToString();
                 if (authMethod == AuthProvider.Default.ToString()) authMethod = "Email/Phone";
-                TDKLogger.Log($"[TDK.Connect:ConnectWallet] Connecting to {authMethod}...");
+                TDKLogger.Log($"[TDK.Connect:ConnectWallet] Connecting via {authMethod}...");
             }
             
             var chainId = GetChainIdAsInt();
