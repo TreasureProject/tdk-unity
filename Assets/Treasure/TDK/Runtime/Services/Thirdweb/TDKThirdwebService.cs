@@ -139,9 +139,8 @@ namespace Treasure
             return ActiveWallet != null && await ActiveWallet.IsConnected();
         }
 
-        public async Task DisconnectWallet(bool endSession = false)
+        public async Task DisconnectWallet()
         {
-            // TODO check if endSession is still needed
             if (ActiveWallet != null)
             {
                 _connectionCancelationTokenSource?.Cancel(); // cancel any in progress connect operations

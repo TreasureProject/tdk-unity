@@ -73,7 +73,6 @@ namespace Treasure
                 + $"\nIssued At: {payload.issued_at}"
                 + $"{(string.IsNullOrEmpty(payload.expiration_time) ? "" : $"\nExpiration Time: {payload.expiration_time}")}"
                 + $"{(string.IsNullOrEmpty(payload.invalid_before) ? "" : $"\nNot Before: {payload.invalid_before}")}";
-            // TODO confirm PersonalSign is the proper method
             return await TDKServiceLocator.GetService<TDKThirdwebService>().ActiveWallet.PersonalSign(payloadToSign);
         }
 
@@ -292,7 +291,7 @@ namespace Treasure
         {
             try
             {
-                await TDK.Connect.Disconnect(true);
+                await TDK.Connect.Disconnect();
             }
             catch (Exception e)
             {

@@ -157,10 +157,10 @@ namespace Treasure
             await Reconnect(ecosystemWalletOptions);
         }
 
-        public async Task Disconnect(bool endSession = false)
+        public async Task Disconnect()
         {
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            await thirdwebService.DisconnectWallet(endSession);
+            await thirdwebService.DisconnectWallet();
             OnDisconnected?.Invoke();
             _address = null;
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);

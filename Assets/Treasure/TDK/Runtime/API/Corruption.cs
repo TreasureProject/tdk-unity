@@ -31,7 +31,6 @@ namespace Treasure
     public struct CorruptionRemoval
     {
         public string requestId;
-        // TODO: change this to enum? Started | Ready
         public string status;
     }
 
