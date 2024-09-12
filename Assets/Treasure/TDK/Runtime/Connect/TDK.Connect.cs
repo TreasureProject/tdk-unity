@@ -105,7 +105,7 @@ namespace Treasure
             return await TDKServiceLocator.GetService<TDKThirdwebService>().IsWalletConnected();
         }
 
-        public async Task SetChainId(ChainId chainId)
+        public async Task SetChainId(ChainId chainId, bool startUserSession = false)
         {
             if (GetChainId() == chainId)
             {
@@ -117,9 +117,13 @@ namespace Treasure
             
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.SwitchNetwork(GetChainIdAsInt());
-            // TODO does user session need to be recreated when chain is switched?
 
             TDKLogger.Log($"Switched chain to {chainId}");
+
+            if (startUserSession)
+            {
+                await TDK.Identity.StartUserSession();
+            }
         }
 
         public void ShowConnectModal()
