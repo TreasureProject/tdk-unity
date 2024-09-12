@@ -117,7 +117,7 @@ namespace Treasure
             
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.SwitchNetwork(GetChainIdAsInt());
-            // TODO recreate user session?
+            // TODO does user session need to be recreated when chain is switched?
 
             TDKLogger.Log($"Switched chain to {chainId}");
         }

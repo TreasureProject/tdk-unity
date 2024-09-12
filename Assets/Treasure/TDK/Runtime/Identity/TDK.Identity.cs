@@ -94,10 +94,12 @@ namespace Treasure
 
         private async Task<List<User.Signer>> GetActiveSigners()
         {
-            var activeSigners = await TDKServiceLocator.GetService<TDKThirdwebService>().ActiveWallet.GetAllActiveSigners();
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            var activeSigners = await thirdwebService.ActiveWallet.GetAllActiveSigners();
+            var allAdmins = await thirdwebService.ActiveWallet.GetAllAdmins();
             return activeSigners.Select(activeSigner => new User.Signer
             {
-                isAdmin = false, // TODO activeSigner.isAdmin is not available anymore
+                isAdmin = allAdmins.Contains(activeSigner.Signer),
                 signer = activeSigner.Signer,
                 approvedTargets = activeSigner.ApprovedTargets.ToArray(),
                 nativeTokenLimitPerTransaction = activeSigner.NativeTokenLimitPerTransaction,
