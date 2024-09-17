@@ -1,10 +1,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Thirdweb;
+using Newtonsoft.Json;
 
 namespace Treasure
 {
@@ -52,6 +54,11 @@ namespace Treasure
         public bool IsAuthenticated
         {
             get { return !string.IsNullOrEmpty(_authToken); }
+        }
+
+        public bool IsUsingTreasureLauncher
+        {
+            get { return TreasureLauncherUtils.GetLauncherAuthToken() != null; }
         }
         #endregion
 
@@ -135,6 +142,24 @@ namespace Treasure
                     signer.nativeTokenLimitPerTransaction >= nativeTokenLimitPerTransaction
                 ));
         }
+
+        private async Task StartLauncherSessionRequest() {
+            var body = JsonConvert.SerializeObject(new {
+                backendWallet = TDK.AppConfig.GetBackendWallet(),
+                approvedTargets = TDK.AppConfig.GetCallTargets(),
+                nativeTokenLimitPerTransaction = TDK.AppConfig.GetNativeTokenLimitPerTransaction(),
+                sessionDurationSec = TDK.AppConfig.SessionDurationSec,
+                sessionMinDurationLeftSec = TDK.AppConfig.SessionMinDurationLeftSec,
+            });
+
+            using UnityWebRequest www = UnityWebRequest.Post("http://localhost:16001/tdk-start-session", body, "application/json");
+            await www.SendWebRequest();
+            var rawResponse = www.downloadHandler.text;
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                throw new UnityException($"Error starting session - {www.error}: {rawResponse}");
+            }
+        }
         #endregion
 
         #region public api
@@ -183,8 +208,9 @@ namespace Treasure
 
                 return user;
             }
-            catch
+            catch (Exception ex)
             {
+                TDKLogger.LogDebug($"ValidateUserSession error: {ex.Message}");
                 // Auth token was invalid or expired
                 return null;
             }
@@ -192,6 +218,10 @@ namespace Treasure
 
         public async Task<string> StartUserSession(ChainId sessionChainId = ChainId.Unknown, string sessionAuthToken = null)
         {
+            if (IsUsingTreasureLauncher) {
+                TDKLogger.LogError("Unable to start user session. Use StartUserSessionViaLauncher instead.");
+                return await Task.FromResult(string.Empty);
+            }
             // Check if user already has a valid session for the specified chain
             var currentChainId = TDK.Connect.GetChainId();
             var chainId = sessionChainId == ChainId.Unknown ? currentChainId : sessionChainId;
@@ -292,6 +322,10 @@ namespace Treasure
 
         public async Task EndUserSession()
         {
+            if (IsUsingTreasureLauncher) {
+                TDKLogger.Log("[TDK.Identity:EndUserSession] Using launcher token, skipping.");
+                return;
+            }
             try
             {
                 await TDK.Connect.Disconnect();
@@ -304,6 +338,50 @@ namespace Treasure
 
             _address = null;
             _authToken = null;
+        }
+
+        public async Task StartUserSessionViaLauncher() {
+            if (!IsUsingTreasureLauncher) {
+                TDKLogger.LogError("Unable to start user session. Use StartUserSession instead.");
+                return;
+            }
+            TDKLogger.Log("Starting session via launcher token");
+            await StartLauncherSessionRequest();
+            
+            var user = await ValidateUserSession(TDK.Connect.GetChainId(), TreasureLauncherUtils.GetLauncherAuthToken());
+            if (user.HasValue)
+            {
+                TDKLogger.Log("User session validated successfully");
+            } else {
+                TDKLogger.Log("Unable to validate user session");
+            }
+        }
+
+        public async Task AttemptConnectionViaLauncherAuthToken()
+        {
+            try
+            {
+                var authToken = TreasureLauncherUtils.GetLauncherAuthToken();
+                if (authToken == null) {
+                    return;
+                }
+
+                _address = TreasureLauncherUtils.GetWalletAddressFromJwt();
+                TDKLogger.LogDebug("Successfully connected from launcher!");
+                TDK.Connect.OnConnected?.Invoke(_address);
+                TDK.Analytics.SetTreasureConnectInfo(_address, TDK.Connect.GetChainIdAsInt()); 
+
+                TDKLogger.LogDebug("Checking for launcher token session...");
+                await TDK.Identity.ValidateUserSession(TDK.Connect.GetChainId(), authToken);
+
+                if (!IsAuthenticated) {
+                    TDKLogger.LogDebug("No session found. Call StartUserSessionViaLauncher to start one");
+                }
+            }
+            catch (Exception ex)
+            {
+                TDKLogger.LogException("Error connecting with launcher token", ex);
+            }
         }
         #endregion
     }
