@@ -45,3 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   themeData: {fileID: 11400000, guid: da5b1539b03acda4e8582859ff253ba7, type: 2}
+  theme: 0
