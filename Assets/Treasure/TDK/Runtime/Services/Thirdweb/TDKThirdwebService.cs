@@ -40,7 +40,7 @@ namespace Treasure
 
             Client = ThirdwebClient.Create(
                 clientId: clientId,
-                bundleId: bundleId,
+                bundleId: bundleId.ToLower(),
                 httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new UnityThirdwebHttpClient() : new ThirdwebHttpClient(),
                 headers: new Dictionary<string, string>
                 {
