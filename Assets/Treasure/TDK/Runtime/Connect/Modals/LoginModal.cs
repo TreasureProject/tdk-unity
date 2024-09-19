@@ -110,12 +110,8 @@ namespace Treasure
             socialLoginHolder.SetActive(true);
             googleLogin.SetActive(true);
             appleLogin.SetActive(true);
-#if UNITY_WEBGL
-            discordLogin.SetActive(false);
-#else
             discordLogin.SetActive(true);
-#endif
-            xLogin.SetActive(true); // TODO confirm webgl support
+            xLogin.SetActive(true);
             loginEmailHolder.SetActive(true);
             loginWalletHolder.SetActive(false);
 
