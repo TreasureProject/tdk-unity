@@ -14,13 +14,9 @@ public class IdentityUI : MonoBehaviour
         {
             _ = await TDK.Identity.StartUserSession();
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            // TODO improve error handling generally:
-            // - doing `Debug.LogError(e)` gives a better error trace
-            // - not catching at all makes the stack trace "file + line links" clickable
-            // - could try TDKLogger.LogException here
-            TDKLogger.LogError($"Error starting user session: {e.Message}");
+            TDKLogger.LogException($"Error starting user session", ex);
         }
     }
 
@@ -39,7 +35,7 @@ public class IdentityUI : MonoBehaviour
     {
         try
         {
-            var chainId = await TDK.Connect.GetChainId();
+            var chainId = TDK.Connect.GetChainId();
             await TDK.Identity.ValidateUserSession(chainId, value);
         }
         catch (Exception e)
@@ -50,16 +46,17 @@ public class IdentityUI : MonoBehaviour
 
     public async void OnGetMagicBalanceBtn()
     {
-        var contractAddress = await TDK.Common.GetContractAddress(Treasure.Contract.Magic);
-        var contract = TDKServiceLocator.GetService<TDKThirdwebService>().SDK.GetContract(contractAddress);
-        var balance = await contract.Read<string>("balanceOf", TDK.Identity.Address);
-        TDKLogger.LogInfo($"Magic balance: {Utils.ToEth(balance)}");
+        var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
+        var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+        var contract = await ThirdwebContract.Create(thirdwebService.Client, contractAddress, TDK.Connect.GetChainIdAsInt());
+        var balance = await contract.ERC20_BalanceOf(TDK.Identity.Address);
+        TDKLogger.LogInfo($"Magic balance: {Utils.ToEth(balance.ToString())}");
     }
 
     public async void OnMintMagicBtn()
     {
         TDKLogger.LogInfo("Minting 1,000 MAGIC...");
-        var transaction = await TDK.API.WriteTransaction(Treasure.Contract.Magic, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
+        var transaction = await TDK.API.WriteTransaction(Contract.Magic, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
         transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
         if (transaction.status == "errored")
         {
@@ -74,16 +71,21 @@ public class IdentityUI : MonoBehaviour
     public async void OnRawMintMagicBtn()
     {
         TDKLogger.LogInfo("Minting 1,000 MAGIC...");
-        var contractAddress = await TDK.Common.GetContractAddress(Treasure.Contract.Magic);
-        var contract = TDKServiceLocator.GetService<TDKThirdwebService>().SDK.GetContract(contractAddress);
-        var tx = await contract.Prepare(
-            functionName: "mint",
-            args: new object[] { TDK.Identity.Address, BigInteger.Parse(Utils.ToWei("1000")) }
+        var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
+        var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+        var contract = await ThirdwebContract.Create(thirdwebService.Client, contractAddress, TDK.Connect.GetChainIdAsInt());
+        var tx = await ThirdwebContract.Prepare(
+            wallet: thirdwebService.ActiveWallet,
+            contract: contract,
+            method: "mint",
+            weiValue: 0,
+            // method params:
+            TDK.Identity.Address,
+            BigInteger.Parse(Utils.ToWei("1000"))
         );
-        await tx.Populate();
         var transaction = await TDK.API.SendRawTransaction(new SendRawTransactionBody()
         {
-            to = contract.Address,
+            to = contractAddress,
             data = tx.Input.Data,
         });
         transaction = await TDK.Common.WaitForTransaction(transaction.queueId);

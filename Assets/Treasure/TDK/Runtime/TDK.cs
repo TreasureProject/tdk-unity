@@ -98,6 +98,8 @@ namespace Treasure
 #endif
             // set as initialized
             Initialized = true;
+
+            _ = Identity.AttemptConnectionViaLauncherAuthToken();
         }
 
         private void InitializeProperties(

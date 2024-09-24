@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -60,9 +61,9 @@ namespace Treasure
             public bool isAdmin;
             public string signer;
             public string[] approvedTargets;
-            public string nativeTokenLimitPerTransaction;
-            public string startTimestamp;
-            public string endTimestamp;
+            public BigInteger nativeTokenLimitPerTransaction;
+            public BigInteger startTimestamp;
+            public BigInteger endTimestamp;
         }
 
         public string id;

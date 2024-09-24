@@ -31,7 +31,6 @@ namespace Treasure
     public struct CorruptionRemoval
     {
         public string requestId;
-        // TODO: change this to enum? Started | Ready
         public string status;
     }
 
@@ -54,7 +53,7 @@ namespace Treasure
 
         public async Task<HarvesterCorruptionRemoval> GetHarvesterCorruptionRemoval(Contract contract)
         {
-            var contractAddress = await TDK.Common.GetContractAddress(contract);
+            var contractAddress = TDK.Common.GetContractAddress(contract);
             return await GetHarvesterCorruptionRemoval(contractAddress);
         }
     }

@@ -35,7 +35,7 @@ namespace Treasure
 
         private void OnEnable()
         {
-            SetAddress(TDK.Connect.Address);
+            SetAddress(TDK.Identity.Address);
         }
 
         public void SetAddress(string address)
@@ -46,6 +46,11 @@ namespace Treasure
 
         public string GetAddressText() {
             return adressText.text;
+        }
+
+        public void SetDisconnectButtonVisible(bool visible)
+        {
+            disconnectButton.gameObject.SetActive(visible);
         }
     }
 }

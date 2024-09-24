@@ -1,7 +1,6 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Numerics;
 using Thirdweb;
 
@@ -35,6 +34,8 @@ namespace Treasure
             public string _prodApiKey;
             public string _devClientId;
             public string _prodClientId;
+            public string _ecosystemId;
+            public string _ecosystemPartnerId;
         }
 
         [Serializable]
@@ -87,8 +88,10 @@ namespace Treasure
 
         public string TDKApiUrl => Environment == Env.DEV ? _general._devApiUrl : _general._prodApiUrl;
         public string ClientId => Environment == Env.DEV ? _general._devClientId : _general._prodClientId;
+        public string EcosystemId => string.IsNullOrEmpty(_general._ecosystemId) ? "ecosystem.treasure" : _general._ecosystemId;
+        public string EcosystemPartnerId => _general._ecosystemPartnerId;
 
-        public string FactoryAddress => _connect._factoryAddress;
+        public string FactoryAddress => string.IsNullOrEmpty(_connect._factoryAddress) ? null : _connect._factoryAddress;
 
         public ChainId DefaultChainId =>
             Environment == Env.DEV ? _connect._devDefaultChainId : _connect._prodDefaultChainId;
@@ -110,23 +113,23 @@ namespace Treasure
 
         public bool AutoInitialize => _autoInitialize;
 
-        public async Task<string> GetBackendWallet()
+        public string GetBackendWallet()
         {
-            var chainId = await TDK.Connect.GetChainId();
+            var chainId = TDK.Connect.GetChainId();
             var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
             return option?.backendWallet.ToLowerInvariant();
         }
 
-        public async Task<List<string>> GetCallTargets()
+        public List<string> GetCallTargets()
         {
-            var chainId = await TDK.Connect.GetChainId();
+            var chainId = TDK.Connect.GetChainId();
             var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
             return option != null ? option.callTargets.ConvertAll(ct => ct.ToLowerInvariant()) : new List<string>();
         }
 
-        public async Task<BigInteger> GetNativeTokenLimitPerTransaction()
+        public BigInteger GetNativeTokenLimitPerTransaction()
         {
-            var chainId = await TDK.Connect.GetChainId();
+            var chainId = TDK.Connect.GetChainId();
             var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
             var value = option?.nativeTokenLimitPerTransaction ?? 0;
             return BigInteger.Parse(Utils.ToWei(value.ToString()));
@@ -169,6 +172,8 @@ namespace Treasure
                 _prodApiKey = config.general.prodApiKey,
                 _devClientId = config.general.devClientId,
                 _prodClientId = config.general.prodClientId,
+                _ecosystemId = config.general.ecosystemId,
+                _ecosystemPartnerId = config.general.ecosystemPartnerId
             };
 
             // Connect
@@ -225,6 +230,8 @@ namespace Treasure
             public string prodApiKey;
             public string devClientId;
             public string prodClientId;
+            public string ecosystemId;
+            public string ecosystemPartnerId;
         }
 
         [Serializable]

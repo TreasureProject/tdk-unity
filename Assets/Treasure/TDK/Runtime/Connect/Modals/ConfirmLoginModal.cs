@@ -1,7 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Thirdweb;
 
 namespace Treasure
 {
@@ -19,6 +22,7 @@ namespace Treasure
 
         private string _email;
         private string _enteredCode = "aaaaaa";
+        private TaskCompletionSource<bool> _currentOtpTaskCompletionSource;
 
         private void Start()
         {
@@ -34,7 +38,7 @@ namespace Treasure
 
         private void OnEnable()
         {
-            confirmCode.GetComponent<LoadingButton>().SetLoading(false);
+            SetConfirmLoading(false);
             SetErrorText("");
             infoText.text = $"We have sent a code to {_email}, please enter it below to confirm your login";
         }
@@ -73,6 +77,10 @@ namespace Treasure
              UIManager.Instance.ShowLoggedInView();
          }*/
 
+        private void SetConfirmLoading(bool isLoading) {
+            confirmCode.GetComponent<LoadingButton>().SetLoading(isLoading);
+        }
+
         private void SetKeyboardSpace(bool value)
         {
             keyBoardSpace.gameObject.SetActive(value);
@@ -81,6 +89,54 @@ namespace Treasure
         private bool IsDigitsOnlyRegex(string str)
         {
             return Regex.IsMatch(str, "^[0-9]+$");
+        }
+
+        public Task<bool> LoginWithOtp(EcosystemWallet wallet)
+        {
+            confirmCode.onClick.RemoveAllListeners();
+            codeInput.text = string.Empty;
+            codeInput.interactable = true;
+            SetConfirmLoading(false);
+
+            _currentOtpTaskCompletionSource = new TaskCompletionSource<bool>();
+
+            confirmCode.onClick.AddListener(async () =>
+            {
+                try
+                {
+                    if (!CheckConfirmationCodeIsValid())
+                    {
+                        return;
+                    }
+                    codeInput.interactable = false;
+                    SetConfirmLoading(true);
+                    
+                    var otp = codeInput.text;
+                    var address = await wallet.LoginWithOtp(otp);
+                    _currentOtpTaskCompletionSource.SetResult(true);
+                }
+                catch (Exception e)
+                {
+                    if (e.Message.Contains("try again")) {
+                        SetErrorText(e.Message);
+                        TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_OTP_FAILED);
+                        TDKLogger.LogError("Login with OTP failed");
+                        codeInput.text = string.Empty;
+                        codeInput.interactable = true;
+                        SetConfirmLoading(false);
+                    } else {
+                        TDKLogger.LogException("OTP error", e);
+                        TDKConnectUIManager.Instance.ShowLoginModal();
+                        _currentOtpTaskCompletionSource.SetException(e);
+                    }
+                }
+            });
+
+            return _currentOtpTaskCompletionSource.Task;
+        }
+
+        public void CancelCurrentLoginAttempt() {
+            _currentOtpTaskCompletionSource?.TrySetException(new Exception("User closed modal"));
         }
     }
 }
