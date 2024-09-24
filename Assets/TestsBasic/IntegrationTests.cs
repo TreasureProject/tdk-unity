@@ -83,7 +83,7 @@ public class IntegrationTests
 
         Assert.That(headerLogo.GetCurrentNameText(), Is.EqualTo("Game Name").Or.Contains("Harness"));
         googleButton.GetComponent<Button>().onClick.Invoke();
-        yield return TestHelpers.WaitUntilWithMax(() => TDK.Connect.Address != null, 30f);
+        yield return TestHelpers.WaitUntilWithMax(() => TDK.Identity.Address != null, 30f);
         Assert.That(loginModal.gameObject.activeInHierarchy, Is.False);
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.False);
 
@@ -92,7 +92,7 @@ public class IntegrationTests
         connectButton.GetComponent<Button>().onClick.Invoke();
         Assert.That(loginModal.gameObject.activeInHierarchy, Is.False);
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.True);
-        Assert.That(accountModal.GetAddressText(), Does.StartWith(TDK.Connect.Address[..6]));
+        Assert.That(accountModal.GetAddressText(), Does.StartWith(TDK.Identity.Address[..6]));
         yield return new WaitForSeconds(3);
         backgroundButton.GetComponent<Button>().onClick.Invoke();
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.False);

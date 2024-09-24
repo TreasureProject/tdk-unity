@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,7 +14,7 @@ namespace Treasure
         [Header("Modals")]
         [SerializeField] private ModalBase loginModal;
         [SerializeField] private ConfirmLoginModal confirmLoginModal;
-        [SerializeField] private ModalBase logedInHolder;
+        [SerializeField] private AccountModal accountModal;
         [SerializeField] private Button backGroundButton;
         [Header("Test buttons")]
         [SerializeField] private Button switchThemeButton;
@@ -84,8 +85,11 @@ namespace Treasure
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
 
-            currentModalOpended = logedInHolder;
-            logedInHolder.Show();
+            currentModalOpended = accountModal;
+            if (TDK.Identity.IsUsingTreasureLauncher) {
+                accountModal.SetDisconnectButtonVisible(false);
+            }
+            accountModal.Show();
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
         }
@@ -105,7 +109,7 @@ namespace Treasure
 
         public void LogOut()
         {
-            logedInHolder.Hide();
+            accountModal.Hide();
 
             loginModal.Show();
             currentModalOpended = loginModal;

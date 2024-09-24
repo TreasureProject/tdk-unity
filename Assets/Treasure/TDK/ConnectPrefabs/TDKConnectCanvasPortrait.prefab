@@ -685,7 +685,7 @@ MonoBehaviour:
   contentHolder: {fileID: 1325838123931798116}
   loginModal: {fileID: 481405605589740029}
   confirmLoginModal: {fileID: 4457305158817837224}
-  logedInHolder: {fileID: 6282861818097865833}
+  accountModal: {fileID: 6282861818097865833}
   backGroundButton: {fileID: 1959962616712148293}
   switchThemeButton: {fileID: 5861984354677357603}
   switchSceneButton: {fileID: 4863048012470258731}

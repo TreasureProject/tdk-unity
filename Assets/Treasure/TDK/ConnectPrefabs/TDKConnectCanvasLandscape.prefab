@@ -1192,7 +1192,7 @@ MonoBehaviour:
   contentHolder: {fileID: 5535267148086878351}
   loginModal: {fileID: 3816540366276100558}
   confirmLoginModal: {fileID: 8235831099756504107}
-  logedInHolder: {fileID: 3072827353527150592}
+  accountModal: {fileID: 3072827353527150592}
   backGroundButton: {fileID: 5835745163015243906}
   switchThemeButton: {fileID: 4521979920749245363}
   switchSceneButton: {fileID: 5918252390982917006}

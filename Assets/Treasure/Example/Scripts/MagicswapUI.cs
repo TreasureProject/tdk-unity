@@ -290,7 +290,7 @@ public class MagicswapUI : MonoBehaviour
     public async void RefreshMetadata() {
         try
         {
-            var walletConnected = await TDK.Connect.IsWalletConnected();
+            var walletConnected = await TDK.Connect.IsWalletConnected() || TDK.Identity.IsUsingTreasureLauncher;
             var enableButtons = walletConnected && TDK.Identity.IsAuthenticated;
             ApproveButton.interactable = enableButtons;
             SwapButton.interactable = enableButtons;
@@ -316,9 +316,9 @@ public class MagicswapUI : MonoBehaviour
             var treasuresAddress = TDK.Common.GetContractAddress(Contract.Treasures);
             var magicContract = await ThirdwebContract.Create(thirdwebService.Client, magicAddress, TDK.Connect.GetChainIdAsInt());
             var treasuresContract = await ThirdwebContract.Create(thirdwebService.Client, treasuresAddress, TDK.Connect.GetChainIdAsInt());
-            var magicBalance = await magicContract.ERC20_BalanceOf(TDK.Connect.Address);
-            var magicAllowance = await magicContract.ERC20_Allowance(TDK.Connect.Address, magicswapRouterAddress);
-            var treasuresAreApproved = await treasuresContract.Read<bool>("isApprovedForAll", TDK.Connect.Address, magicswapRouterAddress);
+            var magicBalance = await magicContract.ERC20_BalanceOf(TDK.Identity.Address);
+            var magicAllowance = await magicContract.ERC20_Allowance(TDK.Identity.Address, magicswapRouterAddress);
+            var treasuresAreApproved = await treasuresContract.Read<bool>("isApprovedForAll", TDK.Identity.Address, magicswapRouterAddress);
 
             var text = $@"<b>- Magic -</b>
 Balance: {Utils.ToEth(magicBalance.ToString())}
@@ -331,7 +331,7 @@ Approved for all: {treasuresAreApproved}";
                     var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
                     var treasures = new List<(string id, BigInteger balance)>();
                     foreach (var tokenId in tokenIds) {
-                        var treasureBalance = await treasuresContract.Read<BigInteger>("balanceOf", TDK.Connect.Address, tokenId);
+                        var treasureBalance = await treasuresContract.Read<BigInteger>("balanceOf", TDK.Identity.Address, tokenId);
                         if (treasureBalance > 0) {
                             treasures.Add((tokenId, treasureBalance));
                         }
@@ -345,8 +345,8 @@ Approved for all: {treasuresAreApproved}";
 
             if (magicswapPool != null) {
                 var lpContract = await ThirdwebContract.Create(thirdwebService.Client, magicswapPool.id, TDK.Connect.GetChainIdAsInt());
-                var lpBalance = await lpContract.ERC20_BalanceOf(TDK.Connect.Address);
-                var lpAllowance = await lpContract.ERC20_Allowance(TDK.Connect.Address, magicswapRouterAddress);
+                var lpBalance = await lpContract.ERC20_BalanceOf(TDK.Identity.Address);
+                var lpAllowance = await lpContract.ERC20_Allowance(TDK.Identity.Address, magicswapRouterAddress);
                 text += "\n<b>- Pool LP -</b>";
                 text += $"\nBalance: {Utils.ToEth(lpBalance.ToString())}";
                 text += $"\nAllowance: {Utils.ToEth(lpAllowance.ToString())}";

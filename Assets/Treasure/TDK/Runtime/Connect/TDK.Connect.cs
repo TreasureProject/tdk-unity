@@ -14,7 +14,8 @@ namespace Treasure
     {
         Google = AuthProvider.Google,
         Apple = AuthProvider.Apple,
-        Discord = AuthProvider.Discord
+        Discord = AuthProvider.Discord,
+        X = AuthProvider.X
     }
 
     public partial class TDK : MonoBehaviour
@@ -75,6 +76,10 @@ namespace Treasure
 
         #region private methods
         private async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, bool isSilentReconnect = false) {
+            if (TDK.Identity.IsUsingTreasureLauncher) {
+                TDKLogger.Log("[TDK.Connect:ConnectWallet] Using launcher token, skipping");
+                return;
+            }
             if (!isSilentReconnect) {
                 var authMethod = ecosystemWalletOptions.AuthProvider.ToString();
                 if (authMethod == AuthProvider.Default.ToString()) authMethod = "Email/Phone";
@@ -107,6 +112,11 @@ namespace Treasure
 
         public async Task SetChainId(ChainId chainId, bool startUserSession = false)
         {
+            if (TDK.Identity.IsUsingTreasureLauncher) {
+                TDKLogger.Log("[TDK.Connect:SetChainId] Using launcher token, skipping");
+                return;
+            }
+
             if (GetChainId() == chainId)
             {
                 TDKLogger.Log($"Chain is already set to {chainId}");
@@ -120,6 +130,8 @@ namespace Treasure
 
             TDKLogger.Log($"Switched chain to {chainId}");
 
+            TDK.Analytics.SetTreasureConnectInfo(_address, GetChainIdAsInt());
+
             if (startUserSession)
             {
                 await TDK.Identity.StartUserSession();
@@ -128,7 +140,7 @@ namespace Treasure
 
         public void ShowConnectModal()
         {
-            if (_address != null)
+            if (TDK.Identity.Address != null)
             {
                 TDKConnectUIManager.Instance.ShowAccountModal();
             }
@@ -163,6 +175,10 @@ namespace Treasure
 
         public async Task Disconnect()
         {
+            if (TDK.Identity.IsUsingTreasureLauncher) {
+                TDKLogger.Log("[TDK.Connect:Disconnect] Using launcher token, skipping.");
+                return;
+            }
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.DisconnectWallet();
             OnDisconnected?.Invoke();
