@@ -14,7 +14,8 @@ namespace Treasure
     {
         Google = AuthProvider.Google,
         Apple = AuthProvider.Apple,
-        Discord = AuthProvider.Discord
+        Discord = AuthProvider.Discord,
+        X = AuthProvider.X
     }
 
     public partial class TDK : MonoBehaviour
