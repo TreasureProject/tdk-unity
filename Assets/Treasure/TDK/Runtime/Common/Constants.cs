@@ -17,13 +17,6 @@ namespace Treasure
         // Tokens
         Magic,
         Vee,
-        // Bridgeworld
-        Consumables,
-        Legions,
-        Treasures,
-        CorruptionRemoval,
-        ERC1155TokenSetCorruptionHandler,
-        HarvesterEmberwing,
         // Treasure Misc
         ManagedAccountFactory,
         MagicswapV2Router,
@@ -48,12 +41,6 @@ namespace Treasure
                 ChainId.Arbitrum, new Dictionary<Contract, string> {
                     { Contract.Magic, "0x539bde0d7dbd336b79148aa742883198bbf60342" },
                     { Contract.Vee, "0x0caadd427a6feb5b5fc1137eb05aa7ddd9c08ce9" },
-                    { Contract.Consumables, "0xf3d00a2559d84de7ac093443bcaada5f4ee4165c" },
-                    { Contract.Legions, "0xfe8c1ac365ba6780aec5a985d989b327c27670a1" },
-                    { Contract.Treasures, "0xebba467ecb6b21239178033189ceae27ca12eadf" },
-                    { Contract.CorruptionRemoval, "0x08f3533acdf2b9c400204056f771bdd6f1f1c200" },
-                    { Contract.ERC1155TokenSetCorruptionHandler, "0x3c62778d8e01ed17c1048b64edaf121d36c71a4e" },
-                    { Contract.HarvesterEmberwing, "0x36882e71d11eadd9f869b0fd70d18d5045939986" },
                     { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
                     { Contract.MagicswapV2Router, "0xf7c8f888720d5af7c54dfc04afe876673d7f5f43" },
                     { Contract.ZeeverseZee, "0x094fa8ae08426ab180e71e60fa253b079e13b9fe" },
@@ -65,12 +52,6 @@ namespace Treasure
                 ChainId.ArbitrumSepolia, new Dictionary<Contract, string> {
                     { Contract.Magic, "0x55d0cf68a1afe0932aff6f36c87efa703508191c" },
                     { Contract.Vee, "0x23be0504127475387a459fe4b01e54f1e336ffae" },
-                    { Contract.Consumables, "0x9d012712d24C90DDEd4574430B9e6065183896BE" },
-                    { Contract.Legions, "0xd144e34c3c0a8e605e9d45792380841a2169dd8f" },
-                    { Contract.Treasures, "0xfe592736200d7545981397ca7a8e896ac0c166d4" },
-                    { Contract.CorruptionRemoval, "0xdd8b0dd8128873049b1d528262724bde600f5be2" },
-                    { Contract.ERC1155TokenSetCorruptionHandler, "0x937817e7fe8e3b3543db46f14473d5f110a79ece" },
-                    { Contract.HarvesterEmberwing, "0x816c0717cf263e7da4cd33d4979ad15dbb70f122" },
                     { Contract.ManagedAccountFactory, "0xae7f7e9286f5f9ede167a19d1d605df4fdbc417b" },
                     { Contract.MagicswapV2Router, "0xa8654a8097b78daf740c1e2ada8a6bf3cd60da50" },
                     { Contract.ZeeverseZee, "0xb1af672c7e0e8880c066ecc24930a12ff2ee8534" },

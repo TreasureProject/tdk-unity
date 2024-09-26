@@ -27,7 +27,7 @@ public class MagicswapUI : MonoBehaviour
     {
         RefreshMetadata();
     }
-    
+
     public async void OnGetPoolDetailsBtn()
     {
         InfoText.text = "Fetching pool details...";
@@ -82,7 +82,8 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void OnApproveMagicBtn() {
+    public async void OnApproveMagicBtn()
+    {
         var amount = BigInteger.Parse(Utils.ToWei("1000")); // 1000 MAGIC
         var magicswapRouterAddress = TDK.Common.GetContractAddress(Contract.MagicswapV2Router);
         try
@@ -100,12 +101,13 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void OnApproveTreasuresBtn() {
+    public async void OnApproveTreasuresBtn()
+    {
         var magicswapRouterAddress = TDK.Common.GetContractAddress(Contract.MagicswapV2Router);
         try
         {
             InfoText.text = $"Approving Treasures for Magicswap...";
-            var transaction = await TDK.Common.ApproveERC1155(Contract.Treasures, magicswapRouterAddress);
+            var transaction = await TDK.Common.ApproveERC1155("0xfe592736200d7545981397ca7a8e896ac0c166d4", magicswapRouterAddress);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
             InfoText.text = $"Response: {responseJson}";
             RefreshMetadata();
@@ -117,13 +119,16 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void OnApproveLPBtn() {
-        if (magicswapPool == null) {
+    public async void OnApproveLPBtn()
+    {
+        if (magicswapPool == null)
+        {
             InfoText.text = "Must get pool details before approving LP!";
             return;
         }
         var callTargets = TDK.AppConfig.GetCallTargets();
-        if (!callTargets.Contains(magicswapPool.id)) {
+        if (!callTargets.Contains(magicswapPool.id))
+        {
             InfoText.text = "`callTargets` in TDKConfig must include the pool id!";
             InfoText.text += "\nPool id: " + magicswapPool.id;
             return;
@@ -145,8 +150,10 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void OnSwapBtn() {
-        if (magicswapRoute == null) {
+    public async void OnSwapBtn()
+    {
+        if (magicswapRoute == null)
+        {
             InfoText.text = "Must get route before swap!";
             return;
         }
@@ -154,7 +161,8 @@ public class MagicswapUI : MonoBehaviour
         try
         {
             // magicswapRoute.amountIn = (BigInteger.Parse(magicswapRoute.amountIn) + 100000000).ToString();
-            var swapBody = new SwapBody {
+            var swapBody = new SwapBody
+            {
                 tokenInId = magicswapRoute.tokenIn.id,
                 tokenOutId = magicswapRoute.tokenOut.id,
                 amountIn = magicswapRoute.amountIn,
@@ -167,7 +175,8 @@ public class MagicswapUI : MonoBehaviour
                 path = magicswapRoute.path,
                 isExactOut = true,
             };
-            bodyJson = JsonConvert.SerializeObject(swapBody, Formatting.Indented, new JsonSerializerSettings {
+            bodyJson = JsonConvert.SerializeObject(swapBody, Formatting.Indented, new JsonSerializerSettings
+            {
                 NullValueHandling = NullValueHandling.Ignore
             });
             InfoText.text = $"Performing swap...\nRequest body: {bodyJson}";
@@ -183,8 +192,10 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void OnAddLiquidityBtn() {
-        if (magicswapPool == null) {
+    public async void OnAddLiquidityBtn()
+    {
+        if (magicswapPool == null)
+        {
             InfoText.text = "Must get pool details before adding liquidity!";
             return;
         }
@@ -204,7 +215,8 @@ public class MagicswapUI : MonoBehaviour
                 reserveB
             );
 
-            var addLiquidityBody = new AddLiquidityBody {
+            var addLiquidityBody = new AddLiquidityBody
+            {
                 amount0 = amountB.ToString(),
                 amount0Min = TDK.Magicswap.GetAmountMin(amountB, 0.01).ToString(),
                 nfts1 = new List<NFTInput>() {
@@ -214,7 +226,8 @@ public class MagicswapUI : MonoBehaviour
                     }
                 }
             };
-            bodyJson = JsonConvert.SerializeObject(addLiquidityBody, Formatting.Indented, new JsonSerializerSettings {
+            bodyJson = JsonConvert.SerializeObject(addLiquidityBody, Formatting.Indented, new JsonSerializerSettings
+            {
                 NullValueHandling = NullValueHandling.Ignore
             });
             InfoText.text = $"Adding liquidity...\nRequest body: {bodyJson}";
@@ -230,8 +243,10 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void OnRemoveLiquidityBtn() {
-        if (magicswapPool == null) {
+    public async void OnRemoveLiquidityBtn()
+    {
+        if (magicswapPool == null)
+        {
             InfoText.text = "Must get pool details before removing liquidity!";
             return;
         }
@@ -241,13 +256,13 @@ public class MagicswapUI : MonoBehaviour
             var reserve0 = BigInteger.Parse(magicswapPool.token0.reserve);
             var reserve1 = BigInteger.Parse(magicswapPool.token1.reserve);
             var totalSupply = BigInteger.Parse(magicswapPool.totalSupply);
-            
+
             var treasuresDesired = new BigInteger(1).AdjustDecimals(0, magicswapPool.token1.decimals);
             // calculate LP amount to get the desired amount of treasures (1).
             // LP amount could otherwise be inputted by the user.
             var amountLPWei = BigInteger.DivRem(treasuresDesired * totalSupply, reserve1, out BigInteger reminder);
             if (reminder > 0) amountLPWei += 1;
-            
+
             var amount0 = amountLPWei * reserve0 / totalSupply;
             var amount1 = amountLPWei * reserve1 / totalSupply; // should be 1 treasure from our LP calculation
 
@@ -259,7 +274,8 @@ public class MagicswapUI : MonoBehaviour
             // dont use helper for amount1 since its NFT, use floored value with decimals instead
             var amount1Min = amount1FlooredNoDecimals.AdjustDecimals(0, magicswapPool.token1.decimals);
 
-            var removeLiquidityBody = new RemoveLiquidityBody {
+            var removeLiquidityBody = new RemoveLiquidityBody
+            {
                 amountLP = amountLPWei.ToString(),
                 amount0Min = amount0Min.ToString(),
                 amount1Min = amount1Min.ToString(),
@@ -270,7 +286,8 @@ public class MagicswapUI : MonoBehaviour
                     }
                 }
             };
-            bodyJson = JsonConvert.SerializeObject(removeLiquidityBody, Formatting.Indented, new JsonSerializerSettings {
+            bodyJson = JsonConvert.SerializeObject(removeLiquidityBody, Formatting.Indented, new JsonSerializerSettings
+            {
                 NullValueHandling = NullValueHandling.Ignore
             });
             bodyJson += $"\nRequired LP for 1 treasure: {Utils.ToEth(amountLPWei.ToString())}";
@@ -287,7 +304,8 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void RefreshMetadata() {
+    public async void RefreshMetadata()
+    {
         try
         {
             var walletConnected = await TDK.Connect.IsWalletConnected() || TDK.Identity.IsUsingTreasureLauncher;
@@ -299,21 +317,23 @@ public class MagicswapUI : MonoBehaviour
             ApproveLPButton.interactable = enableButtons;
             RemoveLiquidityButton.interactable = enableButtons;
 
-            if (!walletConnected) {
+            if (!walletConnected)
+            {
                 MetadataText.text = "Connect Wallet first (Connect tab)";
                 return;
             }
-            if (!TDK.Identity.IsAuthenticated) {
+            if (!TDK.Identity.IsAuthenticated)
+            {
                 MetadataText.text = "Start User Session first (Identity tab)";
                 return;
             }
             MetadataText.text = "Loading metadata...";
-            
+
             RefreshMetadataButton.interactable = false;
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             var magicAddress = TDK.Common.GetContractAddress(Contract.Magic);
             var magicswapRouterAddress = TDK.Common.GetContractAddress(Contract.MagicswapV2Router);
-            var treasuresAddress = TDK.Common.GetContractAddress(Contract.Treasures);
+            var treasuresAddress = "0xfe592736200d7545981397ca7a8e896ac0c166d4";
             var magicContract = await ThirdwebContract.Create(thirdwebService.Client, magicAddress, TDK.Connect.GetChainIdAsInt());
             var treasuresContract = await ThirdwebContract.Create(thirdwebService.Client, treasuresAddress, TDK.Connect.GetChainIdAsInt());
             var magicBalance = await magicContract.ERC20_BalanceOf(TDK.Identity.Address);
@@ -326,24 +346,30 @@ Allowance: {Utils.ToEth(magicAllowance.ToString())}
 <b>- Treasures -</b>
 Approved for all: {treasuresAreApproved}";
 
-            if (magicswapRoute != null) {
-                if (magicswapRoute.tokenOut.isNFT) {
+            if (magicswapRoute != null)
+            {
+                if (magicswapRoute.tokenOut.isNFT)
+                {
                     var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
                     var treasures = new List<(string id, BigInteger balance)>();
-                    foreach (var tokenId in tokenIds) {
+                    foreach (var tokenId in tokenIds)
+                    {
                         var treasureBalance = await treasuresContract.Read<BigInteger>("balanceOf", TDK.Identity.Address, tokenId);
-                        if (treasureBalance > 0) {
+                        if (treasureBalance > 0)
+                        {
                             treasures.Add((tokenId, treasureBalance));
                         }
                     }
-                    if (treasures.Count > 0) {
+                    if (treasures.Count > 0)
+                    {
                         text += $"\nOwned: ";
                         text += string.Join("\n", treasures.ConvertAll((t) => $"#{t.id}: {t.balance}"));
                     }
                 }
             }
 
-            if (magicswapPool != null) {
+            if (magicswapPool != null)
+            {
                 var lpContract = await ThirdwebContract.Create(thirdwebService.Client, magicswapPool.id, TDK.Connect.GetChainIdAsInt());
                 var lpBalance = await lpContract.ERC20_BalanceOf(TDK.Identity.Address);
                 var lpAllowance = await lpContract.ERC20_Allowance(TDK.Identity.Address, magicswapRouterAddress);
@@ -351,7 +377,7 @@ Approved for all: {treasuresAreApproved}";
                 text += $"\nBalance: {Utils.ToEth(lpBalance.ToString())}";
                 text += $"\nAllowance: {Utils.ToEth(lpAllowance.ToString())}";
             }
-            
+
             MetadataText.text = text;
         }
         catch (Exception ex)
@@ -363,6 +389,6 @@ Approved for all: {treasuresAreApproved}";
         {
             RefreshMetadataButton.interactable = true;
         }
-        
+
     }
 }
