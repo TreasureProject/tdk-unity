@@ -24,7 +24,7 @@ namespace Treasure
             return Constants.ContractAddresses[chainId][contract];
         }
 
-        public async Task<Transaction> WaitForTransaction(string queueId)
+        public async Task<Transaction> WaitForTransaction(string queueId, int maxRetries = 15, int retryMs = 2500, int initialWaitMs = 4000)
         {
             var retries = 0;
             Transaction transaction;
@@ -32,10 +32,10 @@ namespace Treasure
             {
                 if (retries > 0)
                 {
-                    // equivalent to `await Task.Delay(2500);` but works on webgl
+                    // equivalent to `await Task.Delay();` but works on webgl
                     var sw = new System.Diagnostics.Stopwatch();
                     sw.Start();
-                    while (sw.ElapsedMilliseconds < 2500)
+                    while (sw.ElapsedMilliseconds < (retries == 0 ? initialWaitMs : retryMs))
                     {
                         await Task.Yield();
                     }
@@ -45,7 +45,7 @@ namespace Treasure
                 transaction = await TDK.API.GetTransactionByQueueId(queueId);
                 retries++;
             } while (
-                retries < 15 &&
+                retries < maxRetries &&
                 transaction.status != "errored" &&
                 transaction.status != "cancelled" &&
                 transaction.status != "mined"
