@@ -30,17 +30,14 @@ namespace Treasure
             Transaction transaction;
             do
             {
-                if (retries > 0)
+                // equivalent to `await Task.Delay();` but works on webgl
+                var sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+                while (sw.ElapsedMilliseconds < (retries == 0 ? initialWaitMs : retryMs))
                 {
-                    // equivalent to `await Task.Delay();` but works on webgl
-                    var sw = new System.Diagnostics.Stopwatch();
-                    sw.Start();
-                    while (sw.ElapsedMilliseconds < (retries == 0 ? initialWaitMs : retryMs))
-                    {
-                        await Task.Yield();
-                    }
-                    sw.Stop();
+                    await Task.Yield();
                 }
+                sw.Stop();
 
                 transaction = await TDK.API.GetTransactionByQueueId(queueId);
                 retries++;
