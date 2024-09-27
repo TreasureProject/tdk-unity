@@ -143,8 +143,10 @@ namespace Treasure
                 ));
         }
 
-        private async Task StartLauncherSessionRequest() {
-            var body = JsonConvert.SerializeObject(new {
+        private async Task StartLauncherSessionRequest()
+        {
+            var body = JsonConvert.SerializeObject(new
+            {
                 backendWallet = TDK.AppConfig.GetBackendWallet(),
                 approvedTargets = TDK.AppConfig.GetCallTargets(),
                 nativeTokenLimitPerTransaction = TDK.AppConfig.GetNativeTokenLimitPerTransaction(),
@@ -218,13 +220,13 @@ namespace Treasure
 
         public async Task<string> StartUserSession(ChainId sessionChainId = ChainId.Unknown, string sessionAuthToken = null)
         {
-            if (IsUsingTreasureLauncher) {
+            if (IsUsingTreasureLauncher)
+            {
                 TDKLogger.LogError("Unable to start user session. Use StartUserSessionViaLauncher instead.");
                 return await Task.FromResult(string.Empty);
             }
             // Check if user already has a valid session for the specified chain
-            var currentChainId = TDK.Connect.GetChainId();
-            var chainId = sessionChainId == ChainId.Unknown ? currentChainId : sessionChainId;
+            var chainId = sessionChainId == ChainId.Unknown ? TDK.Connect.ChainId : sessionChainId;
             var authToken = !string.IsNullOrEmpty(sessionAuthToken) ? sessionAuthToken : _authToken;
             if (!string.IsNullOrEmpty(authToken))
             {
@@ -244,7 +246,7 @@ namespace Treasure
             }
 
             // Switch chains if not on the correct one already
-            if (chainId != currentChainId)
+            if (chainId != TDK.Connect.ChainId)
             {
                 TDKLogger.Log($"Switching chain to {chainId}");
                 await TDK.Connect.SetChainId(chainId);
@@ -322,7 +324,8 @@ namespace Treasure
 
         public async Task EndUserSession()
         {
-            if (IsUsingTreasureLauncher) {
+            if (IsUsingTreasureLauncher)
+            {
                 TDKLogger.Log("[TDK.Identity:EndUserSession] Using launcher token, skipping.");
                 return;
             }
@@ -340,19 +343,23 @@ namespace Treasure
             _authToken = null;
         }
 
-        public async Task StartUserSessionViaLauncher() {
-            if (!IsUsingTreasureLauncher) {
+        public async Task StartUserSessionViaLauncher()
+        {
+            if (!IsUsingTreasureLauncher)
+            {
                 TDKLogger.LogError("Unable to start user session. Use StartUserSession instead.");
                 return;
             }
             TDKLogger.Log("Starting session via launcher token");
             await StartLauncherSessionRequest();
-            
-            var user = await ValidateUserSession(TDK.Connect.GetChainId(), TreasureLauncherUtils.GetLauncherAuthToken());
+
+            var user = await ValidateUserSession(TDK.Connect.ChainId, TreasureLauncherUtils.GetLauncherAuthToken());
             if (user.HasValue)
             {
                 TDKLogger.Log("User session validated successfully");
-            } else {
+            }
+            else
+            {
                 TDKLogger.Log("Unable to validate user session");
             }
         }
@@ -362,19 +369,21 @@ namespace Treasure
             try
             {
                 var authToken = TreasureLauncherUtils.GetLauncherAuthToken();
-                if (authToken == null) {
+                if (authToken == null)
+                {
                     return;
                 }
 
                 _address = TreasureLauncherUtils.GetWalletAddressFromJwt();
                 TDKLogger.LogDebug("Successfully connected from launcher!");
                 TDK.Connect.OnConnected?.Invoke(_address);
-                TDK.Analytics.SetTreasureConnectInfo(_address, TDK.Connect.GetChainIdAsInt()); 
+                TDK.Analytics.SetTreasureConnectInfo(_address, TDK.Connect.ChainIdNumber);
 
                 TDKLogger.LogDebug("Checking for launcher token session...");
-                await TDK.Identity.ValidateUserSession(TDK.Connect.GetChainId(), authToken);
+                await TDK.Identity.ValidateUserSession(TDK.Connect.ChainId, authToken);
 
-                if (!IsAuthenticated) {
+                if (!IsAuthenticated)
+                {
                     TDKLogger.LogDebug("No session found. Call StartUserSessionViaLauncher to start one");
                 }
             }

@@ -35,8 +35,7 @@ public class IdentityUI : MonoBehaviour
     {
         try
         {
-            var chainId = TDK.Connect.GetChainId();
-            await TDK.Identity.ValidateUserSession(chainId, value);
+            await TDK.Identity.ValidateUserSession(TDK.Connect.ChainId, value);
         }
         catch (Exception e)
         {
@@ -48,7 +47,7 @@ public class IdentityUI : MonoBehaviour
     {
         var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
         var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-        var contract = await ThirdwebContract.Create(thirdwebService.Client, contractAddress, TDK.Connect.GetChainIdAsInt());
+        var contract = await ThirdwebContract.Create(thirdwebService.Client, contractAddress, TDK.Connect.ChainIdNumber);
         var balance = await contract.ERC20_BalanceOf(TDK.Identity.Address);
         TDKLogger.LogInfo($"Magic balance: {Utils.ToEth(balance.ToString())}");
     }
@@ -56,7 +55,8 @@ public class IdentityUI : MonoBehaviour
     public async void OnMintMagicBtn()
     {
         TDKLogger.LogInfo("Minting 1,000 MAGIC...");
-        var transaction = await TDK.API.WriteTransaction(Contract.Magic, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
+        var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
+        var transaction = await TDK.API.WriteTransaction(contractAddress, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
         transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
         if (transaction.status == "errored")
         {
@@ -73,7 +73,7 @@ public class IdentityUI : MonoBehaviour
         TDKLogger.LogInfo("Minting 1,000 MAGIC...");
         var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
         var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-        var contract = await ThirdwebContract.Create(thirdwebService.Client, contractAddress, TDK.Connect.GetChainIdAsInt());
+        var contract = await ThirdwebContract.Create(thirdwebService.Client, contractAddress, TDK.Connect.ChainIdNumber);
         var tx = await ThirdwebContract.Prepare(
             wallet: thirdwebService.ActiveWallet,
             contract: contract,

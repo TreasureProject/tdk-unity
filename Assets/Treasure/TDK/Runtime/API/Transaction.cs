@@ -74,16 +74,6 @@ namespace Treasure
             });
         }
 
-        public async Task<Transaction> WriteTransaction(Contract contract, string functionName, object[] args)
-        {
-            var contractAddress = TDK.Common.GetContractAddress(contract);
-            return await WriteTransaction(
-                address: contractAddress,
-                functionName: functionName,
-                args: args
-            );
-        }
-
         public async Task<Transaction> SendRawTransaction(SendRawTransactionBody body)
         {
             body.backendWallet ??= TDK.AppConfig.GetBackendWallet();

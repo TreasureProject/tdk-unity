@@ -47,14 +47,14 @@ namespace Treasure
         #endregion
 
         #region accessors / mutators
-        public ChainId GetChainId()
+        public ChainId ChainId
         {
-            return _chainId;
+            get { return _chainId; }
         }
 
-        public int GetChainIdAsInt()
+        public int ChainIdNumber
         {
-            return (int)_chainId;
+            get { return (int)_chainId; }
         }
 
         public string Address
@@ -75,26 +75,27 @@ namespace Treasure
         #endregion
 
         #region private methods
-        private async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, bool isSilentReconnect = false) {
-            if (TDK.Identity.IsUsingTreasureLauncher) {
+        private async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, bool isSilentReconnect = false)
+        {
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
                 TDKLogger.Log("[TDK.Connect:ConnectWallet] Using launcher token, skipping");
                 return;
             }
-            if (!isSilentReconnect) {
+            if (!isSilentReconnect)
+            {
                 var authMethod = ecosystemWalletOptions.AuthProvider.ToString();
                 if (authMethod == AuthProvider.Default.ToString()) authMethod = "Email/Phone";
                 TDKLogger.Log($"[TDK.Connect:ConnectWallet] Connecting via {authMethod}...");
             }
-            
-            var chainId = GetChainIdAsInt();
 
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            await thirdwebService.ConnectWallet(ecosystemWalletOptions, chainId, isSilentReconnect);
-            
+            await thirdwebService.ConnectWallet(ecosystemWalletOptions, ChainIdNumber, isSilentReconnect);
+
             _address = await thirdwebService.ActiveWallet.GetAddress();
             OnConnected?.Invoke(_address);
-            
-            TDK.Analytics.SetTreasureConnectInfo(_address, chainId);
+
+            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
             TDKLogger.LogDebug($"[TDK.Connect:ConnectWallet] Connection success!");
         }
 
@@ -112,25 +113,26 @@ namespace Treasure
 
         public async Task SetChainId(ChainId chainId, bool startUserSession = false)
         {
-            if (TDK.Identity.IsUsingTreasureLauncher) {
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
                 TDKLogger.Log("[TDK.Connect:SetChainId] Using launcher token, skipping");
                 return;
             }
 
-            if (GetChainId() == chainId)
+            if (chainId == ChainId)
             {
                 TDKLogger.Log($"Chain is already set to {chainId}");
                 return;
             }
 
             _chainId = chainId;
-            
+
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            await thirdwebService.SwitchNetwork(GetChainIdAsInt());
+            await thirdwebService.SwitchNetwork(ChainIdNumber);
 
             TDKLogger.Log($"Switched chain to {chainId}");
 
-            TDK.Analytics.SetTreasureConnectInfo(_address, GetChainIdAsInt());
+            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
 
             if (startUserSession)
             {
@@ -167,7 +169,8 @@ namespace Treasure
             await ConnectWallet(ecosystemWalletOptions);
         }
 
-        public async Task Reconnect(string email) {
+        public async Task Reconnect(string email)
+        {
             TDKLogger.LogDebug($"[TDK.Connect:Reconnect] Reconnecting email ({email})...");
             var ecosystemWalletOptions = new EcosystemWalletOptions(email: email);
             await Reconnect(ecosystemWalletOptions);
@@ -175,7 +178,8 @@ namespace Treasure
 
         public async Task Disconnect()
         {
-            if (TDK.Identity.IsUsingTreasureLauncher) {
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
                 TDKLogger.Log("[TDK.Connect:Disconnect] Using launcher token, skipping.");
                 return;
             }
