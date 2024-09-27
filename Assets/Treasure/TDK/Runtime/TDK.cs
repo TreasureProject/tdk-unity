@@ -18,7 +18,8 @@ namespace Treasure
 
         private static bool _appIsQuitting = false;
 
-        void OnApplicationQuit() {
+        void OnApplicationQuit()
+        {
             _appIsQuitting = true;
         }
 
@@ -31,7 +32,8 @@ namespace Treasure
         {
             get
             {
-                if (_appIsQuitting) {
+                if (_appIsQuitting)
+                {
                     return _instance; // Prevent recreating instance if app is quitting
                 }
                 // setup singleton
@@ -70,7 +72,8 @@ namespace Treasure
         private static void AutoInitialize()
         {
             var tdkConfig = TDKConfig.LoadFromResources();
-            if (tdkConfig.AutoInitialize) {
+            if (tdkConfig.AutoInitialize)
+            {
                 Initialize(
                     tdkConfig: tdkConfig,
                     abstractedEngineApi: new TDKAbstractedEngineApi(),
@@ -85,7 +88,8 @@ namespace Treasure
             LocalSettings localSettings
         )
         {
-            if (Initialized) {
+            if (Initialized)
+            {
                 return;
             }
             Instance.gameObject.AddComponent<TDKTimeKeeper>();
@@ -106,20 +110,21 @@ namespace Treasure
             TDKConfig tdkConfig,
             IAbstractedEngineApi abstractedEngineApi,
             LocalSettings localSettings
-        ) {
+        )
+        {
             AppConfig = tdkConfig;
 
             Instance._abstractedEngineApi = abstractedEngineApi;
             Instance._localsettings = localSettings;
         }
 
-        private void InitializeSubsystems() {
+        private void InitializeSubsystems()
+        {
             InitCommon();
             InitAnalytics();
             InitAPI();
             InitIdentity();
             InitConnect();
-            InitBridgeworld();
             InitMagicswap();
         }
     }

@@ -5,7 +5,7 @@ namespace Treasure
         // event cache values
         public const int MAX_CACHE_EVENT_COUNT = 10;
         public const int MAX_CACHE_SIZE_KB = 64;
-        
+
         // persistent store values
         public const string PERSISTENT_DIRECTORY_NAME = "AnalyticsStore";
         public const int PERSISTENT_MAX_RETRIES = 5;
@@ -43,7 +43,7 @@ namespace Treasure
         public const string PROP_TOKEN_IDS = "token_ids";
         public const string PROP_CONTRACT_ADDRESS = "contract_address";
         public const string PROP_ARGS = "args";
-        public const string PROP_REQUEST_IDS= "request_ids";
+        public const string PROP_REQUEST_IDS = "request_ids";
         public const string PROP_ENGINE_TX = "engin_tx";
 
         // events
@@ -55,17 +55,5 @@ namespace Treasure
         public const string EVT_TREASURECONNECT_UI_LOGIN = "tc_ui_login";
         public const string EVT_TREASURECONNECT_UI_CONFIRM = "tc_ui_confirm";
         public const string EVT_TREASURECONNECT_UI_ACCOUNT = "tc_ui_account";
-
-        // events - bridgeworld
-        public const string EVT_BRIDGEWORLD_NFTS_STAKE = "bworld_nfts_stake";
-        public const string EVT_BRIDGEWORLD_NFTS_UNSTAKE = "bworld_nfts_unstake";
-        public const string EVT_BRIDGEWORLD_NFT_STAKE_BATCH = "bworld_nfts_stake_batch";
-        public const string EVT_BRIDGEWORLD_NFT_UNSTAKE_BATCH = "bworld_nfts_unstake_batch";
-        public const string EVT_BRIDGEWORLD_DEPOSIT = "bworld_deposit";
-        public const string EVT_BRIDGEWORLD_WITHDRAW_MAGIC = "bworld_withdraw_magic";
-        public const string EVT_BRIDGEWORLD_WITHDRAW_MAGIC_ALL = "bworld_withdraw_magic_all";
-        public const string EVT_BRIDGEWORLD_REWARDS_CLAIM_MAGIC = "bworld_rewards_claim_magic";
-        public const string EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_START = "bworld_corruption_removal_start";
-        public const string EVT_BRIDGEWORLD_CORRUPTION_REMOVAL_END = "bworld_corruption_removal_end";
     }
 }

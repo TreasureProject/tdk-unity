@@ -9,7 +9,7 @@ using UnityEngine.iOS;
 
 public class TDKRunner : MonoBehaviour
 {
-    private List<string> _navOptions = new List<string> { "Connect", "Identity", "Analytics", "Bridgeworld", "Magicswap" };
+    private List<string> _navOptions = new List<string> { "Connect", "Identity", "Analytics", "Magicswap" };
     private Text _debugTxt;
     private Text _versionTxt;
 
@@ -23,10 +23,10 @@ public class TDKRunner : MonoBehaviour
         // set version
         _versionTxt.text = "v" + TDKVersion.version;
 
-        #if UNITY_IOS
+#if UNITY_IOS
         // Disable iCloud backup for the persistent folder
         Device.SetNoBackupFlag(TDK.Instance.AbstractedEngineApi.ApplicationPersistentDataPath());
-        #endif
+#endif
 
         TDKLogger.ExternalLogCallback += DebugPanelLog;
     }
