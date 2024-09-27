@@ -71,7 +71,7 @@ namespace Treasure
                     { Contract.CorruptionRemoval, "0xdd8b0dd8128873049b1d528262724bde600f5be2" },
                     { Contract.ERC1155TokenSetCorruptionHandler, "0x937817e7fe8e3b3543db46f14473d5f110a79ece" },
                     { Contract.HarvesterEmberwing, "0x816c0717cf263e7da4cd33d4979ad15dbb70f122" },
-                    { Contract.ManagedAccountFactory, "0xae7f7e9286f5f9ede167a19d1d605df4fdbc417b" },
+                    { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
                     { Contract.MagicswapV2Router, "0xa8654a8097b78daf740c1e2ada8a6bf3cd60da50" },
                     { Contract.ZeeverseZee, "0xb1af672c7e0e8880c066ecc24930a12ff2ee8534" },
                     { Contract.ZeeverseItems, "0xfaad5aa3209ab1b25ede22ed4da5521538b649fa" },
