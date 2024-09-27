@@ -41,7 +41,6 @@ namespace Treasure
         [Serializable]
         public class ConnectConfig
         {
-            public string _factoryAddress;
             public ChainId _devDefaultChainId;
             public ChainId _prodDefaultChainId;
             public int _sessionDurationSec;
@@ -90,8 +89,6 @@ namespace Treasure
         public string ClientId => Environment == Env.DEV ? _general._devClientId : _general._prodClientId;
         public string EcosystemId => string.IsNullOrEmpty(_general._ecosystemId) ? "ecosystem.treasure" : _general._ecosystemId;
         public string EcosystemPartnerId => _general._ecosystemPartnerId;
-
-        public string FactoryAddress => string.IsNullOrEmpty(_connect._factoryAddress) ? null : _connect._factoryAddress;
 
         public ChainId DefaultChainId =>
             Environment == Env.DEV ? _connect._devDefaultChainId : _connect._prodDefaultChainId;
@@ -179,7 +176,6 @@ namespace Treasure
             // Connect
             _connect = new ConnectConfig
             {
-                _factoryAddress = config.connect.factoryAddress,
                 _devDefaultChainId = Constants.NameToChainId.GetValueOrDefault(
                     config.connect.devDefaultChainIdentifier ?? "",
                     ChainId.Unknown
@@ -246,7 +242,6 @@ namespace Treasure
                 public double nativeTokenLimitPerTransaction;
             }
 
-            public string factoryAddress;
             public string devDefaultChainIdentifier;
             public string prodDefaultChainIdentifier;
             public int sessionDurationSec;

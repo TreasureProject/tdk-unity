@@ -52,7 +52,7 @@ namespace Treasure
                 ChainId.ArbitrumSepolia, new Dictionary<Contract, string> {
                     { Contract.Magic, "0x55d0cf68a1afe0932aff6f36c87efa703508191c" },
                     { Contract.Vee, "0x23be0504127475387a459fe4b01e54f1e336ffae" },
-                    { Contract.ManagedAccountFactory, "0xae7f7e9286f5f9ede167a19d1d605df4fdbc417b" },
+                    { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
                     { Contract.MagicswapV2Router, "0xa8654a8097b78daf740c1e2ada8a6bf3cd60da50" },
                     { Contract.ZeeverseZee, "0xb1af672c7e0e8880c066ecc24930a12ff2ee8534" },
                     { Contract.ZeeverseItems, "0xfaad5aa3209ab1b25ede22ed4da5521538b649fa" },
