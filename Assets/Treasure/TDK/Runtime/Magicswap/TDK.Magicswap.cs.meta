@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Treasure/TDK/Runtime/Magicswap/TDK.Magicswap.cs.meta
 guid: 2838e0973606044668bde91624fe85eb
-========
-guid: 30a332c16ce884465af4d3c4db60b057
->>>>>>>> main:Assets/Treasure/TDK/Runtime/API/Magicswap.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
