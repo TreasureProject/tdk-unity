@@ -59,14 +59,7 @@ namespace Treasure
             TDKLogger.LogInfo("TDKThirdwebService initialized.");
 
             Initialized = true;
-
-            // ReconnectTest();
         }
-
-        // public async void ReconnectTest() {
-        //     await Task.Delay(1000);
-        //     _ = TDK.Connect.Reconnect("farchi@treasure.lol");
-        // }
 
         public async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, int chainId, bool isSilentReconnect)
         {
@@ -122,7 +115,7 @@ namespace Treasure
                 smartWallet = await SmartWallet.Create(
                     personalWallet: ecosystemWallet,
                     chainId: chainId,
-                    factoryAddress: Constants.ContractAddresses[(ChainId)chainId][Contract.ManagedAccountFactory],
+                    factoryAddress: TDK.Common.GetContractAddress(Contract.ManagedAccountFactory, (ChainId)chainId),
                     gasless: true
                 );
                 cancellationToken.ThrowIfCancellationRequested();

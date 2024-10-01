@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Thirdweb;
 using TMPro;
@@ -89,7 +90,8 @@ public class MagicswapUI : MonoBehaviour
         try
         {
             InfoText.text = $"Approving {Utils.ToEth(amount.ToString())} MAGIC for Magicswap...";
-            var transaction = await TDK.Common.ApproveERC20(Contract.Magic, magicswapRouterAddress, amount);
+            var magicAddress = TDK.Common.GetContractAddress(Contract.Magic);
+            var transaction = await TDK.Common.ApproveERC20(magicAddress, magicswapRouterAddress, amount);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
             InfoText.text = $"Response: {responseJson}";
             RefreshMetadata();
@@ -330,52 +332,48 @@ public class MagicswapUI : MonoBehaviour
             MetadataText.text = "Loading metadata...";
 
             RefreshMetadataButton.interactable = false;
-            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             var magicAddress = TDK.Common.GetContractAddress(Contract.Magic);
-            var magicswapRouterAddress = TDK.Common.GetContractAddress(Contract.MagicswapV2Router);
             var treasuresAddress = "0xfe592736200d7545981397ca7a8e896ac0c166d4";
-            var magicContract = await ThirdwebContract.Create(thirdwebService.Client, magicAddress, TDK.Connect.GetChainIdAsInt());
-            var treasuresContract = await ThirdwebContract.Create(thirdwebService.Client, treasuresAddress, TDK.Connect.GetChainIdAsInt());
-            var magicBalance = await magicContract.ERC20_BalanceOf(TDK.Identity.Address);
-            var magicAllowance = await magicContract.ERC20_Allowance(TDK.Identity.Address, magicswapRouterAddress);
-            var treasuresAreApproved = await treasuresContract.Read<bool>("isApprovedForAll", TDK.Identity.Address, magicswapRouterAddress);
+            var treasuresContract = await TDK.Common.GetContract(treasuresAddress);
+
+            var magicBalanceTask = TDK.Common.GetFormattedERC20Balance(magicAddress, TDK.Identity.Address, 18);
+            var magicAllowanceTask = TDK.Magicswap.GetERC20Allowance(magicAddress, TDK.Identity.Address);
+            var treasuresAreApprovedTask = TDK.Magicswap.IsERC1155Approved(treasuresAddress, TDK.Identity.Address);
+            await Task.WhenAll(magicBalanceTask, magicAllowanceTask, treasuresAreApprovedTask);
 
             var text = $@"<b>- Magic -</b>
-Balance: {Utils.ToEth(magicBalance.ToString())}
-Allowance: {Utils.ToEth(magicAllowance.ToString())}
+Balance: {magicBalanceTask.Result}
+Allowance: {Utils.ToEth(magicAllowanceTask.Result.ToString())}
 <b>- Treasures -</b>
-Approved for all: {treasuresAreApproved}";
+Approved for all: {treasuresAreApprovedTask.Result}";
 
-            if (magicswapRoute != null)
+            if (magicswapRoute != null && magicswapRoute.tokenOut.isNFT)
             {
-                if (magicswapRoute.tokenOut.isNFT)
+                var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
+                var treasures = new List<(string id, BigInteger balance)>();
+                foreach (var tokenId in tokenIds)
                 {
-                    var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
-                    var treasures = new List<(string id, BigInteger balance)>();
-                    foreach (var tokenId in tokenIds)
+                    var treasureBalance = await treasuresContract.ERC1155_BalanceOf(TDK.Identity.Address, BigInteger.Parse(tokenId));
+                    if (treasureBalance > 0)
                     {
-                        var treasureBalance = await treasuresContract.Read<BigInteger>("balanceOf", TDK.Identity.Address, tokenId);
-                        if (treasureBalance > 0)
-                        {
-                            treasures.Add((tokenId, treasureBalance));
-                        }
+                        treasures.Add((tokenId, treasureBalance));
                     }
-                    if (treasures.Count > 0)
-                    {
-                        text += $"\nOwned: ";
-                        text += string.Join("\n", treasures.ConvertAll((t) => $"#{t.id}: {t.balance}"));
-                    }
+                }
+                if (treasures.Count > 0)
+                {
+                    text += $"\nOwned: ";
+                    text += string.Join("\n", treasures.ConvertAll((t) => $"#{t.id}: {t.balance}"));
                 }
             }
 
             if (magicswapPool != null)
             {
-                var lpContract = await ThirdwebContract.Create(thirdwebService.Client, magicswapPool.id, TDK.Connect.GetChainIdAsInt());
-                var lpBalance = await lpContract.ERC20_BalanceOf(TDK.Identity.Address);
-                var lpAllowance = await lpContract.ERC20_Allowance(TDK.Identity.Address, magicswapRouterAddress);
+                var lpBalanceTask = TDK.Common.GetFormattedERC20Balance(magicswapPool.id, TDK.Identity.Address, 18);
+                var lpAllowanceTask = TDK.Magicswap.GetERC20Allowance(magicswapPool.id, TDK.Identity.Address);
+                await Task.WhenAll(lpBalanceTask, lpAllowanceTask);
                 text += "\n<b>- Pool LP -</b>";
-                text += $"\nBalance: {Utils.ToEth(lpBalance.ToString())}";
-                text += $"\nAllowance: {Utils.ToEth(lpAllowance.ToString())}";
+                text += $"\nBalance: {lpBalanceTask.Result}";
+                text += $"\nAllowance: {Utils.ToEth(lpAllowanceTask.Result.ToString())}";
             }
 
             MetadataText.text = text;

@@ -112,22 +112,19 @@ namespace Treasure
 
         public string GetBackendWallet()
         {
-            var chainId = TDK.Connect.GetChainId();
-            var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
+            var option = _connect._sessionOptions.Find(d => d.chainId == TDK.Connect.ChainId);
             return option?.backendWallet.ToLowerInvariant();
         }
 
         public List<string> GetCallTargets()
         {
-            var chainId = TDK.Connect.GetChainId();
-            var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
+            var option = _connect._sessionOptions.Find(d => d.chainId == TDK.Connect.ChainId);
             return option != null ? option.callTargets.ConvertAll(ct => ct.ToLowerInvariant()) : new List<string>();
         }
 
         public BigInteger GetNativeTokenLimitPerTransaction()
         {
-            var chainId = TDK.Connect.GetChainId();
-            var option = _connect._sessionOptions.Find(d => d.chainId == chainId);
+            var option = _connect._sessionOptions.Find(d => d.chainId == TDK.Connect.ChainId);
             var value = option?.nativeTokenLimitPerTransaction ?? 0;
             return BigInteger.Parse(Utils.ToWei(value.ToString()));
         }
