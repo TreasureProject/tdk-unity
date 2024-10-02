@@ -1,22 +1,49 @@
 name: Create Unity Package
 
-on: push
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  echo:
+  release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - run: |
-        find Assets/ -name \*.meta >> metaList
-
-    - run: mkdir a
-
-    - uses: pCYSl5EDgo/create-unitypackage@master
-      with:
-        package-path: 'a/output.unitypackage'
-        include-files: metaList
-    - uses: actions/upload-artifact@master
-      with:
-        path: a
-        name: package
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get version
+        id: version
+        run: |
+          echo "TAG_NAME=v$(sed -n 's/.*version = "\([^"]*\)".*/\1/p' Assets/Treasure/TDK/Runtime/TDKVersion.cs)" >> $GITHUB_OUTPUT
+      - name: Get existing release
+        id: existing-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "STATUS=$(gh release view ${{steps.version.outputs.TAG_NAME}} --json isDraft)" >> $GITHUB_OUTPUT
+      - name: Select files
+        run: |
+          find Assets/ -name \*.meta >> metaList
+      - name: Make output folder
+        run: mkdir out
+      - name: Create unitypackage
+        uses: pCYSl5EDgo/create-unitypackage@master
+        with:
+          package-path: 'out/tdk-unity_${{steps.version.outputs.TAG_NAME}}_Full.unitypackage'
+          include-files: metaList
+      - name: Upload unitypackage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: out
+          name: package
+      - name: Release
+        # NOTE: might want to specify commit hash for this 3rd party action
+        uses: softprops/action-gh-release@v2
+        # do not override an exising release if its already published
+        if: ${{ !contains(steps.existing-release.outputs.STATUS, '"isDraft":false')}}
+        with:
+          draft: true
+          tag_name: ${{ steps.version.outputs.TAG_NAME }}
+          files: |
+            out/output.unitypackage
