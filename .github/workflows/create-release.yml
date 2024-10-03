@@ -24,7 +24,12 @@ jobs:
           echo "STATUS=$(gh release view ${{steps.version.outputs.TAG_NAME}} --json isDraft)" >> $GITHUB_OUTPUT
       - name: Select files
         run: |
-          find Assets/ -name \*.meta >> metaList
+          for folder in "Helika" "Thirdweb" "Plugins" "Treasure/Example" "Treasure/TDK"
+          do
+            echo "Assets/$folder.meta" >> metaList
+            find "Assets/$folder" -name \*.meta >> metaList
+          done
+          echo "Assets/link.xml.meta" >> metaList
       - name: Make output folder
         run: mkdir out
       - name: Create unitypackage
