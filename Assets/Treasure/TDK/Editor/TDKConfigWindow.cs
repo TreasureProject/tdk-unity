@@ -50,10 +50,6 @@ namespace Treasure
             var gameConfig = JsonUtility.FromJson<SerializedTDKConfig>(_jsonConfigStr);
             TDKConfigEditor.CreateTDKConfig(gameConfig);
 
-            #if TDK_HELIKA
-            TDKConfigEditor.CreateHelikaConfig(gameConfig);
-            #endif
-
             _window.Close();
         }
 
