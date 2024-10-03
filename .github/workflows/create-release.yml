@@ -29,7 +29,10 @@ jobs:
             echo "Assets/$folder.meta" >> metaList
             find "Assets/$folder" -name \*.meta >> metaList
           done
-          echo "Assets/link.xml.meta" >> metaList
+          for file in "link.xml" "csc.rsp"
+          do
+            echo "Assets/$file.meta" >> metaList
+          done
       - name: Make output folder
         run: mkdir out
       - name: Create unitypackage
