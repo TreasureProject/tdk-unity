@@ -1,2 +1,0 @@
-https://github.com/JamesNK/Newtonsoft.Json/releases/tag/13.0.1
-Variant: NetStandard2.0
