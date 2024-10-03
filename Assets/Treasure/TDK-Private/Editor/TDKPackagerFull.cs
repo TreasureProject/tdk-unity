@@ -18,7 +18,6 @@ namespace Treasure
                 // 3rd party
                 "Assets/Helika",
                 "Assets/Thirdweb",
-                "Assets/WebGLTemplates/Thirdweb",
 
                 // Plugins
                 "Assets/Plugins",
