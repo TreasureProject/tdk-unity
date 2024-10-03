@@ -20,7 +20,6 @@ namespace Treasure
 
                 // 3rd party
                 "Assets/Thirdweb",
-                "Assets/WebGLTemplates/Thirdweb",
 
                 // Treasure
                 "Assets/Treasure/Example",
