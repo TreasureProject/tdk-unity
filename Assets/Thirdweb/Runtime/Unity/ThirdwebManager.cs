@@ -134,9 +134,10 @@ namespace Thirdweb.Unity
         }
     }
 
+    [HelpURL("http://portal.thirdweb.com/unity/v5/thirdwebmanager")]
     public class ThirdwebManager : MonoBehaviour
     {
-        [field: SerializeField, Header("Client Settings")]
+        [field: SerializeField]
         private string ClientId { get; set; }
 
         [field: SerializeField]
@@ -151,8 +152,11 @@ namespace Thirdweb.Unity
         [field: SerializeField]
         private bool OptOutUsageAnalytics { get; set; } = false;
 
-        [field: SerializeField, Header("WalletConnect Settings")]
+        [field: SerializeField]
         private ulong[] SupportedChains { get; set; } = new ulong[] { 421614 };
+
+        [field: SerializeField]
+        private string RedirectPageHtmlOverride { get; set; } = null;
 
         public ThirdwebClient Client { get; private set; }
 
@@ -160,7 +164,7 @@ namespace Thirdweb.Unity
 
         public static ThirdwebManager Instance { get; private set; }
 
-        public static readonly string THIRDWEB_UNITY_SDK_VERSION = "5.2.2";
+        public static readonly string THIRDWEB_UNITY_SDK_VERSION = "5.4.0";
 
         private bool _initialized;
 
@@ -195,21 +199,21 @@ namespace Thirdweb.Unity
                 return;
             }
 
+            if (string.IsNullOrEmpty(BundleId))
+            {
+                BundleId = null;
+            }
+
             BundleId ??= Application.identifier ?? $"com.{Application.companyName}.{Application.productName}";
 
             Client = ThirdwebClient.Create(
                 clientId: ClientId,
                 bundleId: BundleId,
-                httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new Helpers.UnityThirdwebHttpClient() : new ThirdwebHttpClient(),
-                headers: new Dictionary<string, string>
-                {
-                    { "x-sdk-name", Application.platform == RuntimePlatform.WebGLPlayer ? "UnitySDK_WebGL" : "UnitySDK" },
-                    { "x-sdk-os", Application.platform.ToString() },
-                    { "x-sdk-platform", "unity" },
-                    { "x-sdk-version", THIRDWEB_UNITY_SDK_VERSION },
-                    { "x-client-id", ClientId },
-                    { "x-bundle-id", BundleId }
-                }
+                httpClient: new CrossPlatformUnityHttpClient(),
+                sdkName: Application.platform == RuntimePlatform.WebGLPlayer ? "UnitySDK_WebGL" : "UnitySDK",
+                sdkOs: Application.platform.ToString(),
+                sdkPlatform: "unity",
+                sdkVersion: THIRDWEB_UNITY_SDK_VERSION
             );
 
             ThirdwebDebug.Log("ThirdwebManager initialized.");
@@ -360,7 +364,7 @@ namespace Thirdweb.Unity
                         isMobile: Application.isMobilePlatform,
                         browserOpenAction: (url) => Application.OpenURL(url),
                         mobileRedirectScheme: BundleId + "://",
-                        browser: new CrossPlatformUnityBrowser()
+                        browser: new CrossPlatformUnityBrowser(RedirectPageHtmlOverride)
                     );
                 }
             }
@@ -398,7 +402,7 @@ namespace Thirdweb.Unity
                         isMobile: Application.isMobilePlatform,
                         browserOpenAction: (url) => Application.OpenURL(url),
                         mobileRedirectScheme: BundleId + "://",
-                        browser: new CrossPlatformUnityBrowser()
+                        browser: new CrossPlatformUnityBrowser(RedirectPageHtmlOverride)
                     );
                 }
             }
@@ -467,7 +471,7 @@ namespace Thirdweb.Unity
             return wallet;
         }
 
-        public async Task<List<LinkedAccount>> LinkAccount(InAppWallet mainWallet, InAppWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
+        public async Task<List<LinkedAccount>> LinkAccount(IThirdwebWallet mainWallet, IThirdwebWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
         {
             return await mainWallet.LinkAccount(
                 walletToLink: walletToLink,
@@ -475,22 +479,7 @@ namespace Thirdweb.Unity
                 isMobile: Application.isMobilePlatform,
                 browserOpenAction: (url) => Application.OpenURL(url),
                 mobileRedirectScheme: BundleId + "://",
-                browser: new CrossPlatformUnityBrowser(),
-                chainId: chainId,
-                jwt: jwtOrPayload,
-                payload: jwtOrPayload
-            );
-        }
-
-        public async Task<List<LinkedAccount>> LinkAccount(EcosystemWallet mainWallet, EcosystemWallet walletToLink, string otp = null, BigInteger? chainId = null, string jwtOrPayload = null)
-        {
-            return await mainWallet.LinkAccount(
-                walletToLink: walletToLink,
-                otp: otp,
-                isMobile: Application.isMobilePlatform,
-                browserOpenAction: (url) => Application.OpenURL(url),
-                mobileRedirectScheme: BundleId + "://",
-                browser: new CrossPlatformUnityBrowser(),
+                browser: new CrossPlatformUnityBrowser(RedirectPageHtmlOverride),
                 chainId: chainId,
                 jwt: jwtOrPayload,
                 payload: jwtOrPayload
