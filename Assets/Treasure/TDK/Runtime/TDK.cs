@@ -97,9 +97,8 @@ namespace Treasure
             Instance.InitializeSubsystems();
 
             // track app start event
-#if !DISABLE_TREASURE_ANALTYICS
-            TDKServiceLocator.GetService<TDKAnalyticsService>().TrackCustom(AnalyticsConstants.EVT_APP_START);
-#endif
+            Analytics.TrackCustomEvent(AnalyticsConstants.EVT_APP_START);
+
             // set as initialized
             Initialized = true;
 

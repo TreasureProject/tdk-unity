@@ -15,12 +15,11 @@ namespace Treasure
 
             var contents = new List<string>
             {
-                // 3rd party
-                "Assets/Helika",
-                "Assets/Thirdweb",
-
                 // Plugins
                 "Assets/Plugins",
+
+                // 3rd party
+                "Assets/Thirdweb",
 
                 // Treasure
                 "Assets/Treasure/Example",
@@ -30,8 +29,9 @@ namespace Treasure
                 "Assets/Treasure/TDK/Resources/TDKConnectThemeData.asset",
                 "Assets/Treasure/TDK/Runtime",
 
-                // code stripping
-                "Assets/link.xml"
+                // code stripping & compilation defines
+                "Assets/link.xml",
+                "Assets/csc.rsp"
             };
 
             AssetDatabase.Refresh();
