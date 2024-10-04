@@ -255,22 +255,8 @@ namespace Treasure
             public int diskFlushFrequencySeconds;
         }
 
-        [Serializable]
-        public class SerializedHelikaConfig
-        {
-            public string prodApiKeyWeb;
-            public string prodApiKeyIos;
-            public string prodApiKeyAndroid;
-            public string prodApiKeyDesktop;
-            public string devApiKeyWeb;
-            public string devApiKeyIos;
-            public string devApiKeyAndroid;
-            public string devApiKeyDesktop;
-        }
-
         public SerializedGeneralConfig general;
         public SerializedConnectConfig connect;
         public SerializedAnalyticsConfig analytics;
-        public SerializedHelikaConfig helika;
     }
 }
