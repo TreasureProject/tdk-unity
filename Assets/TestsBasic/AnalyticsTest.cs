@@ -169,6 +169,8 @@ public class AnalyticsTest
                 cartridgeName = "Harness",
                 devApiUrl = "https://localhost:5000/devTdkApiUrl",
                 prodApiUrl = "https://localhost:5000/prodTdkApiUrl",
+                devClientId = "dev1234",
+                prodClientId = "prod1234",
             },
             analytics = new SerializedTDKConfig.SerializedAnalyticsConfig() {
                 devApiUrl = "https://localhost:5000/devAnalyticsApiUrl",
@@ -202,9 +204,10 @@ public class AnalyticsTest
             new LocalSettings(testTDKAbstractedEngineApi.ApplicationPersistentDataPath())
         );
 
-        yield return TestHelpers.WaitUntilWithMax(() => logs.Count >= 2, 5);
+        yield return TestHelpers.WaitUntilWithMax(() => logs.Count >= 3, 5);
         
         string expectedPersistancePath = Path.Combine(testTDKAbstractedEngineApi.ApplicationPersistentDataPath(), AnalyticsConstants.PERSISTENT_DIRECTORY_NAME);
+        ValidateNextLog("TDKThirdwebService initialized.");
         ValidateNextLog($"[TDKAnalyticsService.Cache:InitPersistentCache] _persistentFolderPath: {expectedPersistancePath}");
         ValidateNextLog("rgx:.* Got server epoch time: \\d+");
 

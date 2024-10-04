@@ -839,10 +839,10 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: TDK_HELIKA;RH_SerializedDictionary
-    Standalone: TDK_HELIKA;RH_SerializedDictionary
-    WebGL: TDK_HELIKA;RH_SerializedDictionary
-    iPhone: TDK_HELIKA;RH_SerializedDictionary
+    Android: RH_SerializedDictionary
+    Standalone: RH_SerializedDictionary
+    WebGL: RH_SerializedDictionary
+    iPhone: RH_SerializedDictionary
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}

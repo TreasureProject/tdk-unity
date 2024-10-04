@@ -76,7 +76,5 @@ crashlytics-build.properties
 ignore config resource files
 Assets/Treasure/TDK/Resources/TDKConfig.asset
 Assets/Treasure/TDK/Resources/TDKConfig.asset.meta
-Assets/Treasure/TDK/Resources/TDKHelikaConfig.asset
-Assets/Treasure/TDK/Resources/TDKHelikaConfig.asset.meta
 Assets/Treasure/TDK/Resources/TDKThirdwebConfig.asset
 Assets/Treasure/TDK/Resources/TDKThirdwebConfig.asset.meta

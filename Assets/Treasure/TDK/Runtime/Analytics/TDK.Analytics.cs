@@ -13,10 +13,6 @@ namespace Treasure
         private void InitAnalytics()
         {
             Analytics = new Analytics();
-
-#if TDK_HELIKA
-            TDKServiceLocator.GetService<TDKHelikaService>();
-#endif
         }
     }
 
@@ -41,17 +37,6 @@ namespace Treasure
                 TDKLogger.LogException("Error setting connect info for TDKAnalyticsService", ex);
             }
 #endif
-
-#if TDK_HELIKA
-            try
-            {
-                TDKServiceLocator.GetService<TDKHelikaService>().SetTreasureConnectInfo(smartWalletAddress, chainId);
-            }
-            catch (System.Exception ex)
-            {
-                TDKLogger.LogException("Error setting connect info for TDKHelikaService", ex);
-            }
-#endif
             TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_CONNECTED);
         }
 
@@ -66,18 +51,6 @@ namespace Treasure
             catch (System.Exception ex)
             {
                 TDKLogger.LogException("Error tracking event via TDKAnalyticsService", ex);
-            }
-#endif
-
-            // send events to helika
-#if TDK_HELIKA
-            try
-            {
-                TDKServiceLocator.GetService<TDKHelikaService>().TrackEvent(eventName, eventProps);
-            }
-            catch (System.Exception ex)
-            {
-                TDKLogger.LogException("Error tracking event via TDKHelikaService", ex);
             }
 #endif
         }
