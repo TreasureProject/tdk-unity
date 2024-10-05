@@ -46,8 +46,7 @@ namespace Treasure
             }
             else
             {
-                var chainId = (int)await TDK.Connect.GetChainId();
-                req.SetRequestHeader("X-Chain-Id", chainId.ToString());
+                req.SetRequestHeader("X-Chain-Id", TDK.Connect.ChainIdNumber.ToString());
             }
 
             // Set auth token with override option
@@ -95,8 +94,7 @@ namespace Treasure
             }
             else
             {
-                var chainId = (int)await TDK.Connect.GetChainId();
-                req.SetRequestHeader("X-Chain-Id", chainId.ToString());
+                req.SetRequestHeader("X-Chain-Id", TDK.Connect.ChainIdNumber.ToString());
             }
 
             // Set auth token with override option

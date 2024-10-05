@@ -29,6 +29,24 @@ namespace Treasure
         public string functionName;
         public object[] args;
         public TransactionOverrides txOverrides;
+        public string backendWallet;
+    }
+
+    [Serializable]
+    public class SendRawTransactionBody
+    {
+        public struct TransactionOverrides
+        {
+            public string gas;
+            public string maxFeePerGas;
+            public string maxPriorityFeePerGas;
+        }
+
+        public string to;
+        public string value;
+        public string data;
+        public TransactionOverrides txOverrides;
+        public string backendWallet;
     }
 
     public partial class API
@@ -41,6 +59,7 @@ namespace Treasure
 
         public async Task<Transaction> WriteTransaction(WriteTransactionBody body)
         {
+            body.backendWallet ??= TDK.AppConfig.GetBackendWallet();
             var response = await Post("/transactions", JsonConvert.SerializeObject(body));
             return JsonConvert.DeserializeObject<Transaction>(response);
         }
@@ -55,14 +74,11 @@ namespace Treasure
             });
         }
 
-        public async Task<Transaction> WriteTransaction(Contract contract, string functionName, object[] args)
+        public async Task<Transaction> SendRawTransaction(SendRawTransactionBody body)
         {
-            var contractAddress = await TDK.Common.GetContractAddress(contract);
-            return await WriteTransaction(
-                address: contractAddress,
-                functionName: functionName,
-                args: args
-            );
+            body.backendWallet ??= TDK.AppConfig.GetBackendWallet();
+            var response = await Post("/transactions/raw", JsonConvert.SerializeObject(body));
+            return JsonConvert.DeserializeObject<Transaction>(response);
         }
     }
 }

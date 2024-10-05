@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using Thirdweb;
-using Thirdweb.Wallets;
+using Thirdweb.Unity;
 
 namespace Treasure
 {
@@ -14,7 +14,8 @@ namespace Treasure
     {
         Google = AuthProvider.Google,
         Apple = AuthProvider.Apple,
-        Discord = AuthProvider.Discord
+        Discord = AuthProvider.Discord,
+        X = AuthProvider.X
     }
 
     public partial class TDK : MonoBehaviour
@@ -34,15 +35,8 @@ namespace Treasure
 
     public class Connect
     {
-        public struct Options
-        {
-            public bool isSilent;
-        }
-
         #region private vars
-        private Options? _options;
         private ChainId _chainId = ChainId.Unknown;
-        private WalletConnection _lastWalletConnection;
         private string _address;
         #endregion
 
@@ -53,28 +47,14 @@ namespace Treasure
         #endregion
 
         #region accessors / mutators
-        public bool IsSilent
+        public ChainId ChainId
         {
-            get { return _options.HasValue && _options.Value.isSilent; }
+            get { return _chainId; }
         }
 
-        public async Task<ChainId> GetChainId()
+        public int ChainIdNumber
         {
-            if (_chainId == ChainId.Unknown)
-            {
-                // WebGL version of the Thirdweb SDK requires a wallet to be connected to call GetChainId()
-                var isConnected = await IsWalletConnected();
-                if (Utils.IsWebGLBuild() && !isConnected)
-                {
-                    _chainId = TDK.AppConfig.DefaultChainId;
-                }
-                else
-                {
-                    _chainId = (ChainId)(int)await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.GetChainId();
-                }
-            }
-
-            return _chainId;
+            get { return (int)_chainId; }
         }
 
         public string Address
@@ -86,6 +66,7 @@ namespace Treasure
         #region constructors
         public Connect()
         {
+            _chainId = TDK.AppConfig.DefaultChainId;
             OnConnected.AddListener(value =>
             {
                 HideConnectModal();
@@ -94,44 +75,51 @@ namespace Treasure
         #endregion
 
         #region private methods
-        private async Task ConnectWallet(WalletConnection wc, ChainId chainId)
+        private async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, bool isSilentReconnect = false)
         {
-            TDKLogger.Log($"[TDK.Connect:Connect] Connecting to {wc.provider}...");
-            var result = await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.Connect(wc);
-            _address = result;
-            _lastWalletConnection = wc;
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
+                TDKLogger.Log("[TDK.Connect:ConnectWallet] Using launcher token, skipping");
+                return;
+            }
+            if (!isSilentReconnect)
+            {
+                var authMethod = ecosystemWalletOptions.AuthProvider.ToString();
+                if (authMethod == AuthProvider.Default.ToString()) authMethod = "Email/Phone";
+                TDKLogger.Log($"[TDK.Connect:ConnectWallet] Connecting via {authMethod}...");
+            }
+
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            await thirdwebService.ConnectWallet(ecosystemWalletOptions, ChainIdNumber, isSilentReconnect);
+
+            _address = await thirdwebService.ActiveWallet.GetAddress();
             OnConnected?.Invoke(_address);
-            TDK.Analytics.SetTreasureConnectInfo(_address, (int)chainId);
-            TDKLogger.LogDebug($"[TDK.Connect:Connect] Connection success!");
+
+            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
+            TDKLogger.LogDebug($"[TDK.Connect:ConnectWallet] Connection success!");
         }
 
-        private async Task Reconnect(WalletConnection walletConnection)
+        private async Task Reconnect(EcosystemWalletOptions ecosystemWalletOptions)
         {
-            _options = new Options { isSilent = true };
-            var chainId = await GetChainId();
-            await ConnectWallet(walletConnection, chainId);
-        }
-
-        private WalletConnection CreateEmailWalletConnection(string email, ChainId chainId) {
-            return new WalletConnection(
-                provider: WalletProvider.SmartWallet,
-                chainId: (int)chainId,
-                email: email,
-                authOptions: new AuthOptions(AuthProvider.EmailOTP),
-                personalWallet: WalletProvider.InAppWallet
-            );
+            await ConnectWallet(ecosystemWalletOptions, isSilentReconnect: true);
         }
         #endregion
 
         #region public api
         public async Task<bool> IsWalletConnected()
         {
-            return await TDKServiceLocator.GetService<TDKThirdwebService>().Wallet.IsConnected();
+            return await TDKServiceLocator.GetService<TDKThirdwebService>().IsWalletConnected();
         }
 
-        public async Task SetChainId(ChainId chainId)
+        public async Task SetChainId(ChainId chainId, bool startUserSession = false)
         {
-            if (await GetChainId() == chainId)
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
+                TDKLogger.Log("[TDK.Connect:SetChainId] Using launcher token, skipping");
+                return;
+            }
+
+            if (chainId == ChainId)
             {
                 TDKLogger.Log($"Chain is already set to {chainId}");
                 return;
@@ -139,21 +127,22 @@ namespace Treasure
 
             _chainId = chainId;
 
-            // Thirdweb SDK currently doesn't allow you to switch networks while connected to a smart wallet
-            // Reinitialize it and auto-connect instead
-            var lastWalletConnection = _lastWalletConnection;
-            TDKServiceLocator.GetService<TDKThirdwebService>().InitializeSDK(Constants.ChainIdToName[chainId]);
-            if (lastWalletConnection != null)
-            {
-                await Reconnect(lastWalletConnection);
-            }
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            await thirdwebService.SwitchNetwork(ChainIdNumber);
 
             TDKLogger.Log($"Switched chain to {chainId}");
+
+            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
+
+            if (startUserSession)
+            {
+                await TDK.Identity.StartUserSession();
+            }
         }
 
         public void ShowConnectModal()
         {
-            if (_address != null)
+            if (TDK.Identity.Address != null)
             {
                 TDKConnectUIManager.Instance.ShowAccountModal();
             }
@@ -170,45 +159,34 @@ namespace Treasure
 
         public async Task ConnectEmail(string email)
         {
-            _options = null;
-            var chainId = await GetChainId();
-            var wc = CreateEmailWalletConnection(email, chainId);
-            await ConnectWallet(wc, chainId);
+            var ecosystemWalletOptions = new EcosystemWalletOptions(email: email);
+            await ConnectWallet(ecosystemWalletOptions);
         }
 
         public async Task ConnectSocial(SocialAuthProvider provider)
         {
-            _options = null;
-            var chainId = await GetChainId();
-            var wc = new WalletConnection(
-                provider: WalletProvider.SmartWallet,
-                chainId: (int)chainId,
-                authOptions: new AuthOptions((AuthProvider)provider),
-                personalWallet: WalletProvider.InAppWallet
-            );
-            await ConnectWallet(wc, chainId);
+            var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: (AuthProvider)provider);
+            await ConnectWallet(ecosystemWalletOptions);
         }
 
-        public async Task Reconnect(string email) {
-            var chainId = await GetChainId();
-            var wc = CreateEmailWalletConnection(email, chainId);
-            await Reconnect(wc);
-        }
-
-        public async Task Disconnect(bool endSession = false)
+        public async Task Reconnect(string email)
         {
-            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            if (thirdwebService.SDK.Session.ActiveWallet != null || await IsWalletConnected())
-            {
-                InAppWalletUI.Instance.Cancel(); // cancel any in progress connect operations
-                await new WaitForEndOfFrame();
-                // this clears SDK.Session.ActiveWallet and allows for a fresh connection attempt
-                await thirdwebService.Wallet.Disconnect(endSession);
-                OnDisconnected?.Invoke();
-            }
+            TDKLogger.LogDebug($"[TDK.Connect:Reconnect] Reconnecting email ({email})...");
+            var ecosystemWalletOptions = new EcosystemWalletOptions(email: email);
+            await Reconnect(ecosystemWalletOptions);
+        }
 
+        public async Task Disconnect()
+        {
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
+                TDKLogger.Log("[TDK.Connect:Disconnect] Using launcher token, skipping.");
+                return;
+            }
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            await thirdwebService.DisconnectWallet();
+            OnDisconnected?.Invoke();
             _address = null;
-            _lastWalletConnection = null;
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);
         }
         #endregion

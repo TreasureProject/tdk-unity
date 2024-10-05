@@ -83,7 +83,7 @@ public class IntegrationTests
 
         Assert.That(headerLogo.GetCurrentNameText(), Is.EqualTo("Game Name").Or.Contains("Harness"));
         googleButton.GetComponent<Button>().onClick.Invoke();
-        yield return TestHelpers.WaitUntilWithMax(() => TDK.Connect.Address != null, 30f);
+        yield return TestHelpers.WaitUntilWithMax(() => TDK.Identity.Address != null, 30f);
         Assert.That(loginModal.gameObject.activeInHierarchy, Is.False);
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.False);
 
@@ -92,7 +92,7 @@ public class IntegrationTests
         connectButton.GetComponent<Button>().onClick.Invoke();
         Assert.That(loginModal.gameObject.activeInHierarchy, Is.False);
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.True);
-        Assert.That(accountModal.GetAddressText(), Does.StartWith(TDK.Connect.Address[..6]));
+        Assert.That(accountModal.GetAddressText(), Does.StartWith(TDK.Identity.Address[..6]));
         yield return new WaitForSeconds(3);
         backgroundButton.GetComponent<Button>().onClick.Invoke();
         Assert.That(accountModal.gameObject.activeInHierarchy, Is.False);
@@ -111,18 +111,12 @@ public class IntegrationTests
         yield return TestHelpers.WaitForTask(TDK.Connect.SetChainId(ChainId.Arbitrum));
         yield return TestHelpers.WaitForTask(TDK.Connect.SetChainId(ChainId.ArbitrumSepolia));
 
-        Assert.That(tdkLogs.Count, Is.EqualTo(10));
+        Assert.That(tdkLogs.Count, Is.EqualTo(4));
         
         Assert.That(tdkLogs, Is.EqualTo(new List<string> {
             "Chain is already set to ArbitrumSepolia",
-            "Initializing Thirdweb SDK for chain: arbitrum",
-            "[TDK.Connect:Connect] Connecting to SmartWallet...",
-            "[TDK.Connect:Connect] Connection success!",
             "Switched chain to Arbitrum",
             "Chain is already set to Arbitrum",
-            "Initializing Thirdweb SDK for chain: arbitrum-sepolia",
-            "[TDK.Connect:Connect] Connecting to SmartWallet...",
-            "[TDK.Connect:Connect] Connection success!",
             "Switched chain to ArbitrumSepolia"
         }));
     }
@@ -186,12 +180,14 @@ public class IntegrationTests
 
         yield return ForceFlushCache();
 
-        Assert.That(tdkLogs.Count, Is.EqualTo(2));
+        Assert.That(tdkLogs.Count, Is.EqualTo(4));
         
-        var eventsArray = AnalyticsEvent.ExtractPayloadFromLog(tdkLogs[0]);
+        Assert.That(tdkLogs[0], Is.EqualTo("[TDKThirdwebService:DisconnectWallet] Clearing active wallet"));
+        Assert.That(tdkLogs[1], Is.EqualTo("[TDKThirdwebService:DisconnectWallet] Active wallet disconnected"));
+        var eventsArray = AnalyticsEvent.ExtractPayloadFromLog(tdkLogs[2]);
         Assert.That(eventsArray.Count, Is.EqualTo(1));
         Assert.That(eventsArray[0].name, Is.EqualTo("tc_disconnected"));
-        Assert.That(tdkLogs[1], Is.EqualTo("[TDKAnalyticsService.IO:SendEvents] Events sent successfully"));
+        Assert.That(tdkLogs[3], Is.EqualTo("[TDKAnalyticsService.IO:SendEvents] Events sent successfully"));
     }
 
     private IEnumerator ForceFlushCache()

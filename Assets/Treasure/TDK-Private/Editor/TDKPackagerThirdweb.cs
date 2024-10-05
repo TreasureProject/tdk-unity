@@ -30,7 +30,6 @@ namespace Treasure
 
                 // Module specific
                 $"Assets/{_packageName}",
-                $"Assets/WebGLTemplates/{_packageName}",
 
                 // Runtime
                 "Assets/Treasure/TDK/Runtime/Connect",

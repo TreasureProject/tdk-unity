@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,7 +14,7 @@ namespace Treasure
         [Header("Modals")]
         [SerializeField] private ModalBase loginModal;
         [SerializeField] private ConfirmLoginModal confirmLoginModal;
-        [SerializeField] private ModalBase logedInHolder;
+        [SerializeField] private AccountModal accountModal;
         [SerializeField] private Button backGroundButton;
         [Header("Test buttons")]
         [SerializeField] private Button switchThemeButton;
@@ -64,7 +65,7 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_LOGIN);
         }
 
-        public void ShowConfirmLoginModal(string email)
+        public ConfirmLoginModal ShowOtpModal(string email)
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
@@ -74,6 +75,8 @@ namespace Treasure
             currentModalOpended = confirmLoginModal;
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_CONFIRM);
+
+            return confirmLoginModal;
         }
 
         public void ShowAccountModal()
@@ -82,8 +85,11 @@ namespace Treasure
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
 
-            currentModalOpended = logedInHolder;
-            logedInHolder.Show();
+            currentModalOpended = accountModal;
+            if (TDK.Identity.IsUsingTreasureLauncher) {
+                accountModal.SetDisconnectButtonVisible(false);
+            }
+            accountModal.Show();
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
         }
@@ -92,6 +98,9 @@ namespace Treasure
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
+            
+            if (currentModalOpended == confirmLoginModal)
+                confirmLoginModal.CancelCurrentLoginAttempt();
 
             currentModalOpended = null;
 
@@ -100,7 +109,7 @@ namespace Treasure
 
         public void LogOut()
         {
-            logedInHolder.Hide();
+            accountModal.Hide();
 
             loginModal.Show();
             currentModalOpended = loginModal;

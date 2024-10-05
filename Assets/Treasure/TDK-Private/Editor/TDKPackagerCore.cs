@@ -26,13 +26,12 @@ namespace Treasure
                 // Runtime
                 "Assets/Treasure/TDK/Runtime/Analytics",
                 "Assets/Treasure/TDK/Runtime/API",
-                "Assets/Treasure/TDK/Runtime/Bridgeworld",
                 "Assets/Treasure/TDK/Runtime/Common",
                 "Assets/Treasure/TDK/Runtime/Identity",
                 "Assets/Treasure/TDK/Runtime/Infrastructure",
 
                 "Assets/Treasure/TDK/Runtime/Services/Treasure",
-                
+
                 "Assets/Treasure/TDK/Runtime/TDK.cs",
                 "Assets/Treasure/TDK/Runtime/TDK.Runtime.asmdef",
                 "Assets/Treasure/TDK/Runtime/TDKConfig.cs",
@@ -44,7 +43,7 @@ namespace Treasure
 
                 "Assets/package.json",
 
-                
+
             };
 
             AssetDatabase.Refresh();

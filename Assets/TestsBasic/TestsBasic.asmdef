@@ -17,8 +17,7 @@
     "autoReferenced": false,
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS",
-        "!DISABLE_TREASURE_ANALTYICS",
-        "!TDK_HELIKA"
+        "!DISABLE_TREASURE_ANALTYICS"
     ],
     "versionDefines": [],
     "noEngineReferences": false

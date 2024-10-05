@@ -1541,7 +1541,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modalRect: {fileID: 3592920012158661337}
   animeTime: 0.3
-  appSettingsData: {fileID: 11400000, guid: 7a33cadc2364fa345bf7da0758bc668d, type: 2}
   infoText: {fileID: 671656708675693775}
   confirmationInputCodeHolder: {fileID: 9026736454687146240}
   confirmCode: {fileID: 9202515568987148471}

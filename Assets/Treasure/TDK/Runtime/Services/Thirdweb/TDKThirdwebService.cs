@@ -1,69 +1,159 @@
-using System;
-using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
 using Thirdweb;
+using Thirdweb.Unity;
+using Thirdweb.Unity.Helpers;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Treasure
 {
     public class TDKThirdwebService : TDKBaseService
     {
-        private ThirdwebSDK _sdk;
+        public ThirdwebClient Client { get; private set; }
+        public SmartWallet ActiveWallet { get; private set; }
+        public bool Initialized { get; private set; }
 
-        public ThirdwebSDK SDK
-        {
-            get { return _sdk; }
-        }
-
-        public Wallet Wallet
-        {
-            get { return _sdk.Wallet; }
-        }
+        private string bundleId;
+        private CancellationTokenSource _connectionCancelationTokenSource;
 
         public override void Awake()
         {
             base.Awake();
 
             ChainId defaultChainId = TDK.AppConfig.DefaultChainId;
-            
-            if (defaultChainId != ChainId.Unknown) {
+
+            if (defaultChainId != ChainId.Unknown)
+            {
                 InitializeSDK(Constants.ChainIdToName[defaultChainId]);
-            } else {
+            }
+            else
+            {
                 TDKLogger.LogWarning("[TDKThirdwebService] Invalid default chain in config, skipping initialization.");
-            }            
+            }
         }
 
-        public void InitializeSDK(string chainIdentifier)
+        private void InitializeSDK(string chainIdentifier)
         {
             TDKLogger.LogDebug("Initializing Thirdweb SDK for chain: " + chainIdentifier);
-            var tdkConfig = TDK.AppConfig;
-            var supportedChains = ((ChainId[])Enum.GetValues(typeof(ChainId)))
-                .Where(chainId => chainId != ChainId.Unknown)
-                .Select(chainId => new ThirdwebChainData { chainName = Constants.ChainIdToName[chainId] })
-                .ToArray();
 
-            // TODO this is copied code from ThirdwebManager.cs, we should refactor it so it wont get outdated
-            var smartWalletConfig = new ThirdwebSDK.SmartWalletConfig()
-            {
-                factoryAddress = string.IsNullOrEmpty(tdkConfig.FactoryAddress) ? Thirdweb.AccountAbstraction.Constants.DEFAULT_FACTORY_ADDRESS : tdkConfig.FactoryAddress,
-                gasless = true,
-                erc20PaymasterAddress = null,
-                erc20TokenAddress = null,
-                bundlerUrl = $"https://{chainIdentifier}.bundler.thirdweb.com",
-                paymasterUrl = $"https://{chainIdentifier}.bundler.thirdweb.com",
-                entryPointAddress = Thirdweb.AccountAbstraction.Constants.DEFAULT_ENTRYPOINT_ADDRESS,
-            };
+            var clientId = TDK.AppConfig.ClientId;
 
-            var options = new ThirdwebSDK.Options
-            {
-                smartWalletConfig = smartWalletConfig,
-                clientId = tdkConfig.ClientId,
-                supportedChains = supportedChains
-            };
+            bundleId ??= Application.identifier ?? $"com.{Application.companyName}.{Application.productName}";
 
-            _sdk = new ThirdwebSDK(
-                chainIdentifier,
-                (int)Constants.NameToChainId[chainIdentifier],
-                options
+            Client = ThirdwebClient.Create(
+                clientId: clientId,
+                bundleId: bundleId.ToLower(),
+                httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new UnityThirdwebHttpClient() : new ThirdwebHttpClient()
             );
+
+            TDKLogger.LogInfo("TDKThirdwebService initialized.");
+
+            Initialized = true;
+        }
+
+        public async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, int chainId, bool isSilentReconnect)
+        {
+            // Allow only one attempt to connect at a time, a new one will cancel any previous
+            _connectionCancelationTokenSource?.Cancel();
+            _connectionCancelationTokenSource = new CancellationTokenSource();
+            var cancellationToken = _connectionCancelationTokenSource.Token;
+
+            EcosystemWallet ecosystemWallet = null;
+            SmartWallet smartWallet = null;
+            try
+            {
+                ecosystemWallet = await EcosystemWallet.Create(
+                    ecosystemId: TDK.AppConfig.EcosystemId,
+                    ecosystemPartnerId: TDK.AppConfig.EcosystemPartnerId,
+                    client: Client,
+                    email: ecosystemWalletOptions.Email,
+                    phoneNumber: ecosystemWalletOptions.PhoneNumber,
+                    authProvider: ecosystemWalletOptions.AuthProvider,
+                    storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
+                );
+                cancellationToken.ThrowIfCancellationRequested();
+                var isConnected = await ecosystemWallet.IsConnected();
+                if (!isConnected)
+                {
+                    if (isSilentReconnect)
+                    {
+                        TDKLogger.LogDebug($"Could not recreate user automatically, skipping silent reconnect");
+                        return;
+                    }
+
+                    TDKLogger.LogDebug("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
+
+                    if (ecosystemWalletOptions.AuthProvider == AuthProvider.Default)
+                    {
+                        await ecosystemWallet.SendOTP();
+                        cancellationToken.ThrowIfCancellationRequested();
+                        var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(ecosystemWalletOptions.Email);
+                        _ = await otpModal.LoginWithOtp(ecosystemWallet);
+                    }
+                    else
+                    {
+                        _ = await ecosystemWallet.LoginWithOauth(
+                            isMobile: Application.isMobilePlatform,
+                            browserOpenAction: (url) => Application.OpenURL(url),
+                            mobileRedirectScheme: bundleId + "://",
+                            browser: new CrossPlatformUnityBrowser(),
+                            cancellationToken: cancellationToken
+                        );
+                    }
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                smartWallet = await SmartWallet.Create(
+                    personalWallet: ecosystemWallet,
+                    chainId: chainId,
+                    factoryAddress: TDK.Common.GetContractAddress(Contract.ManagedAccountFactory, (ChainId)chainId),
+                    gasless: true
+                );
+                cancellationToken.ThrowIfCancellationRequested();
+
+                TDKLogger.LogDebug("[TDKThirdwebService:ConnectWallet] Smart wallet successfully connected!");
+
+                ActiveWallet = smartWallet;
+            }
+            catch
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    TDKLogger.LogInfo("[TDKThirdwebService:ConnectWallet] New connection attempt has been made, ignoring previous connection...");
+                }
+                throw;
+            }
+        }
+
+        public async Task<bool> IsWalletConnected()
+        {
+            return ActiveWallet != null && await ActiveWallet.IsConnected();
+        }
+
+        public async Task DisconnectWallet()
+        {
+            if (ActiveWallet != null)
+            {
+                _connectionCancelationTokenSource?.Cancel(); // cancel any in progress connect operations
+                TDKLogger.LogInfo("[TDKThirdwebService:DisconnectWallet] Clearing active wallet");
+                if (await ActiveWallet.IsConnected())
+                {
+                    var personalWallet = await ActiveWallet.GetPersonalWallet();
+                    await personalWallet.Disconnect();
+                    await ActiveWallet.Disconnect();
+                    TDKLogger.LogInfo("[TDKThirdwebService:DisconnectWallet] Active wallet disconnected");
+                }
+                await new WaitForEndOfFrame();
+                ActiveWallet = null;
+            }
+        }
+
+        public async Task SwitchNetwork(int chainId)
+        {
+            if (ActiveWallet != null && await ActiveWallet.IsConnected())
+            {
+                await ActiveWallet.SwitchNetwork(chainId);
+            }
         }
     }
 }

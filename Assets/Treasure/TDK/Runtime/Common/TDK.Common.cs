@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Threading.Tasks;
+using Thirdweb;
 using UnityEngine;
 
 namespace Treasure
@@ -18,34 +19,30 @@ namespace Treasure
     {
         public Common() { }
 
-        public async Task<string> GetContractAddress(Contract contract)
+        public string GetContractAddress(Contract contract, ChainId chainId = ChainId.Unknown)
         {
-            var chainId = await TDK.Connect.GetChainId();
-            return Constants.ContractAddresses[chainId][contract];
+            return Constants.ContractAddresses[chainId == ChainId.Unknown ? TDK.Connect.ChainId : chainId][contract];
         }
 
-        public async Task<Transaction> WaitForTransaction(string queueId)
+        public async Task<Transaction> WaitForTransaction(string queueId, int maxRetries = 15, int retryMs = 2500, int initialWaitMs = 4000)
         {
             var retries = 0;
             Transaction transaction;
             do
             {
-                if (retries > 0)
+                // equivalent to `await Task.Delay();` but works on webgl
+                var sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+                while (sw.ElapsedMilliseconds < (retries == 0 ? initialWaitMs : retryMs))
                 {
-                    // equivalent to `await Task.Delay(2500);` but works on webgl
-                    var sw = new System.Diagnostics.Stopwatch();
-                    sw.Start();
-                    while (sw.ElapsedMilliseconds < 2500)
-                    {
-                        await Task.Yield();
-                    }
-                    sw.Stop();
+                    await Task.Yield();
                 }
+                sw.Stop();
 
                 transaction = await TDK.API.GetTransactionByQueueId(queueId);
                 retries++;
             } while (
-                retries < 15 &&
+                retries < maxRetries &&
                 transaction.status != "errored" &&
                 transaction.status != "cancelled" &&
                 transaction.status != "mined"
@@ -69,14 +66,10 @@ namespace Treasure
             return transaction;
         }
 
-        public async Task<Transaction> ApproveERC20(Contract contract, string operatorAddress, BigInteger amount)
+        public async Task<ThirdwebContract> GetContract(string address)
         {
-            var transaction = await TDK.API.WriteTransaction(
-                contract: contract,
-                functionName: "approve",
-                args: new string[] { operatorAddress, amount.ToString() }
-            );
-            return await WaitForTransaction(transaction.queueId);
+            var client = TDKServiceLocator.GetService<TDKThirdwebService>().Client;
+            return await ThirdwebContract.Create(client, address, TDK.Connect.ChainIdNumber);
         }
 
         public async Task<Transaction> ApproveERC20(string address, string operatorAddress, BigInteger amount)
@@ -85,16 +78,6 @@ namespace Treasure
                 address: address,
                 functionName: "approve",
                 args: new string[] { operatorAddress, amount.ToString() }
-            );
-            return await WaitForTransaction(transaction.queueId);
-        }
-
-        public async Task<Transaction> ApproveERC1155(Contract contract, string operatorAddress)
-        {
-            var transaction = await TDK.API.WriteTransaction(
-                contract: contract,
-                functionName: "setApprovalForAll",
-                args: new string[] { operatorAddress, "true" }
             );
             return await WaitForTransaction(transaction.queueId);
         }
@@ -109,16 +92,6 @@ namespace Treasure
             return await WaitForTransaction(transaction.queueId);
         }
 
-        public async Task<Transaction> ApproveERC721(Contract contract, string operatorAddress)
-        {
-            var transaction = await TDK.API.WriteTransaction(
-                contract: contract,
-                functionName: "setApprovalForAll",
-                args: new string[] { operatorAddress, "true" }
-            );
-            return await WaitForTransaction(transaction.queueId);
-        }
-
         public async Task<Transaction> ApproveERC721(string address, string operatorAddress)
         {
             var transaction = await TDK.API.WriteTransaction(
@@ -127,6 +100,27 @@ namespace Treasure
                 args: new string[] { operatorAddress, "true" }
             );
             return await WaitForTransaction(transaction.queueId);
+        }
+
+        public async Task<BigInteger> GetERC20Balance(string tokenAddress, string address)
+        {
+            var contract = await GetContract(tokenAddress);
+            return await contract.ERC20_BalanceOf(address);
+        }
+
+        public async Task<string> GetFormattedERC20Balance(string tokenAddress, string address)
+        {
+            var contract = await GetContract(tokenAddress);
+            var decimalsTask = contract.ERC20_Decimals();
+            var balanceTask = contract.ERC20_BalanceOf(address);
+            await Task.WhenAll(decimalsTask, balanceTask);
+            return Utils.FormatERC20(balanceTask.Result.ToString(), 4, decimalsTask.Result);
+        }
+
+        public async Task<string> GetFormattedERC20Balance(string tokenAddress, string address, int decimals)
+        {
+            var balance = await GetERC20Balance(tokenAddress, address);
+            return Utils.FormatERC20(balance.ToString(), 4, decimals);
         }
     }
 }
