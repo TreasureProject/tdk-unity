@@ -24,7 +24,7 @@ jobs:
           echo "STATUS=$(gh release view ${{steps.version.outputs.TAG_NAME}} --json isDraft)" >> $GITHUB_OUTPUT
       - name: Select files
         run: |
-          for folder in "Helika" "Thirdweb" "Plugins" "Treasure/Example" "Treasure/TDK"
+          for folder in "Plugins" "Thirdweb" "Treasure/Example" "Treasure/Plugins" "Treasure/TDK"
           do
             echo "Assets/$folder.meta" >> metaList
             find "Assets/$folder" -name \*.meta >> metaList
