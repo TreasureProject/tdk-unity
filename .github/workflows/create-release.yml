@@ -53,4 +53,4 @@ jobs:
           draft: true
           tag_name: ${{ steps.version.outputs.TAG_NAME }}
           files: |
-            out/output.unitypackage
+            out/tdk-unity_${{steps.version.outputs.TAG_NAME}}_Full.unitypackage
