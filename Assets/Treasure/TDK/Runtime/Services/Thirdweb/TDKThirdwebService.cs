@@ -5,6 +5,7 @@ using Thirdweb.Unity;
 using Thirdweb.Unity.Helpers;
 using System.Threading.Tasks;
 using System.Threading;
+using System;
 
 namespace Treasure
 {
@@ -115,11 +116,13 @@ namespace Treasure
 
                 ActiveWallet = smartWallet;
             }
-            catch
+            catch (Exception ex)
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     TDKLogger.LogInfo("[TDKThirdwebService:ConnectWallet] New connection attempt has been made, ignoring previous connection...");
+                    TDKLogger.LogException("Wallet connection cancelled", ex);
+                    throw new Exception("New connection attempt has been made");
                 }
                 throw;
             }
@@ -132,9 +135,9 @@ namespace Treasure
 
         public async Task DisconnectWallet()
         {
+            _connectionCancelationTokenSource?.Cancel(); // cancel any in progress connect operations
             if (ActiveWallet != null)
             {
-                _connectionCancelationTokenSource?.Cancel(); // cancel any in progress connect operations
                 TDKLogger.LogInfo("[TDKThirdwebService:DisconnectWallet] Clearing active wallet");
                 if (await ActiveWallet.IsConnected())
                 {
