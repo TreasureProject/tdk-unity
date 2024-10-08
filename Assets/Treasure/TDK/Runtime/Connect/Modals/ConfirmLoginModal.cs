@@ -14,7 +14,7 @@ namespace Treasure
         [SerializeField] private GameObject confirmationInputCodeHolder;
         [Space]
         [SerializeField] private Button confirmCode;
-        [SerializeField] private Button didntReceiveEmailButton;
+        [SerializeField] private Button goBackButton;
         [Space]
         [SerializeField] private TMP_InputField codeInput;
         [SerializeField] private TMP_Text errorText;
@@ -29,7 +29,7 @@ namespace Treasure
             codeInput.onSelect.AddListener(value => SetKeyboardSpace(true));
             codeInput.onDeselect.AddListener(value => SetKeyboardSpace(false));
 
-            didntReceiveEmailButton.onClick.AddListener(() =>
+            goBackButton.onClick.AddListener(() =>
             {
                 _ = TDK.Connect.Disconnect();
                 TDKConnectUIManager.Instance.ShowLoginModal();
