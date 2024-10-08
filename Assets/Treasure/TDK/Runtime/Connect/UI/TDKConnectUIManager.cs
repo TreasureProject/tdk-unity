@@ -39,6 +39,10 @@ namespace Treasure
             });
             backGroundButton.onClick.AddListener(() =>
             {
+                if (currentModalOpended == confirmLoginModal)
+                {
+                    return; // do not hide while waiting for user to input OTP
+                }
                 Hide();
             });
         }
