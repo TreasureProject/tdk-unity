@@ -11,14 +11,16 @@ public class ConnectUI : MonoBehaviour
         "arbitrum-sepolia",
         "ethereum",
         "sepolia",
-        "treasure-ruby"
+        "treasure-ruby",
+        "treasure-topaz"
     };
     private List<ChainId> _chainIds = new List<ChainId> {
         ChainId.Arbitrum,
         ChainId.ArbitrumSepolia,
         ChainId.Mainnet,
         ChainId.Sepolia,
-        ChainId.TreasureRuby
+        ChainId.TreasureRuby,
+        ChainId.TreasureTopaz
     };
 
     public void OnConnectWalletBtn()
