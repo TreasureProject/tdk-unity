@@ -39,7 +39,18 @@ namespace Treasure
             });
             backGroundButton.onClick.AddListener(() =>
             {
-                Hide();
+                if (TDK.AppConfig.ConnectHideBehavior == TDKConfig.ConnectUIHideBehavior.HideOnOutsideClick)
+                {
+                    Hide();
+                }
+                else if (TDK.AppConfig.ConnectHideBehavior == TDKConfig.ConnectUIHideBehavior.DoNotHideOnOtpScreen)
+                {
+                    // do not hide while waiting for user to input OTP
+                    if (currentModalOpended != confirmLoginModal)
+                    {
+                        Hide();
+                    }
+                }
             });
         }
 
