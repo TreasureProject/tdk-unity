@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 namespace Treasure
 {
-    // TODO reword in a way that prompts user to take action ("Sign into your account in the pop-up/browser"?)
     public class TransitionModal : ModalBase
     {
         [Space]
