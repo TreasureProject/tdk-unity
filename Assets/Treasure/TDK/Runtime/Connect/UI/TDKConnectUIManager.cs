@@ -15,6 +15,7 @@ namespace Treasure
         [SerializeField] private ModalBase loginModal;
         [SerializeField] private ConfirmLoginModal confirmLoginModal;
         [SerializeField] private AccountModal accountModal;
+        [SerializeField] private TransitionModal transitionModal;
         [SerializeField] private Button backGroundButton;
         [Header("Test buttons")]
         [SerializeField] private Button switchThemeButton;
@@ -38,7 +39,18 @@ namespace Treasure
             });
             backGroundButton.onClick.AddListener(() =>
             {
-                Hide();
+                if (TDK.AppConfig.ConnectHideBehavior == TDKConfig.ConnectUIHideBehavior.HideOnOutsideClick)
+                {
+                    Hide();
+                }
+                else if (TDK.AppConfig.ConnectHideBehavior == TDKConfig.ConnectUIHideBehavior.DoNotHideOnOtpScreen)
+                {
+                    // do not hide while waiting for user to input OTP
+                    if (currentModalOpended != confirmLoginModal)
+                    {
+                        Hide();
+                    }
+                }
             });
         }
 
@@ -92,6 +104,17 @@ namespace Treasure
             accountModal.Show();
 
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
+        }
+
+        public TransitionModal ShowTransitionModal()
+        {
+            if (currentModalOpended != null)
+                currentModalOpended.Hide();
+            
+            transitionModal.Show();
+            currentModalOpended = transitionModal;
+
+            return transitionModal;
         }
 
         public void Hide()

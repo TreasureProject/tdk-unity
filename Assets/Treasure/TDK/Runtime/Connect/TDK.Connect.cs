@@ -42,7 +42,6 @@ namespace Treasure
 
         #region public vars
         public UnityEvent<string> OnConnected = new UnityEvent<string>();
-        public UnityEvent<Exception> OnConnectError = new UnityEvent<Exception>();
         public UnityEvent OnDisconnected = new UnityEvent();
         #endregion
 

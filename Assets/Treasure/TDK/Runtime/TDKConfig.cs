@@ -70,7 +70,10 @@ namespace Treasure
 
         [SerializeField] private ScriptableObjectDictionary moduleConfigurations = null;
 
+        public enum ConnectUIHideBehavior { HideOnOutsideClick, DoNotHideOnOtpScreen, NeverHide }
+
         [Header("Misc")]
+        [SerializeField] private ConnectUIHideBehavior _connectHideBehavior = ConnectUIHideBehavior.DoNotHideOnOtpScreen;
         [SerializeField] private LoggerLevelValue _devLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private LoggerLevelValue _prodLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private bool _autoInitialize = true;
@@ -106,6 +109,11 @@ namespace Treasure
             set { if (Environment == Env.DEV) _devLoggerLevel = value; else _prodLoggerLevel = value; }
         }
 
+        public ConnectUIHideBehavior ConnectHideBehavior
+        {
+            get { return _connectHideBehavior; }
+            set { _connectHideBehavior = value; }
+        }
         public string ApiKey => Environment == Env.DEV ? _general._devApiKey : _general._prodApiKey;
 
         public bool AutoInitialize => _autoInitialize;
