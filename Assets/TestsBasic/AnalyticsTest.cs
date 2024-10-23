@@ -180,7 +180,7 @@ public class AnalyticsTest
                 devDefaultChainIdentifier = "arbitrum-sepolia",
                 prodDefaultChainIdentifier = "arbitrum"
             },
-        });
+        }, null);
         
         testTDKAbstractedEngineApi = new TestTDKAbstractedEngineApi();
 

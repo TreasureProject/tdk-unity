@@ -1193,6 +1193,7 @@ MonoBehaviour:
   loginModal: {fileID: 3816540366276100558}
   confirmLoginModal: {fileID: 8235831099756504107}
   accountModal: {fileID: 3072827353527150592}
+  transitionModal: {fileID: 6023647486176852525}
   backGroundButton: {fileID: 5835745163015243906}
   switchThemeButton: {fileID: 4521979920749245363}
   switchSceneButton: {fileID: 5918252390982917006}
@@ -1407,6 +1408,7 @@ RectTransform:
   - {fileID: 6243914237557355990}
   - {fileID: 2487275532662585301}
   - {fileID: 8045276048941829008}
+  - {fileID: 8010792226727399769}
   m_Father: {fileID: 1239414203006144206}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2850,6 +2852,123 @@ MonoBehaviour:
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2808120534581271167, guid: 43b45d8144a9e2d4d89405b21d4c1a34, type: 3}
   m_PrefabInstance: {fileID: 5286941529918706159}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6841126856559158144
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 5936106593320789926}
+    m_Modifications:
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 430
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7520020354902025585, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_Name
+      value: TransitionModal Landscape
+      objectReference: {fileID: 0}
+    - target: {fileID: 7520020354902025585, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+--- !u!114 &6023647486176852525 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 966263841051187629, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+  m_PrefabInstance: {fileID: 6841126856559158144}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a683fa303016e436eac455f8faa10efd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!224 &8010792226727399769 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 3592920012158661337, guid: 721aa7bcad98347e397e5b3d0bddf557, type: 3}
+  m_PrefabInstance: {fileID: 6841126856559158144}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7188699552004017590
 PrefabInstance:

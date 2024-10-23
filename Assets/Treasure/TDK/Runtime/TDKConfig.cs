@@ -34,13 +34,15 @@ namespace Treasure
             public string _prodApiKey;
             public string _devClientId;
             public string _prodClientId;
-            public string _ecosystemId;
-            public string _ecosystemPartnerId;
         }
 
         [Serializable]
         public class ConnectConfig
         {
+            public string _devEcosystemId;
+            public string _prodEcosystemId;
+            public string _devEcosystemPartnerId;
+            public string _prodEcosystemPartnerId;
             public ChainId _devDefaultChainId;
             public ChainId _prodDefaultChainId;
             public int _sessionDurationSec;
@@ -70,7 +72,10 @@ namespace Treasure
 
         [SerializeField] private ScriptableObjectDictionary moduleConfigurations = null;
 
+        public enum ConnectUIHideBehavior { HideOnOutsideClick, DoNotHideOnOtpScreen, NeverHide }
+
         [Header("Misc")]
+        [SerializeField] private ConnectUIHideBehavior _connectHideBehavior = ConnectUIHideBehavior.DoNotHideOnOtpScreen;
         [SerializeField] private LoggerLevelValue _devLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private LoggerLevelValue _prodLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private bool _autoInitialize = true;
@@ -87,8 +92,10 @@ namespace Treasure
 
         public string TDKApiUrl => Environment == Env.DEV ? _general._devApiUrl : _general._prodApiUrl;
         public string ClientId => Environment == Env.DEV ? _general._devClientId : _general._prodClientId;
-        public string EcosystemId => string.IsNullOrEmpty(_general._ecosystemId) ? "ecosystem.treasure" : _general._ecosystemId;
-        public string EcosystemPartnerId => _general._ecosystemPartnerId;
+        public string EcosystemId => Environment == Env.DEV ?
+            string.IsNullOrEmpty(_connect._devEcosystemId) ? "ecosystem.treasure-dev" : _connect._devEcosystemId
+                : string.IsNullOrEmpty(_connect._prodEcosystemId) ? "ecosystem.treasure" : _connect._prodEcosystemId;
+        public string EcosystemPartnerId => Environment == Env.DEV ? _connect._devEcosystemPartnerId : _connect._prodEcosystemPartnerId;
 
         public ChainId DefaultChainId =>
             Environment == Env.DEV ? _connect._devDefaultChainId : _connect._prodDefaultChainId;
@@ -106,6 +113,11 @@ namespace Treasure
             set { if (Environment == Env.DEV) _devLoggerLevel = value; else _prodLoggerLevel = value; }
         }
 
+        public ConnectUIHideBehavior ConnectHideBehavior
+        {
+            get { return _connectHideBehavior; }
+            set { _connectHideBehavior = value; }
+        }
         public string ApiKey => Environment == Env.DEV ? _general._devApiKey : _general._prodApiKey;
 
         public bool AutoInitialize => _autoInitialize;
@@ -153,26 +165,29 @@ namespace Treasure
             return Resources.Load<TDKConfig>("TDKConfig");
         }
 
-        public void SetConfig(SerializedTDKConfig config)
+        public void SetConfig(SerializedTDKConfig config, TDKConfig previousConfig)
         {
             // General
             _general = new GeneralConfig
             {
                 _cartridgeTag = config.general.cartridgeTag,
                 _cartridgeName = config.general.cartridgeName,
+                _cartridgeIcon = previousConfig != null ? previousConfig._general._cartridgeIcon : null,
                 _devApiUrl = config.general.devApiUrl,
                 _prodApiUrl = config.general.prodApiUrl,
                 _devApiKey = config.general.devApiKey,
                 _prodApiKey = config.general.prodApiKey,
                 _devClientId = config.general.devClientId,
                 _prodClientId = config.general.prodClientId,
-                _ecosystemId = config.general.ecosystemId,
-                _ecosystemPartnerId = config.general.ecosystemPartnerId
             };
 
             // Connect
             _connect = new ConnectConfig
             {
+                _devEcosystemId = config.connect.devEcosystemId,
+                _prodEcosystemId = config.connect.prodEcosystemId,
+                _devEcosystemPartnerId = config.connect.devEcosystemPartnerId,
+                _prodEcosystemPartnerId = config.connect.prodEcosystemPartnerId,
                 _devDefaultChainId = Constants.NameToChainId.GetValueOrDefault(
                     config.connect.devDefaultChainIdentifier ?? "",
                     ChainId.Unknown
@@ -185,7 +200,7 @@ namespace Treasure
                 _sessionMinDurationLeftSec = config.connect.sessionMinDurationLeftSec,
             };
 
-            if (config.connect.sessionOptions != null)
+            if (config.connect.sessionOptions?.Count > 0)
             {
                 _connect._sessionOptions = config.connect.sessionOptions.ConvertAll(option => new SessionOption
                 {
@@ -194,6 +209,10 @@ namespace Treasure
                     callTargets = option.callTargets,
                     nativeTokenLimitPerTransaction = option.nativeTokenLimitPerTransaction,
                 });
+            }
+            else if (previousConfig != null)
+            {
+                _connect._sessionOptions = previousConfig._connect._sessionOptions;
             }
             else
             {
@@ -223,8 +242,6 @@ namespace Treasure
             public string prodApiKey;
             public string devClientId;
             public string prodClientId;
-            public string ecosystemId;
-            public string ecosystemPartnerId;
         }
 
         [Serializable]
@@ -239,6 +256,10 @@ namespace Treasure
                 public double nativeTokenLimitPerTransaction;
             }
 
+            public string devEcosystemId;
+            public string prodEcosystemId;
+            public string devEcosystemPartnerId;
+            public string prodEcosystemPartnerId;
             public string devDefaultChainIdentifier;
             public string prodDefaultChainIdentifier;
             public int sessionDurationSec;

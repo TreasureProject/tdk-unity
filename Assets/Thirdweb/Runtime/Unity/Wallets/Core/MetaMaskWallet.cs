@@ -76,7 +76,7 @@ namespace Thirdweb.Unity
 
         public Task<string> GetAddress()
         {
-            return Task.FromResult(WebGLMetaMask.Instance.GetAddress());
+            return Task.FromResult(WebGLMetaMask.Instance.GetAddress().ToChecksumAddress());
         }
 
         public Task<bool> IsConnected()
@@ -91,8 +91,8 @@ namespace Thirdweb.Unity
                 throw new ArgumentNullException(nameof(rawMessage), "Message to sign cannot be null.");
             }
 
-            var message = Encoding.UTF8.GetString(rawMessage);
-            return PersonalSign(message);
+            var hex = Utils.BytesToHex(rawMessage);
+            return PersonalSign(hex);
         }
 
         public async Task<string> PersonalSign(string message)
@@ -102,7 +102,7 @@ namespace Thirdweb.Unity
                 throw new ArgumentNullException(nameof(message), "Message to sign cannot be null or empty.");
             }
 
-            var rpcRequest = new RpcRequest { Method = "personal_sign", Params = new object[] { message, WebGLMetaMask.Instance.GetAddress() } };
+            var rpcRequest = new RpcRequest { Method = "personal_sign", Params = new object[] { message.StartsWith("0x") ? message : message.StringToHex(), await GetAddress() } };
             return await WebGLMetaMask.Instance.RequestAsync<string>(rpcRequest);
         }
 
