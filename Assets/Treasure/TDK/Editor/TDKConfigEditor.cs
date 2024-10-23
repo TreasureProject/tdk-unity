@@ -29,10 +29,11 @@ namespace Treasure
             CheckForAndCreateResourcesDir(TDKConfig.DEFAULT_CONFIG_LOCATION);
 
             var config = ScriptableObject.CreateInstance<TDKConfig>();
+            var previousConfig = TDKConfig.LoadFromResources();
 
             if(serializedConfig != null)
             {
-                config.SetConfig(serializedConfig);
+                config.SetConfig(serializedConfig, previousConfig);
             }
 
             AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset");
