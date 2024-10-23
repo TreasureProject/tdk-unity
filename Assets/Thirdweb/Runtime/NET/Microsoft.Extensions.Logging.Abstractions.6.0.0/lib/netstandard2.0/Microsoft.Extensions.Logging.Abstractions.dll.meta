@@ -1,11 +1,7 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Thirdweb/Runtime/NET/Microsoft.Extensions.Logging.Abstractions.6.0.0/lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.dll.meta
 guid: 7e1d201fae297cc4f860ff5e95bffa2d
 labels:
 - NuGetForUnity
-========
-guid: 3486176387306324395845d7fa46dba6
->>>>>>>> main:Assets/Thirdweb/Plugins/Android/ThirdwebAndroidPlugin.java.meta
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -18,28 +14,10 @@ PluginImporter:
   validateReferences: 1
   platformData:
   - first:
-<<<<<<<< HEAD:Assets/Thirdweb/Runtime/NET/Microsoft.Extensions.Logging.Abstractions.6.0.0/lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.dll.meta
       Any: 
     second:
       enabled: 1
       settings: {}
-========
-      Android: Android
-    second:
-      enabled: 1
-      settings: {}
-  - first:
-      Any: 
-    second:
-      enabled: 0
-      settings: {}
-  - first:
-      Editor: Editor
-    second:
-      enabled: 0
-      settings:
-        DefaultValueInitialized: true
->>>>>>>> main:Assets/Thirdweb/Plugins/Android/ThirdwebAndroidPlugin.java.meta
   userData: 
   assetBundleName: 
   assetBundleVariant: 
