@@ -34,13 +34,15 @@ namespace Treasure
             public string _prodApiKey;
             public string _devClientId;
             public string _prodClientId;
-            public string _ecosystemId;
-            public string _ecosystemPartnerId;
         }
 
         [Serializable]
         public class ConnectConfig
         {
+            public string _devEcosystemId;
+            public string _prodEcosystemId;
+            public string _devEcosystemPartnerId;
+            public string _prodEcosystemPartnerId;
             public ChainId _devDefaultChainId;
             public ChainId _prodDefaultChainId;
             public int _sessionDurationSec;
@@ -90,8 +92,10 @@ namespace Treasure
 
         public string TDKApiUrl => Environment == Env.DEV ? _general._devApiUrl : _general._prodApiUrl;
         public string ClientId => Environment == Env.DEV ? _general._devClientId : _general._prodClientId;
-        public string EcosystemId => string.IsNullOrEmpty(_general._ecosystemId) ? "ecosystem.treasure" : _general._ecosystemId;
-        public string EcosystemPartnerId => _general._ecosystemPartnerId;
+        public string EcosystemId => Environment == Env.DEV ?
+            string.IsNullOrEmpty(_connect._devEcosystemId) ? "ecosystem.treasure-dev" : _connect._devEcosystemId
+                : string.IsNullOrEmpty(_connect._prodEcosystemId) ? "ecosystem.treasure" : _connect._prodEcosystemId;
+        public string EcosystemPartnerId => Environment == Env.DEV ? _connect._devEcosystemPartnerId : _connect._prodEcosystemPartnerId;
 
         public ChainId DefaultChainId =>
             Environment == Env.DEV ? _connect._devDefaultChainId : _connect._prodDefaultChainId;
@@ -174,13 +178,15 @@ namespace Treasure
                 _prodApiKey = config.general.prodApiKey,
                 _devClientId = config.general.devClientId,
                 _prodClientId = config.general.prodClientId,
-                _ecosystemId = config.general.ecosystemId,
-                _ecosystemPartnerId = config.general.ecosystemPartnerId
             };
 
             // Connect
             _connect = new ConnectConfig
             {
+                _devEcosystemId = config.connect.devEcosystemId,
+                _prodEcosystemId = config.connect.prodEcosystemId,
+                _devEcosystemPartnerId = config.connect.devEcosystemPartnerId,
+                _prodEcosystemPartnerId = config.connect.prodEcosystemPartnerId,
                 _devDefaultChainId = Constants.NameToChainId.GetValueOrDefault(
                     config.connect.devDefaultChainIdentifier ?? "",
                     ChainId.Unknown
@@ -231,8 +237,6 @@ namespace Treasure
             public string prodApiKey;
             public string devClientId;
             public string prodClientId;
-            public string ecosystemId;
-            public string ecosystemPartnerId;
         }
 
         [Serializable]
@@ -247,6 +251,10 @@ namespace Treasure
                 public double nativeTokenLimitPerTransaction;
             }
 
+            public string devEcosystemId;
+            public string prodEcosystemId;
+            public string devEcosystemPartnerId;
+            public string prodEcosystemPartnerId;
             public string devDefaultChainIdentifier;
             public string prodDefaultChainIdentifier;
             public int sessionDurationSec;
