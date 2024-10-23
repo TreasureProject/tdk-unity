@@ -9,7 +9,8 @@ namespace Treasure
         Sepolia = 11155111,
         Arbitrum = 42161,
         ArbitrumSepolia = 421614,
-        TreasureRuby = 978657
+        TreasureRuby = 978657,
+        TreasureTopaz = 978658
     }
 
     public enum Contract
@@ -59,6 +60,9 @@ namespace Treasure
                 ChainId.TreasureRuby, new Dictionary<Contract, string> {
                     { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
                 }
+            },
+            {
+                ChainId.TreasureTopaz, new Dictionary<Contract, string> {}
             }
         };
 
@@ -70,6 +74,7 @@ namespace Treasure
             { ChainId.Arbitrum, "arbitrum" },
             { ChainId.ArbitrumSepolia, "arbitrum-sepolia" },
             { ChainId.TreasureRuby, "treasure-ruby" },
+            { ChainId.TreasureTopaz, "treasure-topaz" }
         };
 
         public static Dictionary<string, ChainId> NameToChainId = new Dictionary<string, ChainId>()
@@ -80,6 +85,7 @@ namespace Treasure
             { "arbitrum", ChainId.Arbitrum },
             { "arbitrum-sepolia", ChainId.ArbitrumSepolia },
             { "treasure-ruby", ChainId.TreasureRuby },
+            { "treasure-topaz", ChainId.TreasureTopaz }
         };
     }
 }
