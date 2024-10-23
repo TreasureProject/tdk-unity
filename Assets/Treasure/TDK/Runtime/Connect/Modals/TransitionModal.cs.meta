@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Treasure/TDK/Runtime/Connect/Modals/TransitionModal.cs.meta
 guid: a683fa303016e436eac455f8faa10efd
-========
-guid: 06841cde28862774ba2b2edb8b8b943b
->>>>>>>> main:Assets/Thirdweb/Runtime/Unity/Http/CrossPlatformUnityHttpClient.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
