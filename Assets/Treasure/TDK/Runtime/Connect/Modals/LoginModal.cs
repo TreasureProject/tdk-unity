@@ -104,7 +104,8 @@ namespace Treasure
             }
             catch (Exception ex)
             {
-                if (ex.Message != "New connection attempt has been made") {
+                if (ex.Message != "New connection attempt has been made")
+                {
                     TDKLogger.LogException($"[LoginModal:ConnectSocial] Error connecting", ex);
                     // close TransitionModal, go back to login modal and show cause of error
                     TDKConnectUIManager.Instance.ShowLoginModal();

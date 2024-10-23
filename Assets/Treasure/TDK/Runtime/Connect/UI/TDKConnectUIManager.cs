@@ -98,7 +98,8 @@ namespace Treasure
                 currentModalOpended.Hide();
 
             currentModalOpended = accountModal;
-            if (TDK.Identity.IsUsingTreasureLauncher) {
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
                 accountModal.SetDisconnectButtonVisible(false);
             }
             accountModal.Show();
@@ -110,7 +111,7 @@ namespace Treasure
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
-            
+
             transitionModal.Show();
             currentModalOpended = transitionModal;
 
@@ -121,7 +122,7 @@ namespace Treasure
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
-            
+
             if (currentModalOpended == confirmLoginModal)
                 confirmLoginModal.CancelCurrentLoginAttempt();
 

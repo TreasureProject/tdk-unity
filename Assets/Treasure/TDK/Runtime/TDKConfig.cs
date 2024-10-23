@@ -178,7 +178,7 @@ namespace Treasure
                 _devApiKey = config.general.devApiKey,
                 _prodApiKey = config.general.prodApiKey,
                 _devClientId = config.general.devClientId,
-                _prodClientId = config.general.prodClientId,
+                _prodClientId = config.general.prodClientId
             };
 
             // Connect

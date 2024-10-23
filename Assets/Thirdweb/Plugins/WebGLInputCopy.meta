@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Thirdweb/Plugins/WebGLInputCopy.meta
 guid: 19b231dc2e1ab5e47bb801e8853f659a
+========
+guid: 23d83eab8f753b04fb7f1384ac6676a0
+>>>>>>>> main:Assets/Thirdweb/Plugins/WebGLInputCopy/WebGLInput.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
