@@ -1,1 +1,1 @@
-thirdweb: 5.4.0
+thirdweb: 5.5.4

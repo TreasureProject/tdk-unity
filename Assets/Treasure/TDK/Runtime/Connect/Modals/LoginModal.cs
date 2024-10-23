@@ -27,6 +27,7 @@ namespace Treasure
         [SerializeField] private Button loginAppleButton;
         [SerializeField] private Button loginDiscordButton;
         [SerializeField] private Button loginXButton;
+        [SerializeField] private TMP_Text socialsErrorText;
         [Space]
         [SerializeField] private TMP_InputField emailInputField;
         [SerializeField] private TMP_Text errorText;
@@ -96,12 +97,21 @@ namespace Treasure
 
             try
             {
+                var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal();
+                transitionModal.SetCancelAction(() => TDKConnectUIManager.Instance.ShowLoginModal());
                 await TDK.Connect.Disconnect(); // clean up any previous connection attempts
                 await TDK.Connect.ConnectSocial(provider);
             }
             catch (Exception ex)
             {
-                TDKLogger.LogException($"[LoginModal:ConnectSocial] Error connecting", ex);
+                if (ex.Message != "New connection attempt has been made")
+                {
+                    TDKLogger.LogException($"[LoginModal:ConnectSocial] Error connecting", ex);
+                    // close TransitionModal, go back to login modal and show cause of error
+                    TDKConnectUIManager.Instance.ShowLoginModal();
+                    socialsErrorText.text = ex.Message;
+                    socialsErrorText.gameObject.SetActive(true);
+                }
             }
         }
 

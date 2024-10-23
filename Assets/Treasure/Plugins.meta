@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Treasure/Plugins.meta
 guid: d5d8f06c2707d4b009ca9a41a9217393
+========
+guid: 27ad92363e0699e4da16db2e5f65b039
+>>>>>>>> main:Assets/Thirdweb/Runtime/Unity/Http.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

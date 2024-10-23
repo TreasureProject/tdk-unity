@@ -72,16 +72,20 @@ namespace Thirdweb.Unity
             }
             else
             {
-                try
+                var currentChainId = WalletConnect.Instance.ActiveChainId;
+                if (currentChainId != $"eip155:{initialChainId}")
                 {
-                    var data = new WalletSwitchEthereumChain(new HexBigInteger(initialChainId).HexValue);
-                    await WalletConnect.Instance.RequestAsync<WalletSwitchEthereumChain, string>(data);
-                    await Task.Delay(5000); // wait for chain switch to take effect
-                    await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
-                }
-                catch (Exception e)
-                {
-                    ThirdwebDebug.LogWarning($"Failed to ensure wallet is on active chain: {e.Message}");
+                    try
+                    {
+                        var data = new WalletSwitchEthereumChain(new HexBigInteger(initialChainId).HexValue);
+                        await WalletConnect.Instance.RequestAsync<WalletSwitchEthereumChain, string>(data);
+                        await Task.Delay(5000); // wait for chain switch to take effect
+                        await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{initialChainId}");
+                    }
+                    catch (Exception e)
+                    {
+                        ThirdwebDebug.LogWarning($"Failed to ensure wallet is on active chain: {e.Message}");
+                    }
                 }
                 _walletConnectService = new WalletConnectServiceCore(WalletConnect.Instance.SignClient);
             }
@@ -91,6 +95,11 @@ namespace Thirdweb.Unity
 
         public async Task EnsureCorrectNetwork(BigInteger chainId)
         {
+            var currentChainId = WalletConnect.Instance.ActiveChainId;
+            if (currentChainId == $"eip155:{chainId}")
+            {
+                return;
+            }
             var chainInfo = await Utils.GetChainMetadata(_client, chainId);
             var wcChainInfo = new EthereumChain()
             {
@@ -140,8 +149,8 @@ namespace Thirdweb.Unity
                 throw new ArgumentNullException(nameof(rawMessage), "Message to sign cannot be null.");
             }
 
-            var message = Encoding.UTF8.GetString(rawMessage);
-            return PersonalSign(message);
+            var hex = Utils.BytesToHex(rawMessage);
+            return PersonalSign(hex);
         }
 
         public async Task<string> PersonalSign(string message)
@@ -151,7 +160,7 @@ namespace Thirdweb.Unity
                 throw new ArgumentNullException(nameof(message), "Message to sign cannot be null.");
             }
 
-            var task = _walletConnectService.PersonalSignAsync(message);
+            var task = _walletConnectService.PersonalSignAsync(message.StartsWith("0x") ? message : message.StringToHex());
             SessionRequestDeeplink();
             return await task as string;
         }
@@ -270,6 +279,10 @@ namespace Thirdweb.Unity
 
                 // Open modal
                 WalletConnectModal.Open(new WalletConnectModalOptions { ConnectOptions = connectOptions, IncludedWalletIds = _includedWalletIds });
+                WalletConnectModal.ModalClosed += (sender, e) =>
+                {
+                    _exception = new Exception("WalletConnect modal was closed.");
+                };
             }
             catch (Exception e)
             {
