@@ -62,9 +62,7 @@ namespace Treasure
                 }
             },
             {
-                ChainId.TreasureTopaz, new Dictionary<Contract, string> {
-                    { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
-                }
+                ChainId.TreasureTopaz, new Dictionary<Contract, string> {}
             }
         };
 
