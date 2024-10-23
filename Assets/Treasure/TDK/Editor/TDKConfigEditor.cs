@@ -32,7 +32,8 @@ namespace Treasure
 
             if(serializedConfig != null)
             {
-                config.SetConfig(serializedConfig);
+                var previousConfig = TDKConfig.LoadFromResources();
+                config.SetConfig(serializedConfig, previousConfig);
             }
 
             AssetDatabase.CreateAsset(config, TDKConfig.DEFAULT_CONFIG_LOCATION + "/TDKConfig.asset");

@@ -165,13 +165,14 @@ namespace Treasure
             return Resources.Load<TDKConfig>("TDKConfig");
         }
 
-        public void SetConfig(SerializedTDKConfig config)
+        public void SetConfig(SerializedTDKConfig config, TDKConfig previousConfig)
         {
             // General
             _general = new GeneralConfig
             {
                 _cartridgeTag = config.general.cartridgeTag,
                 _cartridgeName = config.general.cartridgeName,
+                _cartridgeIcon = previousConfig != null ? previousConfig._general._cartridgeIcon : null,
                 _devApiUrl = config.general.devApiUrl,
                 _prodApiUrl = config.general.prodApiUrl,
                 _devApiKey = config.general.devApiKey,
@@ -199,7 +200,7 @@ namespace Treasure
                 _sessionMinDurationLeftSec = config.connect.sessionMinDurationLeftSec,
             };
 
-            if (config.connect.sessionOptions != null)
+            if (config.connect.sessionOptions?.Count > 0)
             {
                 _connect._sessionOptions = config.connect.sessionOptions.ConvertAll(option => new SessionOption
                 {
@@ -208,6 +209,10 @@ namespace Treasure
                     callTargets = option.callTargets,
                     nativeTokenLimitPerTransaction = option.nativeTokenLimitPerTransaction,
                 });
+            }
+            else if (previousConfig != null)
+            {
+                _connect._sessionOptions = previousConfig._connect._sessionOptions;
             }
             else
             {
