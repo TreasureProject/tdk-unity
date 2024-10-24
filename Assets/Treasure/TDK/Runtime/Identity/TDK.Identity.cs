@@ -98,7 +98,7 @@ namespace Treasure
             );
         }
 
-        private async Task<List<User.Signer>> GetActiveSigners()
+        private async Task<List<User.Session>> GetUserSessions()
         {
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             var activeSignersTask = thirdwebService.ActiveWallet.GetAllActiveSigners();
@@ -106,7 +106,7 @@ namespace Treasure
             await Task.WhenAll(activeSignersTask, allAdminsTask);
             var activeSigners = activeSignersTask.Result;
             var allAdmins = allAdminsTask.Result;
-            return activeSigners.Select(activeSigner => new User.Signer
+            return activeSigners.Select(activeSigner => new User.Session
             {
                 isAdmin = allAdmins.Contains(activeSigner.Signer),
                 signer = activeSigner.Signer,
@@ -117,29 +117,29 @@ namespace Treasure
             }).ToList();
         }
 
-        private bool ValidateActiveSigner(string backendWallet, List<string> callTargets, BigInteger nativeTokenLimitPerTransaction, User.Signer signer)
+        private bool ValidateSession(string backendWallet, List<string> callTargets, BigInteger nativeTokenLimitPerTransaction, User.Session session)
         {
             var requestedCallTargets = callTargets.Select(callTarget => callTarget.ToLowerInvariant());
-            var signerApprovedTargets = signer.approvedTargets.Select(approvedTarget => approvedTarget.ToLowerInvariant());
+            var signerApprovedTargets = session.approvedTargets.Select(approvedTarget => approvedTarget.ToLowerInvariant());
             var nowDate = Utils.GetUnixTimeStampNow();
             var minEndDate = Utils.GetUnixTimeStampNow() + TDK.AppConfig.SessionMinDurationLeftSec;
             var maxEndDate = Utils.GetUnixTimeStampIn10Years();
             return
                 // Expected backend wallet is signer
-                signer.signer.ToLowerInvariant() == backendWallet.ToLowerInvariant() &&
+                session.signer.ToLowerInvariant() == backendWallet.ToLowerInvariant() &&
                 // If this signer is an admin, they always have the required permissions
-                (signer.isAdmin || (
+                (session.isAdmin || (
                     // Start date has passed
-                    signer.startTimestamp < nowDate &&
+                    session.startTimestamp < nowDate &&
                     // Expiration date meets minimum time requirements
-                    signer.endTimestamp >= minEndDate &&
+                    session.endTimestamp >= minEndDate &&
                     // Expiration date is not too far in the future (10 years because Thirdweb uses this for admins)
                     // This check is to prevent sessions from being created with timestamps in milliseconds
-                    signer.endTimestamp <= maxEndDate &&
+                    session.endTimestamp <= maxEndDate &&
                     // All requested targets are approved
                     requestedCallTargets.All(callTarget => signerApprovedTargets.Contains(callTarget)) &&
                     // Native token limit per transaction is approved
-                    signer.nativeTokenLimitPerTransaction >= nativeTokenLimitPerTransaction
+                    session.nativeTokenLimitPerTransaction >= nativeTokenLimitPerTransaction
                 ));
         }
 
@@ -186,9 +186,9 @@ namespace Treasure
                     var nativeTokenLimitPerTransaction = TDK.AppConfig.GetNativeTokenLimitPerTransaction();
 
                     // Check if any active signers match the call targets
-                    var hasActiveSession = user.allActiveSigners.Any((signer) =>
+                    var hasActiveSession = user.sessions.Any((signer) =>
                     {
-                        return ValidateActiveSigner(
+                        return ValidateSession(
                             backendWallet,
                             callTargets,
                             nativeTokenLimitPerTransaction,
@@ -203,7 +203,7 @@ namespace Treasure
                     }
                 }
 
-                _address = user.smartAccountAddress;
+                _address = user.address;
                 _authToken = authToken;
 
                 TDKLogger.Log("Existing user session is valid");
@@ -280,10 +280,10 @@ namespace Treasure
             if (!didCreateSession && requiresSession)
             {
                 var hasActiveSession = false;
-                List<User.Signer> activeSigners = null;
+                List<User.Session> sessions = null;
                 try
                 {
-                    activeSigners = await GetActiveSigners();
+                    sessions = await GetUserSessions();
                 }
                 catch (Exception e)
                 {
@@ -292,12 +292,12 @@ namespace Treasure
                     TDKLogger.LogError($"Error fetching active signers: {e}");
                 }
 
-                if (activeSigners != null && activeSigners.Count > 0)
+                if (sessions != null && sessions.Count > 0)
                 {
                     // Check if any active signers match the call targets
-                    hasActiveSession = activeSigners.Any((signer) =>
+                    hasActiveSession = sessions.Any((signer) =>
                     {
-                        return ValidateActiveSigner(
+                        return ValidateSession(
                             backendWallet,
                             callTargets,
                             nativeTokenLimitPerTransaction,

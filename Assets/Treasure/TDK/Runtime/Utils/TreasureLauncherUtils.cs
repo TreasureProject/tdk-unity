@@ -7,7 +7,7 @@ namespace Treasure
     public class TreasureLauncherUtils
     {
         private static bool hasParsedCommandLineArgs = false;
-        
+
         private static string tdkAuthToken = null;
 
         public static string GetLauncherAuthToken()
@@ -21,7 +21,7 @@ namespace Treasure
             // TODO check token expiration date?
             var content = GetLauncherAuthToken().Split('.')[1];
             var jsonPayload = Decode(content);
-            return JsonConvert.DeserializeObject<JToken>(jsonPayload)["ctx"]["smartAccountAddress"].ToString();
+            return JsonConvert.DeserializeObject<JToken>(jsonPayload)["ctx"]["address"].ToString();
         }
 
         private static void ParseArgs()
