@@ -1,11 +1,6 @@
 name: Create Unity Package
-
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -38,7 +33,7 @@ jobs:
       - name: Create unitypackage
         uses: pCYSl5EDgo/create-unitypackage@b5c57408698b1fab8b3a84d4b67f767b8b7c0be9 # v1.2.3
         with:
-          package-path: 'out/tdk-unity_${{steps.version.outputs.TAG_NAME}}_Full.unitypackage'
+          package-path: "out/tdk-unity_${{steps.version.outputs.TAG_NAME}}_Full.unitypackage"
           include-files: metaList
       - name: Upload unitypackage artifact
         uses: actions/upload-artifact@v4
