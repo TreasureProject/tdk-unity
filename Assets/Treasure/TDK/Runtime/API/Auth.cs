@@ -56,7 +56,7 @@ namespace Treasure
     [Serializable]
     public struct User
     {
-        public struct Signer
+        public struct Session
         {
             public bool isAdmin;
             public string signer;
@@ -67,9 +67,9 @@ namespace Treasure
         }
 
         public string id;
-        public string smartAccountAddress;
+        public string address;
         public string email;
-        public List<Signer> allActiveSigners;
+        public List<Session> sessions;
     }
 
     public partial class API
