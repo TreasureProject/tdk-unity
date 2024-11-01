@@ -44,7 +44,13 @@ namespace Treasure
             Client = ThirdwebClient.Create(
                 clientId: clientId,
                 bundleId: bundleId.ToLower(),
-                httpClient: Application.platform == RuntimePlatform.WebGLPlayer ? new UnityThirdwebHttpClient() : new ThirdwebHttpClient()
+                httpClient: Application.platform == RuntimePlatform.WebGLPlayer
+                    ? new UnityThirdwebHttpClient()
+                    : new ThirdwebHttpClient(),
+                sdkName: Application.platform == RuntimePlatform.WebGLPlayer ? "UnitySDK_WebGL" : "UnitySDK",
+                sdkOs: Application.platform.ToString(),
+                sdkPlatform: "unity",
+                sdkVersion: ThirdwebManager.THIRDWEB_UNITY_SDK_VERSION
             );
 
             TDKLogger.LogInfo("TDKThirdwebService initialized.");
