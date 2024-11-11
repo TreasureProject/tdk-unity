@@ -5,6 +5,7 @@ using Thirdweb.Unity.Helpers;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Cysharp.Threading.Tasks;
 
 namespace Treasure
 {
@@ -151,7 +152,7 @@ namespace Treasure
                     await ActiveWallet.Disconnect();
                     TDKLogger.LogInfo("[TDKThirdwebService:DisconnectWallet] Active wallet disconnected");
                 }
-                await new WaitForEndOfFrame();
+                await UniTask.WaitForEndOfFrame(this);
                 ActiveWallet = null;
             }
         }
