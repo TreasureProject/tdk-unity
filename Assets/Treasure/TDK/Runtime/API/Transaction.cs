@@ -1,6 +1,8 @@
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Thirdweb;
 
 namespace Treasure
 {
@@ -59,9 +61,15 @@ namespace Treasure
 
         public async Task<Transaction> WriteTransaction(WriteTransactionBody body)
         {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            if (await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber))
+            {
+                return await thirdwebService.WriteTransaction(body);
+            }
             body.backendWallet ??= TDK.AppConfig.GetBackendWallet();
             var response = await Post("/transactions", JsonConvert.SerializeObject(body));
-            return JsonConvert.DeserializeObject<Transaction>(response);
+            var transaction = JsonConvert.DeserializeObject<Transaction>(response);
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
         public async Task<Transaction> WriteTransaction(string address, string functionName, object[] args)
@@ -76,9 +84,15 @@ namespace Treasure
 
         public async Task<Transaction> SendRawTransaction(SendRawTransactionBody body)
         {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            if (await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber))
+            {
+                return await thirdwebService.WriteTransactionRaw(body);
+            }
             body.backendWallet ??= TDK.AppConfig.GetBackendWallet();
             var response = await Post("/transactions/raw", JsonConvert.SerializeObject(body));
-            return JsonConvert.DeserializeObject<Transaction>(response);
+            var transaction = JsonConvert.DeserializeObject<Transaction>(response);
+            return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
     }
 }

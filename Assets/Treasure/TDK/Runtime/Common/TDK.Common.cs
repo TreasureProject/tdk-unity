@@ -79,7 +79,7 @@ namespace Treasure
                 functionName: "approve",
                 args: new string[] { operatorAddress, amount.ToString() }
             );
-            return await WaitForTransaction(transaction.queueId);
+            return transaction;
         }
 
         public async Task<Transaction> ApproveERC1155(string address, string operatorAddress)
@@ -89,7 +89,7 @@ namespace Treasure
                 functionName: "setApprovalForAll",
                 args: new string[] { operatorAddress, "true" }
             );
-            return await WaitForTransaction(transaction.queueId);
+            return transaction;
         }
 
         public async Task<Transaction> ApproveERC721(string address, string operatorAddress)
@@ -99,7 +99,7 @@ namespace Treasure
                 functionName: "setApprovalForAll",
                 args: new string[] { operatorAddress, "true" }
             );
-            return await WaitForTransaction(transaction.queueId);
+            return transaction;
         }
 
         public async Task<BigInteger> GetERC20Balance(string tokenAddress, string address)

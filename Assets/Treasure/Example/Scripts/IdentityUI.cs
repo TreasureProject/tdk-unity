@@ -57,7 +57,6 @@ public class IdentityUI : MonoBehaviour
         TDKLogger.LogInfo("Minting 1,000 MAGIC...");
         var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
         var transaction = await TDK.API.WriteTransaction(contractAddress, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
-        transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
         if (transaction.status == "errored")
         {
             TDKLogger.LogError($"Mint failed: {transaction.errorMessage}");
@@ -88,7 +87,6 @@ public class IdentityUI : MonoBehaviour
             to = contractAddress,
             data = tx.Input.Data,
         });
-        transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
         if (transaction.status == "errored")
         {
             TDKLogger.LogError($"Mint failed: {transaction.errorMessage}");
@@ -108,7 +106,6 @@ public class IdentityUI : MonoBehaviour
             value = Utils.ToWei("0.0001"),
             data = "0x",
         });
-        transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
         if (transaction.status == "errored")
         {
             TDKLogger.LogError($"Send failed: {transaction.errorMessage}");
