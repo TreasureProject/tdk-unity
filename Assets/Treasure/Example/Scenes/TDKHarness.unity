@@ -6880,7 +6880,7 @@ RectTransform:
   m_Children:
   - {fileID: 1386214748}
   - {fileID: 32992486}
-  - {fileID: 1708236940}
+  - {fileID: 1903752308}
   - {fileID: 1365931527}
   - {fileID: 618070553}
   - {fileID: 1614308284}
@@ -6890,7 +6890,7 @@ RectTransform:
   - {fileID: 132739380}
   - {fileID: 359465598}
   - {fileID: 717699300}
-  - {fileID: 1903752308}
+  - {fileID: 1708236940}
   m_Father: {fileID: 1699658596}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -7641,7 +7641,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Get route info
+  m_Text: Get A -> B route
 --- !u!222 &1817982286
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7814,7 +7814,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1699658597}
         m_TargetAssemblyTypeName: MagicswapUI, Assembly-CSharp
-        m_MethodName: OnGetRouteBtn
+        m_MethodName: OnGetInvertedRouteBtn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

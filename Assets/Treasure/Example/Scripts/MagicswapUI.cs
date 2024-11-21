@@ -223,12 +223,17 @@ public class MagicswapUI : MonoBehaviour
             InfoText.text = "Must get pool details before approving LP!";
             return;
         }
-        var callTargets = TDK.AppConfig.GetCallTargets();
-        if (!callTargets.Contains(magicswapPool.id))
+        var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+        var usingZkSyncChain = await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber);
+        if (!usingZkSyncChain)
         {
-            InfoText.text = "`callTargets` in TDKConfig must include the pool id!";
-            InfoText.text += "\nPool id: " + magicswapPool.id;
-            return;
+            var callTargets = TDK.AppConfig.GetCallTargets();
+            if (!callTargets.Contains(magicswapPool.id))
+            {
+                InfoText.text = "`callTargets` in TDKConfig must include the pool id!";
+                InfoText.text += "\nPool id: " + magicswapPool.id;
+                return;
+            }
         }
         var amount = BigInteger.Parse(Utils.ToWei("20"));
         var magicswapRouterAddress = TDK.Common.GetContractAddress(Contract.MagicswapV2Router);
@@ -296,7 +301,6 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    // TODO make it work with erc20-erc20
     public async void OnAddLiquidityBtn()
     {
         if (magicswapPool == null)
@@ -311,25 +315,59 @@ public class MagicswapUI : MonoBehaviour
             // for tokenB we can calculate amountB based on amountA and the pool reserves
             var tokenA = magicswapPool.token1;
             var tokenB = magicswapPool.token0;
-            var amountA = new BigInteger(1);
+            var amountA = new BigInteger(1).AdjustDecimals(0, tokenA.decimals); // TODO make this configurable?
             var reserveA = BigInteger.Parse(tokenA.reserve);
             var reserveB = BigInteger.Parse(tokenB.reserve);
             var amountB = TDK.Magicswap.GetQuote(
-                amountA.AdjustDecimals(0, tokenA.decimals),
+                amountA,
                 reserveA,
                 reserveB
             );
 
-            var addLiquidityBody = new AddLiquidityBody
+            string amount0 = null;
+            string amount0Min = null;
+            List<NFTInput> nfts0 = null;
+            if (tokenB.isNFT)
             {
-                amount0 = amountB.ToString(),
-                amount0Min = TDK.Magicswap.GetAmountMin(amountB, 0.01).ToString(),
+                nfts0 = new List<NFTInput>() {
+                    new() {
+                        id = tokenB.collectionTokenIds[0],
+                        quantity = (int) amountB.AdjustDecimals(tokenB.decimals, 0),
+                    }
+                };
+            }
+            else
+            {
+                amount0 = amountB.ToString();
+                amount0Min = TDK.Magicswap.GetAmountMin(amountB, 0.01).ToString();
+            }
+            
+            string amount1 = null;
+            string amount1Min = null;
+            List<NFTInput> nfts1 = null;
+            if (tokenA.isNFT)
+            {
                 nfts1 = new List<NFTInput>() {
                     new() {
                         id = tokenA.collectionTokenIds[0],
-                        quantity = (int)amountA,
+                        quantity = (int) amountB.AdjustDecimals(tokenB.decimals, 0),
                     }
-                }
+                };
+            }
+            else
+            {
+                amount1 = amountA.ToString();
+                amount1Min = TDK.Magicswap.GetAmountMin(amountA, 0.01).ToString();
+            }
+
+            var addLiquidityBody = new AddLiquidityBody
+            {
+                amount0 = amount0,
+                amount0Min = amount0Min,
+                amount1 = amount1,
+                amount1Min = amount1Min,
+                nfts0 = nfts0,
+                nfts1 = nfts1,
             };
             bodyJson = JsonConvert.SerializeObject(addLiquidityBody, Formatting.Indented, new JsonSerializerSettings
             {

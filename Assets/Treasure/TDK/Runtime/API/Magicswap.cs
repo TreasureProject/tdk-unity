@@ -155,6 +155,7 @@ namespace Treasure
         public string amount0Min;
         public string amount1Min;
         public string backendWallet = null;
+        public string toAddress = null;
     }
 
     [Serializable]
@@ -258,6 +259,7 @@ namespace Treasure
 
         public async Task<Transaction> AddLiquidity(string poolId, AddLiquidityBody addLiquidityBody) {
             addLiquidityBody.backendWallet ??= TDK.AppConfig.GetBackendWallet();
+            addLiquidityBody.toAddress ??= TDK.Identity.Address;
             var body = JsonConvert.SerializeObject(addLiquidityBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
             });
