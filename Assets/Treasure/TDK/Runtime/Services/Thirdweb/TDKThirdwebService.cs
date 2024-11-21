@@ -176,7 +176,7 @@ namespace Treasure
             {
                 throw new UnityException("[TDKThirdwebService.WriteTransaction] No active wallet connected");
             }
-            var contract = await ThirdwebContract.Create(Client, body.address, TDK.Connect.ChainIdNumber);
+            var contract = await ThirdwebContract.Create(Client, body.address, TDK.Connect.ChainIdNumber, body.abi);
             var transaction = await ThirdwebContract.Prepare(ActiveWallet, contract, body.functionName, 0, parameters: body.args);
             SetTxOverrides(transaction,
                 value: body.txOverrides.value,
@@ -184,6 +184,7 @@ namespace Treasure
                 maxFeePerGas: body.txOverrides.maxFeePerGas,
                 maxPriorityFeePerGas: body.txOverrides.maxPriorityFeePerGas
             );
+            Debug.Log("before send...");
             var receipt = await ThirdwebTransaction.SendAndWaitForTransactionReceipt(transaction);
             return ParseThirdwebTransactionReceipt(receipt);
         }
@@ -241,11 +242,13 @@ namespace Treasure
             var status = receipt.Status.ToString();
             TDKLogger.LogDebug(receipt.ToString());
             TDKLogger.LogDebug(status);
-            if (status == "reverted")
+            const string revertedStatus = "0";
+            const string successStatus = "1";
+            if (status == revertedStatus)
             {
                 throw new UnityException($"[ParseThirdwebTransactionReceipt] Transaction reverted ({receipt.TransactionHash})");
             }
-            if (status != "success")
+            if (status != successStatus)
             {
                 throw new UnityException($"[ParseThirdwebTransactionReceipt] Transaction errored ({receipt.TransactionHash})");
             }
