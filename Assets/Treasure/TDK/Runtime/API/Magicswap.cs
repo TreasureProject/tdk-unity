@@ -178,7 +178,6 @@ namespace Treasure
         public string value;
 
         public WriteTransactionBody ToWriteTransactionBody() {
-            // TODO fall back to original string if BigInteger.Parse fails
             for (int i = 0; i < args.Length; i++) 
             {
                 if (args[i] is JArray jArray)
@@ -191,7 +190,11 @@ namespace Treasure
                         {
                             if (!subStringArg.StartsWith("0x"))
                             {
-                                subArray[j] = BigInteger.Parse(subStringArg);
+                                var successfullyConverted = BigInteger.TryParse(subStringArg, out BigInteger result);
+                                if (successfullyConverted)
+                                {
+                                    subArray[j] = result;
+                                }
                             }
                         }
                     }
@@ -200,7 +203,11 @@ namespace Treasure
                 {
                     if (!stringArg.StartsWith("0x"))
                     {
-                        args[i] = BigInteger.Parse(stringArg);
+                        var successfullyConverted = BigInteger.TryParse(stringArg, out BigInteger result);
+                        if (successfullyConverted)
+                        {
+                            args[i] = result;
+                        }
                     }
                 }
 
