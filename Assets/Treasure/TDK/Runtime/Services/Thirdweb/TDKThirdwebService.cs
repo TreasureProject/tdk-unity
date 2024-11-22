@@ -184,7 +184,6 @@ namespace Treasure
                 maxFeePerGas: body.txOverrides.maxFeePerGas,
                 maxPriorityFeePerGas: body.txOverrides.maxPriorityFeePerGas
             );
-            Debug.Log("before send...");
             var receipt = await ThirdwebTransaction.SendAndWaitForTransactionReceipt(transaction);
             return ParseThirdwebTransactionReceipt(receipt);
         }
@@ -240,8 +239,6 @@ namespace Treasure
         private Transaction ParseThirdwebTransactionReceipt(ThirdwebTransactionReceipt receipt)
         {
             var status = receipt.Status.ToString();
-            TDKLogger.LogDebug(receipt.ToString());
-            TDKLogger.LogDebug(status);
             const string revertedStatus = "0";
             const string successStatus = "1";
             if (status == revertedStatus)

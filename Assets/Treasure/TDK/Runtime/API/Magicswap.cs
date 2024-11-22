@@ -167,6 +167,7 @@ namespace Treasure
         public string amount1Min;
         public bool swapLeftover = true;
         public string backendWallet = null;
+        public string toAddress = null;
     }
 
     [Serializable]
@@ -186,11 +187,11 @@ namespace Treasure
                     args[i] = subArray;
                     for (int j = 0; j < subArray.Length; j++)
                     {
-                        if (subArray[i] is string subStringArg)
+                        if (subArray[j] is string subStringArg)
                         {
                             if (!subStringArg.StartsWith("0x"))
                             {
-                                subArray[i] = BigInteger.Parse(subStringArg);
+                                subArray[j] = BigInteger.Parse(subStringArg);
                             }
                         }
                     }
@@ -247,7 +248,6 @@ namespace Treasure
             if (await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber))
             {
                 var argsResponse = await Post("/magicswap/swap/args", body);
-                UnityEngine.Debug.Log(argsResponse);
                 var contractCallArgs = JsonConvert.DeserializeObject<ContractCallArgs>(argsResponse);
                 return await thirdwebService.WriteTransaction(contractCallArgs.ToWriteTransactionBody());
             }
@@ -278,6 +278,7 @@ namespace Treasure
 
         public async Task<Transaction> RemoveLiquidity(string poolId, RemoveLiquidityBody removeLiquidityBody) {
             removeLiquidityBody.backendWallet ??= TDK.AppConfig.GetBackendWallet();
+            removeLiquidityBody.toAddress ??= TDK.Identity.Address;
             var body = JsonConvert.SerializeObject(removeLiquidityBody, new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Ignore
             });

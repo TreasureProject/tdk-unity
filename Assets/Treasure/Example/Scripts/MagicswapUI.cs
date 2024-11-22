@@ -386,7 +386,6 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    // TODO make it work with erc20-erc20
     public async void OnRemoveLiquidityBtn()
     {
         if (magicswapPool == null)
@@ -397,44 +396,98 @@ public class MagicswapUI : MonoBehaviour
         var bodyJson = "";
         try
         {
-            var reserve0 = BigInteger.Parse(magicswapPool.token0.reserve);
-            var reserve1 = BigInteger.Parse(magicswapPool.token1.reserve);
+            var token0 = magicswapPool.token0;
+            var token1 = magicswapPool.token1;
             var totalSupply = BigInteger.Parse(magicswapPool.totalSupply);
+            var reserve0 = BigInteger.Parse(token0.reserve);
+            var reserve1 = BigInteger.Parse(token1.reserve);
 
-            var treasuresDesired = new BigInteger(1).AdjustDecimals(0, magicswapPool.token1.decimals);
-            // calculate LP amount to get the desired amount of treasures (1).
-            // LP amount could otherwise be inputted by the user.
-            var amountLPWei = BigInteger.DivRem(treasuresDesired * totalSupply, reserve1, out BigInteger reminder);
-            if (reminder > 0) amountLPWei += 1;
+            BigInteger amountLPWei;
+            MagicswapToken desiredNftToken = null;
+            if (token0.isNFT)
+            {
+                desiredNftToken = token0;
+            }
+            if (token1.isNFT)
+            {
+                // higher reserve = higher yield. in nft-nft, ensure lower yield token is used to
+                // calculate the lp amount to avoid the case where you get 0.9 nfts which it rounds to 0
+                var token0YieldsMore = reserve0 > reserve1; 
+                if (desiredNftToken == null || token0YieldsMore)
+                {
+                    desiredNftToken = token1;
+                }
+            }
+            if (desiredNftToken != null)
+            {
+                // calculate LP amount to get the desired amount of nfts (1 in this example).
+                var nftsDesired = new BigInteger(1).AdjustDecimals(0, desiredNftToken.decimals);
+                amountLPWei = BigInteger.DivRem(
+                    nftsDesired * totalSupply,
+                    BigInteger.Parse(desiredNftToken.reserve),
+                    out BigInteger reminder
+                );
+                if (reminder > 0) amountLPWei += 1;
+            }
+            else
+            {
+                // LP amount could otherwise be inputted by the user.
+                amountLPWei = BigInteger.Parse(Utils.ToWei("2.5"));
+            }
 
             var amount0 = amountLPWei * reserve0 / totalSupply;
-            var amount1 = amountLPWei * reserve1 / totalSupply; // should be 1 treasure from our LP calculation
+            var amount1 = amountLPWei * reserve1 / totalSupply;
 
-            // floor amount1 since token1 is nft
-            var amount1FlooredNoDecimals = amount1.AdjustDecimals(magicswapPool.token1.decimals, 0);
+            BigInteger amount0Min;
+            BigInteger amount1Min;
+            List<NFTInput> nfts0 = null;
+            List<NFTInput> nfts1 = null;
 
-            // use helper for amount0 since its ERC20
-            var amount0Min = TDK.Magicswap.GetAmountMin(amount0, 0.01);
-            // dont use helper for amount1 since its NFT, use floored value with decimals instead
-            var amount1Min = amount1FlooredNoDecimals.AdjustDecimals(0, magicswapPool.token1.decimals);
+            if (token0.isNFT)
+            {
+                var amount0FlooredNoDecimals = amount0.AdjustDecimals(token0.decimals, 0);
+                amount0Min = amount0FlooredNoDecimals.AdjustDecimals(0, token0.decimals);
+                nfts0 = new List<NFTInput>() {
+                    new() {
+                        id = token0.collectionTokenIds[0],
+                        quantity = (int) amount0FlooredNoDecimals,
+                    }
+                };
+            }
+            else
+            {
+                amount0Min = TDK.Magicswap.GetAmountMin(amount0, 0.01);
+            }
 
+            if (token1.isNFT)
+            {
+                var amount1FlooredNoDecimals = amount1.AdjustDecimals(token1.decimals, 0);
+                amount1Min = amount1FlooredNoDecimals.AdjustDecimals(0, token1.decimals);
+                nfts1 = new List<NFTInput>() {
+                    new() {
+                        id = token1.collectionTokenIds[0],
+                        quantity = (int) amount1FlooredNoDecimals,
+                    }
+                };
+            }
+            else
+            {
+                amount1Min = TDK.Magicswap.GetAmountMin(amount1, 0.01);
+            }
+            
             var removeLiquidityBody = new RemoveLiquidityBody
             {
                 amountLP = amountLPWei.ToString(),
                 amount0Min = amount0Min.ToString(),
                 amount1Min = amount1Min.ToString(),
-                nfts1 = new List<NFTInput>() {
-                    new() {
-                        id = magicswapPool.token1.collectionTokenIds[0],
-                        quantity = (int)amount1FlooredNoDecimals,
-                    }
-                }
+                nfts0 = nfts0,
+                nfts1 = nfts1,
             };
             bodyJson = JsonConvert.SerializeObject(removeLiquidityBody, Formatting.Indented, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
-            bodyJson += $"\nRequired LP for 1 treasure: {Utils.ToEth(amountLPWei.ToString())}";
+            bodyJson += $"\nRequired LP: {Utils.ToEth(amountLPWei.ToString())}";
             InfoText.text = $"Removing liquidity...\nRequest body: {bodyJson}";
             var transaction = await TDK.Magicswap.RemoveLiquidity(magicswapPool.id, removeLiquidityBody);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
