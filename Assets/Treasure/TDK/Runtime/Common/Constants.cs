@@ -63,7 +63,6 @@ namespace Treasure
             },
             {
                 ChainId.TreasureTopaz, new Dictionary<Contract, string> {
-                    { Contract.Magic, "0x095ded714d42cbd5fb2e84a0ffbfb140e38dc9e1" },
                     { Contract.ManagedAccountFactory, null }, // not present in topaz
                     { Contract.MagicswapV2Router, "0xad781ed13b5966e7c620b896b6340abb4dd2ca86" },
                 }
