@@ -532,11 +532,16 @@ public class MagicswapUI : MonoBehaviour
 
             RefreshMetadataButton.interactable = false;
             
+            // ---- TOKEN A ----
             var text = $"<b>- {UITestValues.tokenNameA} (A) -</b>\n";
             if (UITestValues.isNftA)
             {
                 var isApproved = await TDK.Magicswap.IsERC1155Approved(UITestValues.nftForApprovalA, TDK.Identity.Address);
                 text += $"Approved: {isApproved}\n";
+                if (magicswapPool != null)
+                {
+                    text += await GetERC1155BalanceText(UITestValues.nftForApprovalA, magicswapPool.token0);
+                }
             }
             else if (UITestValues.isEthA)
             {
@@ -550,11 +555,17 @@ public class MagicswapUI : MonoBehaviour
                 text += $"Balance: {balance}\n";
                 text += $"Allowance: {Utils.ToEth(allowance.ToString())}\n";
             }
+
+            // ---- TOKEN B ----
             text += $"<b>- {UITestValues.tokenNameB} (B) -</b>\n";
             if (UITestValues.isNftB)
             {
                 var isApproved = await TDK.Magicswap.IsERC1155Approved(UITestValues.nftForApprovalB, TDK.Identity.Address);
                 text += $"Approved: {isApproved}\n";
+                if (magicswapPool != null)
+                {
+                    text += await GetERC1155BalanceText(UITestValues.nftForApprovalB, magicswapPool.token1);
+                }
             }
             else if (UITestValues.isEthB)
             {
@@ -568,28 +579,8 @@ public class MagicswapUI : MonoBehaviour
                 text += $"Balance: {balance}\n";
                 text += $"Allowance: {Utils.ToEth(allowance.ToString())}\n";
             }
-
-            // TODO show nfts regardless of route direction
-            if (magicswapRoute != null && magicswapRoute.tokenOut.isNFT)
-            {
-                var nftsContractB = await TDK.Common.GetContract(UITestValues.nftForApprovalB);
-                var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
-                var nfts = new List<(string id, BigInteger balance)>();
-                foreach (var tokenId in tokenIds)
-                {
-                    var nftBalance = await nftsContractB.ERC1155_BalanceOf(TDK.Identity.Address, BigInteger.Parse(tokenId));
-                    if (nftBalance > 0)
-                    {
-                        nfts.Add((tokenId, nftBalance));
-                    }
-                }
-                if (nfts.Count > 0)
-                {
-                    text += $"<b>Owned ({UITestValues.tokenNameB}):</b>\n";
-                    text += string.Join("\n", nfts.ConvertAll((t) => $"#{t.id}: {t.balance}")) + "\n";
-                }
-            }
-
+            
+            // ---- POOL ----
             if (magicswapPool != null)
             {
                 var lpBalanceTask = TDK.Common.GetFormattedERC20Balance(magicswapPool.id, TDK.Identity.Address, 18);
@@ -611,6 +602,30 @@ public class MagicswapUI : MonoBehaviour
         {
             RefreshMetadataButton.interactable = true;
         }
-
     }
+
+    #region code DRY helpers
+
+    private static async Task<string> GetERC1155BalanceText(string contractAddress, MagicswapToken token)
+    {
+        var text = "";
+        var nftsContract = await TDK.Common.GetContract(contractAddress);
+        var tokenIds = token.collectionTokenIds;
+        var nfts = new List<(string id, BigInteger balance)>();
+        foreach (var tokenId in tokenIds)
+        {
+            var nftBalance = await nftsContract.ERC1155_BalanceOf(TDK.Identity.Address, BigInteger.Parse(tokenId));
+            if (nftBalance > 0)
+            {
+                nfts.Add((tokenId, nftBalance));
+            }
+        }
+        if (nfts.Count > 0)
+        {
+            text += string.Join("\n", nfts.ConvertAll((t) => $"#{t.id} owned: {t.balance}")) + "\n";
+        }
+        return text;
+    }
+
+    #endregion
 }
