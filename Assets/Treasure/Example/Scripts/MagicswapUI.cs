@@ -311,63 +311,64 @@ public class MagicswapUI : MonoBehaviour
         var bodyJson = "";
         try
         {
-            // for tokenA we should know the amount we want to add (amountA = 1 in this case)
-            // for tokenB we can calculate amountB based on amountA and the pool reserves
-            var tokenA = magicswapPool.token1;
-            var tokenB = magicswapPool.token0;
-            var amountA = new BigInteger(1).AdjustDecimals(0, tokenA.decimals); // TODO make this configurable?
-            var reserveA = BigInteger.Parse(tokenA.reserve);
-            var reserveB = BigInteger.Parse(tokenB.reserve);
-            var amountB = TDK.Magicswap.GetQuote(
-                amountA,
-                reserveA,
-                reserveB
+            var token0 = magicswapPool.token0;
+            var token1 = magicswapPool.token1;
+            var reserve0 = BigInteger.Parse(token0.reserve);
+            var reserve1 = BigInteger.Parse(token1.reserve);
+            
+            // for one token we should know the amount we want to add (amount1 = 1 in this case)
+            var amount1 = new BigInteger(1).AdjustDecimals(0, token1.decimals);
+            // for the other token we calculate it based on the previous amount and the pool reserves
+            var amount0 = TDK.Magicswap.GetQuote(
+                amount1,
+                reserve1,
+                reserve0
             );
 
-            string amount0 = null;
-            string amount0Min = null;
-            List<NFTInput> nfts0 = null;
-            if (tokenB.isNFT)
+            string amount0Body = null;
+            string amount0MinBody = null;
+            List<NFTInput> nfts0Body = null;
+            if (token0.isNFT)
             {
-                nfts0 = new List<NFTInput>() {
+                nfts0Body = new List<NFTInput>() {
                     new() {
-                        id = tokenB.collectionTokenIds[0],
-                        quantity = (int) amountB.AdjustDecimals(tokenB.decimals, 0),
+                        id = token0.collectionTokenIds[0],
+                        quantity = (int) amount0.AdjustDecimals(token0.decimals, 0),
                     }
                 };
             }
             else
             {
-                amount0 = amountB.ToString();
-                amount0Min = TDK.Magicswap.GetAmountMin(amountB, 0.01).ToString();
+                amount0Body = amount0.ToString();
+                amount0MinBody = TDK.Magicswap.GetAmountMin(amount0, 0.01).ToString();
             }
             
-            string amount1 = null;
-            string amount1Min = null;
-            List<NFTInput> nfts1 = null;
-            if (tokenA.isNFT)
+            string amount1Body = null;
+            string amount1MinBody = null;
+            List<NFTInput> nfts1Body = null;
+            if (token1.isNFT)
             {
-                nfts1 = new List<NFTInput>() {
+                nfts1Body = new List<NFTInput>() {
                     new() {
-                        id = tokenA.collectionTokenIds[0],
-                        quantity = (int) amountB.AdjustDecimals(tokenB.decimals, 0),
+                        id = token1.collectionTokenIds[0],
+                        quantity = (int) amount1.AdjustDecimals(token1.decimals, 0),
                     }
                 };
             }
             else
             {
-                amount1 = amountA.ToString();
-                amount1Min = TDK.Magicswap.GetAmountMin(amountA, 0.01).ToString();
+                amount1Body = amount1.ToString();
+                amount1MinBody = TDK.Magicswap.GetAmountMin(amount1, 0.01).ToString();
             }
 
             var addLiquidityBody = new AddLiquidityBody
             {
-                amount0 = amount0,
-                amount0Min = amount0Min,
-                amount1 = amount1,
-                amount1Min = amount1Min,
-                nfts0 = nfts0,
-                nfts1 = nfts1,
+                amount0 = amount0Body,
+                amount0Min = amount0MinBody,
+                amount1 = amount1Body,
+                amount1Min = amount1MinBody,
+                nfts0 = nfts0Body,
+                nfts1 = nfts1Body,
             };
             bodyJson = JsonConvert.SerializeObject(addLiquidityBody, Formatting.Indented, new JsonSerializerSettings
             {
