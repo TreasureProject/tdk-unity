@@ -77,9 +77,9 @@ namespace Treasure
             var transaction = await TDK.API.WriteTransaction(
                 address: address,
                 functionName: "approve",
-                args: new string[] { operatorAddress, amount.ToString() }
+                args: new object[] { operatorAddress, amount }
             );
-            return await WaitForTransaction(transaction.queueId);
+            return transaction;
         }
 
         public async Task<Transaction> ApproveERC1155(string address, string operatorAddress)
@@ -89,7 +89,7 @@ namespace Treasure
                 functionName: "setApprovalForAll",
                 args: new string[] { operatorAddress, "true" }
             );
-            return await WaitForTransaction(transaction.queueId);
+            return transaction;
         }
 
         public async Task<Transaction> ApproveERC721(string address, string operatorAddress)
@@ -99,7 +99,23 @@ namespace Treasure
                 functionName: "setApprovalForAll",
                 args: new string[] { operatorAddress, "true" }
             );
-            return await WaitForTransaction(transaction.queueId);
+            return transaction;
+        }
+
+        public async Task<BigInteger> GetNativeBalance()
+        {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            if (await thirdwebService.IsWalletConnected())
+            {
+                return await thirdwebService.ActiveWallet.GetBalance(TDK.Connect.ChainIdNumber);
+            }
+            return 0;
+        }
+
+        public async Task<string> GetFormattedNativeBalance()
+        {
+            var balance = await GetNativeBalance();
+            return Utils.FormatERC20(balance.ToString(), 4, 18);
         }
 
         public async Task<BigInteger> GetERC20Balance(string tokenAddress, string address)
