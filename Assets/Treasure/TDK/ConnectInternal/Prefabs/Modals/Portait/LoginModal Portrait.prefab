@@ -404,7 +404,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modalRect: {fileID: 6848740655419140236}
   animeTime: 0.3
-  emailLoginButtons: {fileID: 5198618471701588360}
   loginGoogleButton: {fileID: 2550542841664581002}
   loginAppleButton: {fileID: 1523236729675194036}
   loginDiscordButton: {fileID: 3250561422971331914}
@@ -416,8 +415,6 @@ MonoBehaviour:
   keyBoardSpace: {fileID: 4895687020408113594}
   keepMeLoggedInToggle: {fileID: 6673431290987264435}
   connectButton: {fileID: 2833442547538300771}
-  connectWalletButton: {fileID: 2163981100647043125}
-  connectEmailButton: {fileID: 0}
 --- !u!1 &1992328998416660445
 GameObject:
   m_ObjectHideFlags: 0
@@ -1863,7 +1860,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Or
+  m_text: or
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c4ea218dd51bc52448c157e5d9e720e1, type: 2}
   m_sharedMaterial: {fileID: -6057154001904965228, guid: c4ea218dd51bc52448c157e5d9e720e1, type: 2}
