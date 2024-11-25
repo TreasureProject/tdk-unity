@@ -13,20 +13,20 @@ namespace Treasure
         [SerializeField] private GameObject appleLogin;
         [SerializeField] private GameObject discordLogin;
         [SerializeField] private GameObject xLogin;
+        [SerializeField] private GameObject walletLogin;
         [Space]
         [SerializeField] private GameObject loginEmailHolder;
         [SerializeField] private GameObject orSeparatorObject;
-        [SerializeField] private GameObject loginWalletHolder;
         [SerializeField] private GameObject landscapeRightSideHolder;
         [Header("Connect with wallet")]
         [SerializeField] private GameObject emailLoginButtons;
-        [SerializeField] private GameObject walletLoginButtons;
 
         [Header("Inputs")]
         [SerializeField] private Button loginGoogleButton;
         [SerializeField] private Button loginAppleButton;
         [SerializeField] private Button loginDiscordButton;
         [SerializeField] private Button loginXButton;
+        [SerializeField] private Button loginWalletButton;
         [SerializeField] private TMP_Text socialsErrorText;
         [Space]
         [SerializeField] private TMP_InputField emailInputField;
@@ -52,7 +52,6 @@ namespace Treasure
                 connectWalletButton.onClick.AddListener(() =>
                 {
                     emailLoginButtons.SetActive(false);
-                    walletLoginButtons.SetActive(true);
 
                     TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_BTN, new System.Collections.Generic.Dictionary<string, object>()
                     {
@@ -65,7 +64,6 @@ namespace Treasure
                 connectEmailButton.onClick.AddListener(() =>
                 {
                     emailLoginButtons.SetActive(true);
-                    walletLoginButtons.SetActive(false);
 
                     TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_BTN, new System.Collections.Generic.Dictionary<string, object>()
                     {
@@ -78,6 +76,7 @@ namespace Treasure
             loginAppleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Apple); });
             loginDiscordButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Discord); });
             loginXButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.X); });
+            loginWalletButton.onClick.AddListener(() => { ConnectSiwe(); });
         }
 
         private void OnEnable()
@@ -125,8 +124,8 @@ namespace Treasure
             appleLogin.SetActive(true);
             discordLogin.SetActive(true);
             xLogin.SetActive(true);
+            walletLogin.SetActive(true);
             loginEmailHolder.SetActive(true);
-            loginWalletHolder.SetActive(false);
 
             if (landscapeRightSideHolder != null)
             {
@@ -178,6 +177,39 @@ namespace Treasure
             {
                 errorText.text = message;
                 errorText.gameObject.SetActive(true);
+            }
+        }
+
+        private async void ConnectSiwe()
+        {
+            if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
+            {
+                errorText.text = "Please make sure you have active Internet connection.";
+                errorText.gameObject.SetActive(true);
+                return;
+            }
+
+            var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal();
+
+            try
+            {
+                transitionModal.SetCancelAction(() => TDKConnectUIManager.Instance.ShowLoginModal());
+                await TDK.Connect.Disconnect(); // clean up any previous connection attempts
+                await TDK.Connect.ConnectSIWE();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message != "New connection attempt has been made")
+                {
+                    TDKLogger.LogException($"[LoginModal:ConnectSiwe] Error connecting", ex);
+                    if (transitionModal.gameObject.activeInHierarchy) // if transition modal is still open
+                    {
+                        // close TransitionModal, go back to login modal and show cause of error
+                        TDKConnectUIManager.Instance.ShowLoginModal();
+                        socialsErrorText.text = ex.Message;
+                        socialsErrorText.gameObject.SetActive(true);
+                    }
+                }
             }
         }
 

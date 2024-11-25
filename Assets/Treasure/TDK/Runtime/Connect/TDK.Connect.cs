@@ -168,6 +168,12 @@ namespace Treasure
             await ConnectWallet(ecosystemWalletOptions);
         }
 
+        public async Task ConnectSIWE()
+        {
+            var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: AuthProvider.Siwe);
+            await ConnectWallet(ecosystemWalletOptions);
+        }
+
         public async Task Reconnect(string email)
         {
             TDKLogger.LogDebug($"[TDK.Connect:Reconnect] Reconnecting email ({email})...");

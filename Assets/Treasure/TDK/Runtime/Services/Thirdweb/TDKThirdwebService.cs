@@ -97,6 +97,10 @@ namespace Treasure
                         var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(ecosystemWalletOptions.Email);
                         _ = await otpModal.LoginWithOtp(ecosystemWallet);
                     }
+                    else if (ecosystemWalletOptions.AuthProvider == AuthProvider.Siwe)
+                    {
+                        _ = await ecosystemWallet.LoginWithSiwe(chainId: chainId);
+                    }
                     else
                     {
                         _ = await ecosystemWallet.LoginWithOauth(
