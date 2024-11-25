@@ -8,19 +8,6 @@ namespace Treasure
 {
     public class LoginModal : ModalBase
     {
-        [SerializeField] private GameObject socialLoginHolder;
-        [SerializeField] private GameObject googleLogin;
-        [SerializeField] private GameObject appleLogin;
-        [SerializeField] private GameObject discordLogin;
-        [SerializeField] private GameObject xLogin;
-        [SerializeField] private GameObject walletLogin;
-        [Space]
-        [SerializeField] private GameObject loginEmailHolder;
-        [SerializeField] private GameObject orSeparatorObject;
-        [SerializeField] private GameObject landscapeRightSideHolder;
-        [Header("Connect with wallet")]
-        [SerializeField] private GameObject emailLoginButtons;
-
         [Header("Inputs")]
         [SerializeField] private Button loginGoogleButton;
         [SerializeField] private Button loginAppleButton;
@@ -35,53 +22,24 @@ namespace Treasure
         [SerializeField] private Toggle keepMeLoggedInToggle;
         [Space]
         [SerializeField] private Button connectButton;
-        [SerializeField] private Button connectWalletButton;
-        [SerializeField] private Button connectEmailButton;
 
         private void Start()
         {
-            SetupUI();
-
             emailInputField.onSelect.AddListener(value => keyBoardSpace.gameObject.SetActive(true));
             emailInputField.onDeselect.AddListener(value => keyBoardSpace.gameObject.SetActive(false));
 
             connectButton.onClick.AddListener(() => OnClickConnectwithEmail());
 
-            if (connectWalletButton != null)
-            {
-                connectWalletButton.onClick.AddListener(() =>
-                {
-                    emailLoginButtons.SetActive(false);
-
-                    TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_BTN, new System.Collections.Generic.Dictionary<string, object>()
-                    {
-                        { AnalyticsConstants.PROP_TYPE, "wallet" }
-                    });
-                });
-            }
-            if (connectEmailButton != null)
-            {
-                connectEmailButton.onClick.AddListener(() =>
-                {
-                    emailLoginButtons.SetActive(true);
-
-                    TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_BTN, new System.Collections.Generic.Dictionary<string, object>()
-                    {
-                        { AnalyticsConstants.PROP_TYPE, "email" }
-                    });
-                });
-            }
-
             loginGoogleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Google); });
             loginAppleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Apple); });
             loginDiscordButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Discord); });
             loginXButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.X); });
+
             loginWalletButton.onClick.AddListener(() => { ConnectSiwe(); });
         }
 
         private void OnEnable()
         {
-            SetupUI();
             connectButton.GetComponent<LoadingButton>().SetLoading(false);
         }
 
@@ -114,27 +72,6 @@ namespace Treasure
                         socialsErrorText.gameObject.SetActive(true);
                     }
                 }
-            }
-        }
-
-        private void SetupUI()
-        {
-            socialLoginHolder.SetActive(true);
-            googleLogin.SetActive(true);
-            appleLogin.SetActive(true);
-            discordLogin.SetActive(true);
-            xLogin.SetActive(true);
-            walletLogin.SetActive(true);
-            loginEmailHolder.SetActive(true);
-
-            if (landscapeRightSideHolder != null)
-            {
-                landscapeRightSideHolder.SetActive(true);
-                orSeparatorObject.SetActive(true);
-            }
-            else
-            {
-                orSeparatorObject.SetActive(false);
             }
         }
 

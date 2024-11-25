@@ -316,10 +316,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 973707841316252887}
-  - {fileID: 410767483982038271}
-  - {fileID: 1434709622857845508}
-  - {fileID: 3324441976173838679}
   - {fileID: 6498205075984798377}
+  - {fileID: 2396502251167881770}
+  - {fileID: 410767483982038271}
+  - {fileID: 3324441976173838679}
+  - {fileID: 1434709622857845508}
   m_Father: {fileID: 4281580372477015370}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -496,7 +497,7 @@ RectTransform:
   - {fileID: 2369120173807479119}
   - {fileID: 7683311967831880955}
   - {fileID: 3871509984409300064}
-  m_Father: {fileID: 6498205075984798377}
+  m_Father: {fileID: 8187741287968447434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -693,15 +694,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modalRect: {fileID: 3847678051868063840}
   animeTime: 0.3
-  socialLoginHolder: {fileID: 4417870823505645840}
-  googleLogin: {fileID: 1575454034695727671}
-  appleLogin: {fileID: 7075941236449079899}
-  discordLogin: {fileID: 6744354428734700962}
-  xLogin: {fileID: 7982996651723927478}
-  walletLogin: {fileID: 1642297629593141092}
-  loginEmailHolder: {fileID: 7040809040414209068}
-  orSeparatorObject: {fileID: 3509074055764820260}
-  landscapeRightSideHolder: {fileID: 2704254460827720437}
   emailLoginButtons: {fileID: 6779728346332041505}
   loginGoogleButton: {fileID: 1507139352171644247}
   loginAppleButton: {fileID: 7135257932423191867}
@@ -1127,7 +1119,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 185, y: -168}
+  m_AnchoredPosition: {x: 185, y: -348}
   m_SizeDelta: {x: 322, y: 20}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &5332171044201215846
@@ -1465,7 +1457,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2396502251167881770}
   - {fileID: 9107000921323648632}
   m_Father: {fileID: 8187741287968447434}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
