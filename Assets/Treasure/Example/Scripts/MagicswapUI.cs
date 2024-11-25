@@ -23,6 +23,62 @@ public class MagicswapUI : MonoBehaviour
 
     MagicswapRoute magicswapRoute;
     MagicswapPool magicswapPool;
+    bool isMagicswapRouteInverted;
+
+    class MagicswapUITestValues {
+        public string poolId;
+        public string tokenNameA;
+        public string tokenNameB;
+        public string tokenIdA;
+        public string tokenIdB;
+        public bool isNftA;
+        public bool isNftB;
+        public bool isEthA = false;
+        public bool isEthB = false;
+        public string nftForApprovalA;
+        public string nftForApprovalB;
+        public string amount;
+        public bool isExactOutAToB;
+        public bool isExactOutBToA;
+    }
+
+    Dictionary<ChainId, MagicswapUITestValues> uiTestValuesMap = new Dictionary<ChainId, MagicswapUITestValues>
+    {
+        {
+            ChainId.ArbitrumSepolia, new MagicswapUITestValues
+            {
+                poolId = "0x0626699bc82858c16ae557b2eaad03a58cfcc8bd", // magic to treasures pool
+                tokenNameA = "Magic",
+                tokenNameB = "Treasures",
+                tokenIdA = "0x55d0cf68a1afe0932aff6f36c87efa703508191c", // magic
+                tokenIdB = "0xd30e91d5cd201d967c908d9e74f6cea9efe35e06", // from pool fetch
+                isNftA = false,
+                isNftB = true,
+                amount = "1",
+                isExactOutAToB = true, // `amount` is the amount out (output = 1 nft)
+                isExactOutBToA = false, // `amount` is the amount in (input = 1 nft)
+                nftForApprovalB = "0xfe592736200d7545981397ca7a8e896ac0c166d4", // treasures
+            }
+        },
+        {
+            ChainId.TreasureTopaz, new MagicswapUITestValues
+            {
+                poolId = "0x9c61210b8c8ea450bd3fdbd7a7c1208206d18b7b", // usdc to wmagic pool
+                tokenNameA = "Usdc",
+                tokenNameB = "Magic",
+                tokenIdA = "0x99b9ed17bb37768bb1a3cb6d91b15834eb7c2185", // usdc
+                tokenIdB = "0x095ded714d42cbd5fb2e84a0ffbfb140e38dc9e1", // wmagic
+                isNftA = false,
+                isNftB = false,
+                isEthB = true,
+                amount = "5",
+                isExactOutAToB = false, // `amount` is the amount out
+                isExactOutBToA = false, // `amount` is the amount out
+            }
+        }
+    };
+
+    MagicswapUITestValues UITestValues => uiTestValuesMap[TDK.Connect.ChainId];
 
     void Start()
     {
@@ -34,8 +90,8 @@ public class MagicswapUI : MonoBehaviour
         InfoText.text = "Fetching pool details...";
         try
         {
-            var magicToTreasuresPoolId = "0x0626699bc82858c16ae557b2eaad03a58cfcc8bd";
-            var poolData = await TDK.Magicswap.GetPoolById(magicToTreasuresPoolId);
+            var poolId = UITestValues.poolId;
+            var poolData = await TDK.Magicswap.GetPoolById(poolId);
             InfoText.text = JsonConvert.SerializeObject(poolData, Formatting.Indented);
             magicswapPool = poolData;
         }
@@ -48,18 +104,28 @@ public class MagicswapUI : MonoBehaviour
 
     public async void OnGetRouteBtn()
     {
+        await GetRoute(invertRoute: false);
+    }
+
+    public async void OnGetInvertedRouteBtn()
+    {
+        await GetRoute(invertRoute: true);
+    }
+
+    private async Task GetRoute(bool invertRoute)
+    {
         try
         {
             InfoText.text = "Fetching route...";
-            var magicAddress = TDK.Common.GetContractAddress(Contract.Magic);
             var routeData = await TDK.Magicswap.GetRoute(
-                tokenInId: magicAddress,
-                tokenOutId: "0xd30e91d5cd201d967c908d9e74f6cea9efe35e06", // from pool fetch
-                amount: "1",
-                isExactOut: true
+                tokenInId: invertRoute ? UITestValues.tokenIdB : UITestValues.tokenIdA,
+                tokenOutId: invertRoute ? UITestValues.tokenIdA : UITestValues.tokenIdB,
+                amount: UITestValues.amount,
+                isExactOut: invertRoute ? UITestValues.isExactOutBToA : UITestValues.isExactOutAToB
             );
             InfoText.text = JsonConvert.SerializeObject(routeData, Formatting.Indented);
             magicswapRoute = routeData;
+            isMagicswapRouteInverted = invertRoute;
         }
         catch (Exception ex)
         {
@@ -83,15 +149,44 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void OnApproveMagicBtn()
+    public async void OnApproveTokenABtn() {
+        if (UITestValues.isNftA)
+        {
+            await OnApproveERC1155(UITestValues.nftForApprovalA, UITestValues.tokenNameA);
+        }
+        else if (UITestValues.isEthA)
+        {
+            InfoText.text = "Approval of native token not needed";
+        }
+        else
+        {
+            await OnApproveERC20(UITestValues.tokenIdA, UITestValues.tokenNameA);
+        }
+    }
+
+    public async void OnApproveTokenBBtn() {
+        if (UITestValues.isNftB)
+        {
+            await OnApproveERC1155(UITestValues.nftForApprovalB, UITestValues.tokenNameB);
+        }
+        else if (UITestValues.isEthB)
+        {
+            InfoText.text = "Approval of native token not needed";
+        }
+        else
+        {
+            await OnApproveERC20(UITestValues.tokenIdB, UITestValues.tokenNameB);
+        }
+    }
+
+    public async Task OnApproveERC20(string tokenId, string tokenName)
     {
-        var amount = BigInteger.Parse(Utils.ToWei("1000")); // 1000 MAGIC
+        var amount = BigInteger.Parse(Utils.ToWei("1000")); // approve 1000 units
         var magicswapRouterAddress = TDK.Common.GetContractAddress(Contract.MagicswapV2Router);
         try
         {
-            InfoText.text = $"Approving {Utils.ToEth(amount.ToString())} MAGIC for Magicswap...";
-            var magicAddress = TDK.Common.GetContractAddress(Contract.Magic);
-            var transaction = await TDK.Common.ApproveERC20(magicAddress, magicswapRouterAddress, amount);
+            InfoText.text = $"Approving {Utils.ToEth(amount.ToString())} {tokenName} for Magicswap...";
+            var transaction = await TDK.Common.ApproveERC20(tokenId, magicswapRouterAddress, amount);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
             InfoText.text = $"Response: {responseJson}";
             RefreshMetadata();
@@ -103,13 +198,13 @@ public class MagicswapUI : MonoBehaviour
         }
     }
 
-    public async void OnApproveTreasuresBtn()
+    public async Task OnApproveERC1155(string tokenId, string tokenName)
     {
         var magicswapRouterAddress = TDK.Common.GetContractAddress(Contract.MagicswapV2Router);
         try
         {
-            InfoText.text = $"Approving Treasures for Magicswap...";
-            var transaction = await TDK.Common.ApproveERC1155("0xfe592736200d7545981397ca7a8e896ac0c166d4", magicswapRouterAddress);
+            InfoText.text = $"Approving {tokenName} for Magicswap...";
+            var transaction = await TDK.Common.ApproveERC1155(tokenId, magicswapRouterAddress);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
             InfoText.text = $"Response: {responseJson}";
             RefreshMetadata();
@@ -128,12 +223,17 @@ public class MagicswapUI : MonoBehaviour
             InfoText.text = "Must get pool details before approving LP!";
             return;
         }
-        var callTargets = TDK.AppConfig.GetCallTargets();
-        if (!callTargets.Contains(magicswapPool.id))
+        var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+        var usingZkSyncChain = await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber);
+        if (!usingZkSyncChain)
         {
-            InfoText.text = "`callTargets` in TDKConfig must include the pool id!";
-            InfoText.text += "\nPool id: " + magicswapPool.id;
-            return;
+            var callTargets = TDK.AppConfig.GetCallTargets();
+            if (!callTargets.Contains(magicswapPool.id))
+            {
+                InfoText.text = "`callTargets` in TDKConfig must include the pool id!";
+                InfoText.text += "\nPool id: " + magicswapPool.id;
+                return;
+            }
         }
         var amount = BigInteger.Parse(Utils.ToWei("20"));
         var magicswapRouterAddress = TDK.Common.GetContractAddress(Contract.MagicswapV2Router);
@@ -167,15 +267,22 @@ public class MagicswapUI : MonoBehaviour
             {
                 tokenInId = magicswapRoute.tokenIn.id,
                 tokenOutId = magicswapRoute.tokenOut.id,
-                amountIn = magicswapRoute.amountIn,
-                nftsOut = new List<NFTInput> {
+                amountIn = magicswapRoute.tokenIn.isNFT ? null : magicswapRoute.amountIn,
+                amountOut = magicswapRoute.tokenOut.isNFT ? null : magicswapRoute.amountOut,
+                nftsIn = !magicswapRoute.tokenIn.isNFT ? null : new List<NFTInput> {
+                    new() {
+                        id = magicswapRoute.tokenIn.collectionTokenIds[0],
+                        quantity = (int) BigInteger.Parse(magicswapRoute.amountIn).AdjustDecimals(18, 0)
+                    }
+                },
+                nftsOut = !magicswapRoute.tokenOut.isNFT ? null : new List<NFTInput> {
                     new() {
                         id = magicswapRoute.tokenOut.collectionTokenIds[0],
-                        quantity = 1,
+                        quantity = (int) BigInteger.Parse(magicswapRoute.amountOut).AdjustDecimals(18, 0)
                     }
                 },
                 path = magicswapRoute.path,
-                isExactOut = true,
+                isExactOut = isMagicswapRouteInverted ? UITestValues.isExactOutBToA : UITestValues.isExactOutAToB,
             };
             bodyJson = JsonConvert.SerializeObject(swapBody, Formatting.Indented, new JsonSerializerSettings
             {
@@ -204,29 +311,64 @@ public class MagicswapUI : MonoBehaviour
         var bodyJson = "";
         try
         {
-            // for tokenA we should know the amount we want to add (amountA = 1 in this case)
-            // for tokenB we can calculate amountB based on amountA and the pool reserves
-            var tokenA = magicswapPool.token1;
-            var tokenB = magicswapPool.token0;
-            var amountA = new BigInteger(1);
-            var reserveA = BigInteger.Parse(tokenA.reserve);
-            var reserveB = BigInteger.Parse(tokenB.reserve);
-            var amountB = TDK.Magicswap.GetQuote(
-                amountA.AdjustDecimals(0, tokenA.decimals),
-                reserveA,
-                reserveB
+            var token0 = magicswapPool.token0;
+            var token1 = magicswapPool.token1;
+            var reserve0 = BigInteger.Parse(token0.reserve);
+            var reserve1 = BigInteger.Parse(token1.reserve);
+            
+            // for one token we should know the amount we want to add (amount1 = 1 in this case)
+            var amount1 = new BigInteger(1).AdjustDecimals(0, token1.decimals);
+            // for the other token we calculate it based on the previous amount and the pool reserves
+            var amount0 = TDK.Magicswap.GetQuote(
+                amount1,
+                reserve1,
+                reserve0
             );
+
+            string amount0Body = null;
+            string amount0MinBody = null;
+            List<NFTInput> nfts0Body = null;
+            if (token0.isNFT)
+            {
+                nfts0Body = new List<NFTInput>() {
+                    new() {
+                        id = token0.collectionTokenIds[0],
+                        quantity = (int) amount0.AdjustDecimals(token0.decimals, 0),
+                    }
+                };
+            }
+            else
+            {
+                amount0Body = amount0.ToString();
+                amount0MinBody = TDK.Magicswap.GetAmountMin(amount0, 0.01).ToString();
+            }
+            
+            string amount1Body = null;
+            string amount1MinBody = null;
+            List<NFTInput> nfts1Body = null;
+            if (token1.isNFT)
+            {
+                nfts1Body = new List<NFTInput>() {
+                    new() {
+                        id = token1.collectionTokenIds[0],
+                        quantity = (int) amount1.AdjustDecimals(token1.decimals, 0),
+                    }
+                };
+            }
+            else
+            {
+                amount1Body = amount1.ToString();
+                amount1MinBody = TDK.Magicswap.GetAmountMin(amount1, 0.01).ToString();
+            }
 
             var addLiquidityBody = new AddLiquidityBody
             {
-                amount0 = amountB.ToString(),
-                amount0Min = TDK.Magicswap.GetAmountMin(amountB, 0.01).ToString(),
-                nfts1 = new List<NFTInput>() {
-                    new() {
-                        id = tokenA.collectionTokenIds[0],
-                        quantity = (int)amountA,
-                    }
-                }
+                amount0 = amount0Body,
+                amount0Min = amount0MinBody,
+                amount1 = amount1Body,
+                amount1Min = amount1MinBody,
+                nfts0 = nfts0Body,
+                nfts1 = nfts1Body,
             };
             bodyJson = JsonConvert.SerializeObject(addLiquidityBody, Formatting.Indented, new JsonSerializerSettings
             {
@@ -255,44 +397,98 @@ public class MagicswapUI : MonoBehaviour
         var bodyJson = "";
         try
         {
-            var reserve0 = BigInteger.Parse(magicswapPool.token0.reserve);
-            var reserve1 = BigInteger.Parse(magicswapPool.token1.reserve);
+            var token0 = magicswapPool.token0;
+            var token1 = magicswapPool.token1;
             var totalSupply = BigInteger.Parse(magicswapPool.totalSupply);
+            var reserve0 = BigInteger.Parse(token0.reserve);
+            var reserve1 = BigInteger.Parse(token1.reserve);
 
-            var treasuresDesired = new BigInteger(1).AdjustDecimals(0, magicswapPool.token1.decimals);
-            // calculate LP amount to get the desired amount of treasures (1).
-            // LP amount could otherwise be inputted by the user.
-            var amountLPWei = BigInteger.DivRem(treasuresDesired * totalSupply, reserve1, out BigInteger reminder);
-            if (reminder > 0) amountLPWei += 1;
+            BigInteger amountLPWei;
+            MagicswapToken desiredNftToken = null;
+            if (token0.isNFT)
+            {
+                desiredNftToken = token0;
+            }
+            if (token1.isNFT)
+            {
+                // higher reserve = higher yield. in nft-nft, ensure lower yield token is used to
+                // calculate the lp amount to avoid the case where you get 0.9 nfts which it rounds to 0
+                var token0YieldsMore = reserve0 > reserve1; 
+                if (desiredNftToken == null || token0YieldsMore)
+                {
+                    desiredNftToken = token1;
+                }
+            }
+            if (desiredNftToken != null)
+            {
+                // calculate LP amount to get the desired amount of nfts (1 in this example).
+                var nftsDesired = new BigInteger(1).AdjustDecimals(0, desiredNftToken.decimals);
+                amountLPWei = BigInteger.DivRem(
+                    nftsDesired * totalSupply,
+                    BigInteger.Parse(desiredNftToken.reserve),
+                    out BigInteger reminder
+                );
+                if (reminder > 0) amountLPWei += 1;
+            }
+            else
+            {
+                // LP amount could otherwise be inputted by the user.
+                amountLPWei = BigInteger.Parse(Utils.ToWei("2.5"));
+            }
 
             var amount0 = amountLPWei * reserve0 / totalSupply;
-            var amount1 = amountLPWei * reserve1 / totalSupply; // should be 1 treasure from our LP calculation
+            var amount1 = amountLPWei * reserve1 / totalSupply;
 
-            // floor amount1 since token1 is nft
-            var amount1FlooredNoDecimals = amount1.AdjustDecimals(magicswapPool.token1.decimals, 0);
+            BigInteger amount0Min;
+            BigInteger amount1Min;
+            List<NFTInput> nfts0 = null;
+            List<NFTInput> nfts1 = null;
 
-            // use helper for amount0 since its ERC20
-            var amount0Min = TDK.Magicswap.GetAmountMin(amount0, 0.01);
-            // dont use helper for amount1 since its NFT, use floored value with decimals instead
-            var amount1Min = amount1FlooredNoDecimals.AdjustDecimals(0, magicswapPool.token1.decimals);
+            if (token0.isNFT)
+            {
+                var amount0FlooredNoDecimals = amount0.AdjustDecimals(token0.decimals, 0);
+                amount0Min = amount0FlooredNoDecimals.AdjustDecimals(0, token0.decimals);
+                nfts0 = new List<NFTInput>() {
+                    new() {
+                        id = token0.collectionTokenIds[0],
+                        quantity = (int) amount0FlooredNoDecimals,
+                    }
+                };
+            }
+            else
+            {
+                amount0Min = TDK.Magicswap.GetAmountMin(amount0, 0.01);
+            }
 
+            if (token1.isNFT)
+            {
+                var amount1FlooredNoDecimals = amount1.AdjustDecimals(token1.decimals, 0);
+                amount1Min = amount1FlooredNoDecimals.AdjustDecimals(0, token1.decimals);
+                nfts1 = new List<NFTInput>() {
+                    new() {
+                        id = token1.collectionTokenIds[0],
+                        quantity = (int) amount1FlooredNoDecimals,
+                    }
+                };
+            }
+            else
+            {
+                amount1Min = TDK.Magicswap.GetAmountMin(amount1, 0.01);
+            }
+            
             var removeLiquidityBody = new RemoveLiquidityBody
             {
                 amountLP = amountLPWei.ToString(),
                 amount0Min = amount0Min.ToString(),
                 amount1Min = amount1Min.ToString(),
-                nfts1 = new List<NFTInput>() {
-                    new() {
-                        id = magicswapPool.token1.collectionTokenIds[0],
-                        quantity = (int)amount1FlooredNoDecimals,
-                    }
-                }
+                nfts0 = nfts0,
+                nfts1 = nfts1,
             };
             bodyJson = JsonConvert.SerializeObject(removeLiquidityBody, Formatting.Indented, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
             });
-            bodyJson += $"\nRequired LP for 1 treasure: {Utils.ToEth(amountLPWei.ToString())}";
+            bodyJson += $"\nRequired LP: {Utils.ToEth(amountLPWei.ToString())}";
             InfoText.text = $"Removing liquidity...\nRequest body: {bodyJson}";
             var transaction = await TDK.Magicswap.RemoveLiquidity(magicswapPool.id, removeLiquidityBody);
             var responseJson = JsonConvert.SerializeObject(transaction, Formatting.Indented);
@@ -310,8 +506,11 @@ public class MagicswapUI : MonoBehaviour
     {
         try
         {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            var usingZkSyncChain = await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber);
+            
             var walletConnected = await TDK.Connect.IsWalletConnected() || TDK.Identity.IsUsingTreasureLauncher;
-            var enableButtons = walletConnected && TDK.Identity.IsAuthenticated;
+            var enableButtons = walletConnected && (TDK.Identity.IsAuthenticated || usingZkSyncChain);
             ApproveButton.interactable = enableButtons;
             SwapButton.interactable = enableButtons;
             AddLiquidityButton.interactable = enableButtons;
@@ -324,7 +523,7 @@ public class MagicswapUI : MonoBehaviour
                 MetadataText.text = "Connect Wallet first (Connect tab)";
                 return;
             }
-            if (!TDK.Identity.IsAuthenticated)
+            if (!TDK.Identity.IsAuthenticated && !usingZkSyncChain)
             {
                 MetadataText.text = "Start User Session first (Identity tab)";
                 return;
@@ -332,48 +531,64 @@ public class MagicswapUI : MonoBehaviour
             MetadataText.text = "Loading metadata...";
 
             RefreshMetadataButton.interactable = false;
-            var magicAddress = TDK.Common.GetContractAddress(Contract.Magic);
-            var treasuresAddress = "0xfe592736200d7545981397ca7a8e896ac0c166d4";
-            var treasuresContract = await TDK.Common.GetContract(treasuresAddress);
-
-            var magicBalanceTask = TDK.Common.GetFormattedERC20Balance(magicAddress, TDK.Identity.Address, 18);
-            var magicAllowanceTask = TDK.Magicswap.GetERC20Allowance(magicAddress, TDK.Identity.Address);
-            var treasuresAreApprovedTask = TDK.Magicswap.IsERC1155Approved(treasuresAddress, TDK.Identity.Address);
-            await Task.WhenAll(magicBalanceTask, magicAllowanceTask, treasuresAreApprovedTask);
-
-            var text = $@"<b>- Magic -</b>
-Balance: {magicBalanceTask.Result}
-Allowance: {Utils.ToEth(magicAllowanceTask.Result.ToString())}
-<b>- Treasures -</b>
-Approved for all: {treasuresAreApprovedTask.Result}";
-
-            if (magicswapRoute != null && magicswapRoute.tokenOut.isNFT)
+            
+            // ---- TOKEN A ----
+            var text = $"<b>- {UITestValues.tokenNameA} (A) -</b>\n";
+            if (UITestValues.isNftA)
             {
-                var tokenIds = magicswapRoute.tokenOut.collectionTokenIds;
-                var treasures = new List<(string id, BigInteger balance)>();
-                foreach (var tokenId in tokenIds)
+                var isApproved = await TDK.Magicswap.IsERC1155Approved(UITestValues.nftForApprovalA, TDK.Identity.Address);
+                text += $"Approved: {isApproved}\n";
+                if (magicswapPool != null)
                 {
-                    var treasureBalance = await treasuresContract.ERC1155_BalanceOf(TDK.Identity.Address, BigInteger.Parse(tokenId));
-                    if (treasureBalance > 0)
-                    {
-                        treasures.Add((tokenId, treasureBalance));
-                    }
-                }
-                if (treasures.Count > 0)
-                {
-                    text += $"\nOwned: ";
-                    text += string.Join("\n", treasures.ConvertAll((t) => $"#{t.id}: {t.balance}"));
+                    text += await GetERC1155BalanceText(UITestValues.nftForApprovalA, magicswapPool.token0);
                 }
             }
+            else if (UITestValues.isEthA)
+            {
+                var balance = await TDK.Common.GetFormattedNativeBalance();
+                text += $"Balance: {balance}\n";
+            }
+            else
+            {
+                var balance = await TDK.Common.GetFormattedERC20Balance(UITestValues.tokenIdA, TDK.Identity.Address, 18);
+                var allowance = await TDK.Magicswap.GetERC20Allowance(UITestValues.tokenIdA, TDK.Identity.Address);
+                text += $"Balance: {balance}\n";
+                text += $"Allowance: {Utils.ToEth(allowance.ToString())}\n";
+            }
 
+            // ---- TOKEN B ----
+            text += $"<b>- {UITestValues.tokenNameB} (B) -</b>\n";
+            if (UITestValues.isNftB)
+            {
+                var isApproved = await TDK.Magicswap.IsERC1155Approved(UITestValues.nftForApprovalB, TDK.Identity.Address);
+                text += $"Approved: {isApproved}\n";
+                if (magicswapPool != null)
+                {
+                    text += await GetERC1155BalanceText(UITestValues.nftForApprovalB, magicswapPool.token1);
+                }
+            }
+            else if (UITestValues.isEthB)
+            {
+                var balance = await TDK.Common.GetFormattedNativeBalance();
+                text += $"Balance: {balance}\n";
+            }
+            else
+            {
+                var balance = await TDK.Common.GetFormattedERC20Balance(UITestValues.tokenIdB, TDK.Identity.Address, 18);
+                var allowance = await TDK.Magicswap.GetERC20Allowance(UITestValues.tokenIdB, TDK.Identity.Address);
+                text += $"Balance: {balance}\n";
+                text += $"Allowance: {Utils.ToEth(allowance.ToString())}\n";
+            }
+            
+            // ---- POOL ----
             if (magicswapPool != null)
             {
                 var lpBalanceTask = TDK.Common.GetFormattedERC20Balance(magicswapPool.id, TDK.Identity.Address, 18);
                 var lpAllowanceTask = TDK.Magicswap.GetERC20Allowance(magicswapPool.id, TDK.Identity.Address);
                 await Task.WhenAll(lpBalanceTask, lpAllowanceTask);
-                text += "\n<b>- Pool LP -</b>";
-                text += $"\nBalance: {lpBalanceTask.Result}";
-                text += $"\nAllowance: {Utils.ToEth(lpAllowanceTask.Result.ToString())}";
+                text += "<b>- Pool LP -</b>\n";
+                text += $"Balance: {lpBalanceTask.Result}\n";
+                text += $"Allowance: {Utils.ToEth(lpAllowanceTask.Result.ToString())}\n";
             }
 
             MetadataText.text = text;
@@ -387,6 +602,30 @@ Approved for all: {treasuresAreApprovedTask.Result}";
         {
             RefreshMetadataButton.interactable = true;
         }
-
     }
+
+    #region code DRY helpers
+
+    private static async Task<string> GetERC1155BalanceText(string contractAddress, MagicswapToken token)
+    {
+        var text = "";
+        var nftsContract = await TDK.Common.GetContract(contractAddress);
+        var tokenIds = token.collectionTokenIds;
+        var nfts = new List<(string id, BigInteger balance)>();
+        foreach (var tokenId in tokenIds)
+        {
+            var nftBalance = await nftsContract.ERC1155_BalanceOf(TDK.Identity.Address, BigInteger.Parse(tokenId));
+            if (nftBalance > 0)
+            {
+                nfts.Add((tokenId, nftBalance));
+            }
+        }
+        if (nfts.Count > 0)
+        {
+            text += string.Join("\n", nfts.ConvertAll((t) => $"#{t.id} owned: {t.balance}")) + "\n";
+        }
+        return text;
+    }
+
+    #endregion
 }

@@ -5,6 +5,7 @@ using Thirdweb.Unity.Helpers;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using System.Numerics;
 
 namespace Treasure
 {
@@ -166,6 +167,97 @@ namespace Treasure
             {
                 await ActiveWallet.SwitchNetwork(chainId);
             }
+        }
+
+        public Task<bool> IsZkSyncChain(int chainId)
+        {
+            return Utils.IsZkSync(Client, new BigInteger(chainId));
+        }
+
+        public async Task<Transaction> WriteTransaction(WriteTransactionBody body)
+        {
+            if (!await IsWalletConnected())
+            {
+                throw new UnityException("[TDKThirdwebService.WriteTransaction] No active wallet connected");
+            }
+            var contract = await ThirdwebContract.Create(Client, body.address, TDK.Connect.ChainIdNumber, body.abi);
+            var transaction = await ThirdwebContract.Prepare(ActiveWallet, contract, body.functionName, 0, parameters: body.args);
+            SetTxOverrides(transaction,
+                value: body.txOverrides.value,
+                gas: body.txOverrides.gas,
+                maxFeePerGas: body.txOverrides.maxFeePerGas,
+                maxPriorityFeePerGas: body.txOverrides.maxPriorityFeePerGas
+            );
+            var receipt = await ThirdwebTransaction.SendAndWaitForTransactionReceipt(transaction);
+            return ParseThirdwebTransactionReceipt(receipt);
+        }
+
+        public async Task<Transaction> WriteTransactionRaw(SendRawTransactionBody body)
+        {
+            if (!await IsWalletConnected())
+            {
+                throw new UnityException("[TDKThirdwebService.WriteTransactionRaw] No active wallet connected");
+            }
+            var transactionInput = new ThirdwebTransactionInput(
+                chainId: TDK.Connect.ChainIdNumber,
+                to: body.to,
+                value: string.IsNullOrEmpty(body.value) ? 0 : BigInteger.Parse(body.value),
+                data: body.data
+            );
+            var transaction = await ThirdwebTransaction.Create(ActiveWallet, transactionInput);
+            SetTxOverrides(transaction,
+                gas: body.txOverrides.gas,
+                maxFeePerGas: body.txOverrides.maxFeePerGas,
+                maxPriorityFeePerGas: body.txOverrides.maxPriorityFeePerGas
+            );
+            var receipt = await ThirdwebTransaction.SendAndWaitForTransactionReceipt(transaction);
+            return ParseThirdwebTransactionReceipt(receipt);
+        }
+
+        private void SetTxOverrides(
+            ThirdwebTransaction transaction,
+            string value = null,
+            string gas = null,
+            string maxFeePerGas = null,
+            string maxPriorityFeePerGas = null
+        )
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                transaction.SetValue(BigInteger.Parse(value));
+            }
+            if (!string.IsNullOrEmpty(gas))
+            {
+                transaction.SetGasLimit(BigInteger.Parse(gas));
+            }
+            if (!string.IsNullOrEmpty(maxFeePerGas))
+            {
+                transaction.SetMaxFeePerGas(BigInteger.Parse(maxFeePerGas));
+            }
+            if (!string.IsNullOrEmpty(maxPriorityFeePerGas))
+            {
+                transaction.SetMaxPriorityFeePerGas(BigInteger.Parse(maxPriorityFeePerGas));
+            }
+        }
+
+        private Transaction ParseThirdwebTransactionReceipt(ThirdwebTransactionReceipt receipt)
+        {
+            var status = receipt.Status.ToString();
+            const string revertedStatus = "0";
+            const string successStatus = "1";
+            if (status == revertedStatus)
+            {
+                throw new UnityException($"[ParseThirdwebTransactionReceipt] Transaction reverted ({receipt.TransactionHash})");
+            }
+            if (status != successStatus)
+            {
+                throw new UnityException($"[ParseThirdwebTransactionReceipt] Transaction errored ({receipt.TransactionHash})");
+            }
+            return new Transaction {
+                status = "mined",
+                transactionHash = receipt.TransactionHash,
+                errorMessage = null,
+            };
         }
     }
 }

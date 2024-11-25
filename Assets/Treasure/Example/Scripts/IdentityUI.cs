@@ -56,15 +56,14 @@ public class IdentityUI : MonoBehaviour
     {
         TDKLogger.LogInfo("Minting 1,000 MAGIC...");
         var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
-        var transaction = await TDK.API.WriteTransaction(contractAddress, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
-        transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
-        if (transaction.status == "errored")
+        try
         {
-            TDKLogger.LogError($"Mint failed: {transaction.errorMessage}");
-        }
-        else
-        {
+            var transaction = await TDK.API.WriteTransaction(contractAddress, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
             TDKLogger.LogInfo($"Mint successful: {transaction.transactionHash}");
+        }
+        catch (Exception ex)
+        {
+            TDKLogger.LogException("Mint failed", ex);
         }
     }
 
@@ -83,39 +82,37 @@ public class IdentityUI : MonoBehaviour
             TDK.Identity.Address,
             BigInteger.Parse(Utils.ToWei("1000"))
         );
-        var transaction = await TDK.API.SendRawTransaction(new SendRawTransactionBody()
+        try
         {
-            to = contractAddress,
-            data = tx.Input.Data,
-        });
-        transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
-        if (transaction.status == "errored")
-        {
-            TDKLogger.LogError($"Mint failed: {transaction.errorMessage}");
-        }
-        else
-        {
+            var transaction = await TDK.API.SendRawTransaction(new SendRawTransactionBody()
+            {
+                to = contractAddress,
+                data = tx.Input.Data,
+            });
             TDKLogger.LogInfo($"Mint successful: {transaction.transactionHash}");
+        }
+        catch (Exception ex)
+        {
+            TDKLogger.LogException("Mint failed", ex);
         }
     }
 
     public async void OnSendEthBtn()
     {
         TDKLogger.LogInfo("Sending 0.0001 ETH to 0xe647b2c46365741e85268ced243113d08f7e00b8...");
-        var transaction = await TDK.API.SendRawTransaction(new SendRawTransactionBody()
+        try
         {
-            to = "0xe647b2c46365741e85268ced243113d08f7e00b8",
-            value = Utils.ToWei("0.0001"),
-            data = "0x",
-        });
-        transaction = await TDK.Common.WaitForTransaction(transaction.queueId);
-        if (transaction.status == "errored")
-        {
-            TDKLogger.LogError($"Send failed: {transaction.errorMessage}");
-        }
-        else
-        {
+            var transaction = await TDK.API.SendRawTransaction(new SendRawTransactionBody()
+            {
+                to = "0xe647b2c46365741e85268ced243113d08f7e00b8",
+                value = Utils.ToWei("0.0001"),
+                data = "0x",
+            });
             TDKLogger.LogInfo($"Send successful: {transaction.transactionHash}");
+        }
+        catch (Exception ex)
+        {
+            TDKLogger.LogException("Send failed", ex);
         }
     }
 }
