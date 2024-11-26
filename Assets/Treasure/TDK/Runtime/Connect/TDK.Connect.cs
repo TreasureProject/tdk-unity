@@ -168,10 +168,25 @@ namespace Treasure
             await ConnectWallet(ecosystemWalletOptions);
         }
 
-        public async Task ConnectSIWE()
+        // TODO implement silent reconnect
+        // TODO stop requiring WalletConnectModal to be in the scene
+        public async Task ConnectExternalWallet()
         {
-            var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: AuthProvider.Siwe);
-            await ConnectWallet(ecosystemWalletOptions);
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
+                TDKLogger.Log("[TDK.Connect:ConnectExternalWallet] Using launcher token, skipping");
+                return;
+            }
+
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            await thirdwebService.ConnectExternalWallet(ChainIdNumber);
+
+            // TODO dry from ConnectWallet?
+            _address = await thirdwebService.ActiveWallet.GetAddress();
+            OnConnected?.Invoke(_address);
+
+            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
+            TDKLogger.LogDebug($"[TDK.Connect:ConnectExternalWallet] Connection success!");
         }
 
         public async Task Reconnect(string email)

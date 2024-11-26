@@ -35,7 +35,7 @@ namespace Treasure
             loginDiscordButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Discord); });
             loginXButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.X); });
 
-            loginWalletButton.onClick.AddListener(() => { ConnectSiwe(); });
+            loginWalletButton.onClick.AddListener(() => { ConnectExternalWallet(); });
         }
 
         private void OnEnable()
@@ -117,7 +117,7 @@ namespace Treasure
             }
         }
 
-        private async void ConnectSiwe()
+        private async void ConnectExternalWallet()
         {
             if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
             {
@@ -126,26 +126,17 @@ namespace Treasure
                 return;
             }
 
-            var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal();
-
             try
             {
-                transitionModal.SetCancelAction(() => TDKConnectUIManager.Instance.ShowLoginModal());
                 await TDK.Connect.Disconnect(); // clean up any previous connection attempts
-                await TDK.Connect.ConnectSIWE();
+                await TDK.Connect.ConnectExternalWallet();
             }
             catch (Exception ex)
             {
                 if (ex.Message != "New connection attempt has been made")
                 {
-                    TDKLogger.LogException($"[LoginModal:ConnectSiwe] Error connecting", ex);
-                    if (transitionModal.gameObject.activeInHierarchy) // if transition modal is still open
-                    {
-                        // close TransitionModal, go back to login modal and show cause of error
-                        TDKConnectUIManager.Instance.ShowLoginModal();
-                        socialsErrorText.text = ex.Message;
-                        socialsErrorText.gameObject.SetActive(true);
-                    }
+                    // TODO error handling
+                    throw ex;
                 }
             }
         }

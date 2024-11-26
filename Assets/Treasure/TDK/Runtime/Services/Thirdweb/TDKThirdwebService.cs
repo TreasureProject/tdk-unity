@@ -98,10 +98,6 @@ namespace Treasure
                         var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(ecosystemWalletOptions.Email);
                         _ = await otpModal.LoginWithOtp(ecosystemWallet);
                     }
-                    else if (ecosystemWalletOptions.AuthProvider == AuthProvider.Siwe)
-                    {
-                        _ = await ecosystemWallet.LoginWithSiwe(chainId: chainId);
-                    }
                     else
                     {
                         _ = await ecosystemWallet.LoginWithOauth(
@@ -131,6 +127,47 @@ namespace Treasure
                 if (cancellationToken.IsCancellationRequested)
                 {
                     TDKLogger.LogInfo("[TDKThirdwebService:ConnectWallet] New connection attempt has been made, ignoring previous connection...");
+                    TDKLogger.LogException("Wallet connection cancelled", ex);
+                    throw new Exception("New connection attempt has been made");
+                }
+                throw;
+            }
+        }
+
+        public async Task ConnectExternalWallet(int chainId)
+        {
+            // Allow only one attempt to connect at a time, a new one will cancel any previous
+            _connectionCancelationTokenSource?.Cancel();
+            _connectionCancelationTokenSource = new CancellationTokenSource();
+            var cancellationToken = _connectionCancelationTokenSource.Token;
+            try
+            {
+                // TODO where to get supported chains list?
+                // TODO fix issue while trying to connect to arb-sepolia while metamask is on a different chain
+                var supportedChains = new BigInteger[] { chainId, 1 };
+                WalletConnectWallet wallet = await WalletConnectWallet.Create(
+                    client: Client,
+                    initialChainId: chainId,
+                    supportedChains: supportedChains
+                );
+                cancellationToken.ThrowIfCancellationRequested();
+                SmartWallet smartWallet = await SmartWallet.Create(
+                    personalWallet: wallet,
+                    chainId: chainId,
+                    factoryAddress: TDK.Common.GetContractAddress(Contract.ManagedAccountFactory, (ChainId)chainId),
+                    gasless: true
+                );
+                cancellationToken.ThrowIfCancellationRequested();
+
+                TDKLogger.LogDebug("[TDKThirdwebService:ConnectExternalWallet] Smart wallet successfully connected!");
+
+                ActiveWallet = smartWallet;
+            }
+            catch (Exception ex)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    TDKLogger.LogInfo("[TDKThirdwebService:ConnectExternalWallet] New connection attempt has been made, ignoring previous connection...");
                     TDKLogger.LogException("Wallet connection cancelled", ex);
                     throw new Exception("New connection attempt has been made");
                 }

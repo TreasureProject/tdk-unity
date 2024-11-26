@@ -45,7 +45,8 @@ namespace Thirdweb.Unity
             _exception = null;
             _isConnected = false;
             _supportedChains = eip155ChainsSupported;
-
+            
+            // TODO consider removing this condition to allow automatically reconnecting with modal's ResumeSessionOnInit
             if (WalletConnect.Instance != null && WalletConnect.Instance.IsConnected)
             {
                 try
@@ -66,7 +67,8 @@ namespace Thirdweb.Unity
                 await Task.Delay(100);
             }
 
-            if (_exception != null)
+            // TODO try to reproduce race condition consistently before uncommenting this
+            if (_exception != null /*&& !WalletConnect.Instance.IsConnected */)
             {
                 throw _exception;
             }
