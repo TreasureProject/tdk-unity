@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 using Nethereum.ABI.EIP712;
 using WalletConnectSharp.Sign.Models;
@@ -45,8 +44,7 @@ namespace Thirdweb.Unity
             _exception = null;
             _isConnected = false;
             _supportedChains = eip155ChainsSupported;
-            
-            // TODO consider removing this condition to allow automatically reconnecting with modal's ResumeSessionOnInit
+
             if (WalletConnect.Instance != null && WalletConnect.Instance.IsConnected)
             {
                 try
@@ -61,15 +59,16 @@ namespace Thirdweb.Unity
             }
 
             CreateNewSession(eip155ChainsSupported);
+            WalletConnectModal.ModalClosed += OnModalClosed;
 
             while (!WalletConnect.Instance.IsConnected && _exception == null)
             {
                 await Task.Delay(100);
             }
 
-            // TODO try to reproduce race condition consistently before uncommenting this
-            if (_exception != null /*&& !WalletConnect.Instance.IsConnected */)
+            if (_exception != null)
             {
+                WalletConnectModal.ModalClosed -= OnModalClosed;
                 throw _exception;
             }
             else
@@ -95,7 +94,7 @@ namespace Thirdweb.Unity
             return new WalletConnectWallet(client);
         }
 
-        public async Task EnsureCorrectNetwork(BigInteger chainId)
+        public async Task SwitchNetwork(BigInteger chainId)
         {
             var currentChainId = WalletConnect.Instance.ActiveChainId;
             if (currentChainId == $"eip155:{chainId}")
@@ -125,6 +124,12 @@ namespace Thirdweb.Unity
             await WalletConnect.Instance.RequestAsync<WalletSwitchEthereumChain, string>(data);
             await Task.Delay(5000); // wait for chain switch to take effect
             await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{chainId}");
+        }
+
+        [Obsolete("Use SwitchNetwork instead.")]
+        public Task EnsureCorrectNetwork(BigInteger chainId)
+        {
+            return SwitchNetwork(chainId);
         }
 
         #region IThirdwebWallet
@@ -256,6 +261,26 @@ namespace Thirdweb.Unity
             throw new NotImplementedException();
         }
 
+        public Task<List<LinkedAccount>> LinkAccount(
+            IThirdwebWallet walletToLink,
+            string otp = null,
+            bool? isMobile = null,
+            Action<string> browserOpenAction = null,
+            string mobileRedirectScheme = "thirdweb://",
+            IThirdwebBrowser browser = null,
+            BigInteger? chainId = null,
+            string jwt = null,
+            string payload = null
+        )
+        {
+            throw new InvalidOperationException("LinkAccount is not supported by external wallets.");
+        }
+
+        public Task<List<LinkedAccount>> GetLinkedAccounts()
+        {
+            throw new InvalidOperationException("GetLinkedAccounts is not supported by external wallets.");
+        }
+
         #endregion
 
         #region UI
@@ -278,17 +303,19 @@ namespace Thirdweb.Unity
                 };
 
                 var connectOptions = new ConnectOptions { OptionalNamespaces = optionalNamespaces, };
-
-                // Open modal
                 WalletConnectModal.Open(new WalletConnectModalOptions { ConnectOptions = connectOptions, IncludedWalletIds = _includedWalletIds });
-                WalletConnectModal.ModalClosed += (sender, e) =>
-                {
-                    _exception = new Exception("WalletConnect modal was closed.");
-                };
             }
             catch (Exception e)
             {
                 _exception = e;
+            }
+        }
+
+        protected static void OnModalClosed(object sender, EventArgs e)
+        {
+            if (!WalletConnect.Instance.IsConnected)
+            {
+                _exception = new Exception("WalletConnect modal was closed.");
             }
         }
 
@@ -300,26 +327,6 @@ namespace Thirdweb.Unity
             var activeSessionTopic = WalletConnect.Instance.ActiveSession.Topic;
             WalletConnect.Instance.Linker.OpenSessionRequestDeepLinkAfterMessageFromSession(activeSessionTopic);
 #endif
-        }
-
-        public Task<List<LinkedAccount>> LinkAccount(
-            IThirdwebWallet walletToLink,
-            string otp = null,
-            bool? isMobile = null,
-            Action<string> browserOpenAction = null,
-            string mobileRedirectScheme = "thirdweb://",
-            IThirdwebBrowser browser = null,
-            BigInteger? chainId = null,
-            string jwt = null,
-            string payload = null
-        )
-        {
-            throw new InvalidOperationException("LinkAccount is not supported by external wallets.");
-        }
-
-        public Task<List<LinkedAccount>> GetLinkedAccounts()
-        {
-            throw new InvalidOperationException("GetLinkedAccounts is not supported by external wallets.");
         }
     }
 }
