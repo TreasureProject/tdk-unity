@@ -97,7 +97,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modalRect: {fileID: 3209660051194142649}
   animeTime: 0.3
-  cancelButton: {fileID: 2462750359162560071}
+  headerText: {fileID: 746218485662127581}
+  infoText: {fileID: 7362927454854189632}
+  actionButton: {fileID: 2462750359162560071}
+  actionButtonText: {fileID: 4533543185179920136}
 --- !u!1 &3768863826792799367
 GameObject:
   m_ObjectHideFlags: 0
@@ -821,6 +824,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4533543185179920136 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3840563273972026306, guid: e23b01b46f7753141acbbae60bfdf8e1, type: 3}
+  m_PrefabInstance: {fileID: 839369868582669514}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &8986744097272005545 stripped

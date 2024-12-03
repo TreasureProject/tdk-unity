@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,25 +9,12 @@ namespace Treasure
 {
     public class LoginModal : ModalBase
     {
-        [SerializeField] private GameObject socialLoginHolder;
-        [SerializeField] private GameObject googleLogin;
-        [SerializeField] private GameObject appleLogin;
-        [SerializeField] private GameObject discordLogin;
-        [SerializeField] private GameObject xLogin;
-        [Space]
-        [SerializeField] private GameObject loginEmailHolder;
-        [SerializeField] private GameObject orSeparatorObject;
-        [SerializeField] private GameObject loginWalletHolder;
-        [SerializeField] private GameObject landscapeRightSideHolder;
-        [Header("Connect with wallet")]
-        [SerializeField] private GameObject emailLoginButtons;
-        [SerializeField] private GameObject walletLoginButtons;
-
         [Header("Inputs")]
         [SerializeField] private Button loginGoogleButton;
         [SerializeField] private Button loginAppleButton;
         [SerializeField] private Button loginDiscordButton;
         [SerializeField] private Button loginXButton;
+        [SerializeField] private Button loginWalletButton;
         [SerializeField] private TMP_Text socialsErrorText;
         [Space]
         [SerializeField] private TMP_InputField emailInputField;
@@ -35,54 +23,25 @@ namespace Treasure
         [SerializeField] private Toggle keepMeLoggedInToggle;
         [Space]
         [SerializeField] private Button connectButton;
-        [SerializeField] private Button connectWalletButton;
-        [SerializeField] private Button connectEmailButton;
 
         private void Start()
         {
-            SetupUI();
-
             emailInputField.onSelect.AddListener(value => keyBoardSpace.gameObject.SetActive(true));
             emailInputField.onDeselect.AddListener(value => keyBoardSpace.gameObject.SetActive(false));
 
             connectButton.onClick.AddListener(() => OnClickConnectwithEmail());
 
-            if (connectWalletButton != null)
-            {
-                connectWalletButton.onClick.AddListener(() =>
-                {
-                    emailLoginButtons.SetActive(false);
-                    walletLoginButtons.SetActive(true);
-
-                    TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_BTN, new System.Collections.Generic.Dictionary<string, object>()
-                    {
-                        { AnalyticsConstants.PROP_TYPE, "wallet" }
-                    });
-                });
-            }
-            if (connectEmailButton != null)
-            {
-                connectEmailButton.onClick.AddListener(() =>
-                {
-                    emailLoginButtons.SetActive(true);
-                    walletLoginButtons.SetActive(false);
-
-                    TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_CONNECT_BTN, new System.Collections.Generic.Dictionary<string, object>()
-                    {
-                        { AnalyticsConstants.PROP_TYPE, "email" }
-                    });
-                });
-            }
-
             loginGoogleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Google); });
             loginAppleButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Apple); });
             loginDiscordButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Discord); });
             loginXButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.X); });
+
+            loginWalletButton.gameObject.SetActive(TDK.AppConfig.EnableWalletLogin);
+            loginWalletButton.onClick.AddListener(() => { ConnectExternalWallet(); });
         }
 
         private void OnEnable()
         {
-            SetupUI();
             connectButton.GetComponent<LoadingButton>().SetLoading(false);
         }
 
@@ -90,15 +49,19 @@ namespace Treasure
         {
             if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
             {
-                errorText.text = "Please make sure you have active Internet connection.";
-                errorText.gameObject.SetActive(true);
+                socialsErrorText.text = "Please make sure you have active Internet connection.";
+                socialsErrorText.gameObject.SetActive(true);
                 return;
             }
 
-            var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal();
+            TDKConnectUIManager.Instance.ShowTransitionModal(
+                "Authenticating...",
+                "Sign into your account in the pop-up",
+                buttonText: "Cancel",
+                buttonAction: () => TDKConnectUIManager.Instance.ShowLoginModal()
+            );
             try
             {
-                transitionModal.SetCancelAction(() => TDKConnectUIManager.Instance.ShowLoginModal());
                 await TDK.Connect.Disconnect(); // clean up any previous connection attempts
                 await TDK.Connect.ConnectSocial(provider);
             }
@@ -107,7 +70,7 @@ namespace Treasure
                 if (ex.Message != "New connection attempt has been made")
                 {
                     TDKLogger.LogException($"[LoginModal:ConnectSocial] Error connecting", ex);
-                    if (transitionModal.gameObject.activeInHierarchy) // if transition modal is still open
+                    if (TDKConnectUIManager.Instance.GetTransitionModal().gameObject.activeInHierarchy) // if transition modal is still open
                     {
                         // close TransitionModal, go back to login modal and show cause of error
                         TDKConnectUIManager.Instance.ShowLoginModal();
@@ -115,27 +78,6 @@ namespace Treasure
                         socialsErrorText.gameObject.SetActive(true);
                     }
                 }
-            }
-        }
-
-        private void SetupUI()
-        {
-            socialLoginHolder.SetActive(true);
-            googleLogin.SetActive(true);
-            appleLogin.SetActive(true);
-            discordLogin.SetActive(true);
-            xLogin.SetActive(true);
-            loginEmailHolder.SetActive(true);
-            loginWalletHolder.SetActive(false);
-
-            if (landscapeRightSideHolder != null)
-            {
-                landscapeRightSideHolder.SetActive(true);
-                orSeparatorObject.SetActive(true);
-            }
-            else
-            {
-                orSeparatorObject.SetActive(false);
             }
         }
 
@@ -178,6 +120,61 @@ namespace Treasure
             {
                 errorText.text = message;
                 errorText.gameObject.SetActive(true);
+            }
+        }
+
+        private async void ConnectExternalWallet()
+        {
+            if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
+            {
+                socialsErrorText.text = "Please make sure you have active Internet connection.";
+                socialsErrorText.gameObject.SetActive(true);
+                return;
+            }
+
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            thirdwebService.EnsureWalletConnectInitialized();
+
+            var ensureChainModalTaskSource = new TaskCompletionSource<object>();
+            TDKConnectUIManager.Instance.ShowTransitionModal(
+                "Confirm selected network",
+                $"For better results, make sure the active network ({TDK.Connect.ChainId}) is selected in your external wallet app before connecting",
+                buttonText: "Continue",
+                buttonAction: () => {
+                    ensureChainModalTaskSource.SetResult(null);
+                }
+            );
+            await ensureChainModalTaskSource.Task;
+            var transitionModal = TDKConnectUIManager.Instance.GetTransitionModal();
+            transitionModal.SetInfoLabels("Processing...", "This could take a few seconds");
+            transitionModal.SetButtonAction("Restart", () => TDKConnectUIManager.Instance.ShowLoginModal());
+            var isWalletConnectReady = await thirdwebService.WaitForWalletConnectReady(maxWait: 10);
+            if (!isWalletConnectReady)
+            {
+                // show error on login modal and stop if WalletConnectModal is not ready after 10 seconds
+                TDKConnectUIManager.Instance.ShowLoginModal();
+                socialsErrorText.text = "Wallet Connect timed out";
+                socialsErrorText.gameObject.SetActive(true);
+                return;
+            }
+            try
+            {
+                await TDK.Connect.Disconnect(); // clean up any previous connection attempts
+                await TDK.Connect.ConnectExternalWallet();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message != "New connection attempt has been made")
+                {
+                    TDKLogger.LogException($"[LoginModal:ConnectExternalWallet] Error connecting", ex);
+                    if (TDKConnectUIManager.Instance.GetTransitionModal().gameObject.activeInHierarchy) // if transition modal is still open
+                    {
+                        // close TransitionModal, go back to login modal and show cause of error
+                        TDKConnectUIManager.Instance.ShowLoginModal();
+                        socialsErrorText.text = ex.Message;
+                        socialsErrorText.gameObject.SetActive(true);
+                    }
+                }
             }
         }
 

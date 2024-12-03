@@ -91,16 +91,21 @@ namespace Treasure
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.ConnectWallet(ecosystemWalletOptions, ChainIdNumber, isSilentReconnect);
 
-            _address = await thirdwebService.ActiveWallet.GetAddress();
-            OnConnected?.Invoke(_address);
-
-            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
+            await OnConnectSuccess();
             TDKLogger.LogDebug($"[TDK.Connect:ConnectWallet] Connection success!");
         }
 
         private async Task Reconnect(EcosystemWalletOptions ecosystemWalletOptions)
         {
             await ConnectWallet(ecosystemWalletOptions, isSilentReconnect: true);
+        }
+
+        private async Task OnConnectSuccess()
+        {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            _address = await thirdwebService.ActiveWallet.GetAddress();
+            OnConnected?.Invoke(_address);
+            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
         }
         #endregion
 
@@ -166,6 +171,22 @@ namespace Treasure
         {
             var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: (AuthProvider)provider);
             await ConnectWallet(ecosystemWalletOptions);
+        }
+
+        // TODO stop requiring WalletConnectModal to be in the scene
+        public async Task ConnectExternalWallet()
+        {
+            if (TDK.Identity.IsUsingTreasureLauncher)
+            {
+                TDKLogger.Log("[TDK.Connect:ConnectExternalWallet] Using launcher token, skipping");
+                return;
+            }
+
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            await thirdwebService.ConnectExternalWallet(ChainIdNumber);
+
+            await OnConnectSuccess();
+            TDKLogger.LogDebug($"[TDK.Connect:ConnectExternalWallet] Connection success!");
         }
 
         public async Task Reconnect(string email)

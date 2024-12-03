@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using System.Numerics;
+using WalletConnectUnity.Modal;
+using WalletConnectUnity.Core;
 
 namespace Treasure
 {
@@ -17,6 +19,8 @@ namespace Treasure
 
         private string bundleId;
         private CancellationTokenSource _connectionCancelationTokenSource;
+
+        private bool _didInitWalletConnect = false;
 
         public override void Awake()
         {
@@ -77,9 +81,15 @@ namespace Treasure
                     email: ecosystemWalletOptions.Email,
                     phoneNumber: ecosystemWalletOptions.PhoneNumber,
                     authProvider: ecosystemWalletOptions.AuthProvider,
+                    siweSigner: ecosystemWalletOptions.SiweSigner,
                     storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
                 );
                 cancellationToken.ThrowIfCancellationRequested();
+                
+                var isEmailLogin = ecosystemWalletOptions.AuthProvider == AuthProvider.Default;
+                var isSocialsLogin = Enum.IsDefined(typeof(SocialAuthProvider), (int) ecosystemWalletOptions.AuthProvider);
+                var isWalletLogin = ecosystemWalletOptions.AuthProvider == AuthProvider.Siwe;
+
                 var isConnected = await ecosystemWallet.IsConnected();
                 if (!isConnected)
                 {
@@ -91,14 +101,15 @@ namespace Treasure
 
                     TDKLogger.LogDebug("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
 
-                    if (ecosystemWalletOptions.AuthProvider == AuthProvider.Default)
+                    
+                    if (isEmailLogin)
                     {
                         await ecosystemWallet.SendOTP();
                         cancellationToken.ThrowIfCancellationRequested();
                         var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(ecosystemWalletOptions.Email);
                         _ = await otpModal.LoginWithOtp(ecosystemWallet);
                     }
-                    else
+                    else if (isSocialsLogin)
                     {
                         _ = await ecosystemWallet.LoginWithOauth(
                             isMobile: Application.isMobilePlatform,
@@ -108,8 +119,27 @@ namespace Treasure
                             cancellationToken: cancellationToken
                         );
                     }
+                    else if (isWalletLogin)
+                    {
+                        TDKConnectUIManager.Instance.GetTransitionModal().SetInfoLabels(
+                            "Connecting...",
+                            "Sign transaction in your external wallet"
+                        );
+                        _ = await ecosystemWallet.LoginWithSiwe(TDK.Connect.ChainIdNumber);
+                    }
+                    else
+                    {
+                        throw new Exception("Unexpected AuthProvider value");
+                    }
                 }
                 cancellationToken.ThrowIfCancellationRequested();
+                if (isWalletLogin)
+                {
+                    TDKConnectUIManager.Instance.GetTransitionModal().SetInfoLabels(
+                        "Almost there...",
+                        "Upgrading to smart wallet"
+                    );
+                }
                 smartWallet = await SmartWallet.Create(
                     personalWallet: ecosystemWallet,
                     chainId: chainId,
@@ -132,6 +162,53 @@ namespace Treasure
                 }
                 throw;
             }
+        }
+
+        public async Task ConnectExternalWallet(int chainId)
+        {
+            _connectionCancelationTokenSource?.Cancel();
+            var supportedChains = new BigInteger[] { chainId };
+            WalletConnectWallet wallet = await WalletConnectWallet.Create(
+                client: Client,
+                initialChainId: chainId,
+                supportedChains: supportedChains
+            );
+            var options = new EcosystemWalletOptions(authprovider: AuthProvider.Siwe, siweSigner: wallet);
+            await ConnectWallet(options, TDK.Connect.ChainIdNumber, isSilentReconnect: false);
+        }
+
+        // TODO fix heavy cpu load related to unhandled errors appearing when switching chains in metamask after WalletConnect is initialized
+        public void EnsureWalletConnectInitialized()
+        {
+            if (_didInitWalletConnect == false)
+            {
+                _didInitWalletConnect = true;
+                TDKMainThreadDispatcher.Enqueue(async () => {
+                    // initialize modal only after user clicks button to prevent unnecessary work when not using this flow
+                    TDKLogger.LogDebug("Initializing WalletConnectModal...");
+                    await WalletConnectModal.InitializeAsync();
+                    TDKLogger.LogDebug("WalletConnectModal initialized!");
+                    // disconnect any previous session, because:
+                    // - thirdweb sdk does this internally anyways as soon as WalletConnectWallet is created (due to instability)
+                    // - unexpected errors and freezes happen when chain is switched in metamask and the session was recovered
+                    if (WalletConnect.Instance.IsConnected)
+                    {
+                        TDKLogger.LogDebug("Disconnecting previous WalletConnect session...");
+                        await WalletConnect.Instance.DisconnectAsync();
+                        TDKLogger.LogDebug("WalletConnect disconnected!");
+                    }
+                });
+            }
+        }
+
+        public async Task<bool> WaitForWalletConnectReady(float maxWait)
+        {
+            float timeout = maxWait;
+            await new WaitUntil(() => {
+                timeout -= Time.deltaTime;
+                return timeout <= 0 || WalletConnectModal.IsReady;
+            });
+            return WalletConnectModal.IsReady;
         }
 
         public async Task<bool> IsWalletConnected()
