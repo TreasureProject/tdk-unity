@@ -36,6 +36,7 @@ namespace Treasure
             loginDiscordButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.Discord); });
             loginXButton.onClick.AddListener(() => { ConnectSocial(SocialAuthProvider.X); });
 
+            loginWalletButton.gameObject.SetActive(TDK.AppConfig.EnableWalletLogin);
             loginWalletButton.onClick.AddListener(() => { ConnectExternalWallet(); });
         }
 
