@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using System.Numerics;
+using WalletConnectUnity.Modal;
+using WalletConnectUnity.Core;
 
 namespace Treasure
 {
@@ -17,6 +19,8 @@ namespace Treasure
 
         private string bundleId;
         private CancellationTokenSource _connectionCancelationTokenSource;
+
+        private bool _didInitWalletConnect = false;
 
         public override void Awake()
         {
@@ -151,6 +155,7 @@ namespace Treasure
                     supportedChains: supportedChains
                 );
                 cancellationToken.ThrowIfCancellationRequested();
+                // TODO show transition modal while upgrading to smart wallet
                 SmartWallet smartWallet = await SmartWallet.Create(
                     personalWallet: wallet,
                     chainId: chainId,
@@ -173,6 +178,40 @@ namespace Treasure
                 }
                 throw;
             }
+        }
+
+        // TODO fix heavy cpu load related to unhandled errors appearing when switching chains in metamask after WalletConnect is initialized
+        public void EnsureWalletConnectInitialized()
+        {
+            if (_didInitWalletConnect == false)
+            {
+                _didInitWalletConnect = true;
+                TDKMainThreadDispatcher.Enqueue(async () => {
+                    // initialize modal only after user clicks button to prevent unnecessary work when not using this flow
+                    TDKLogger.LogDebug("Initializing WalletConnectModal...");
+                    await WalletConnectModal.InitializeAsync();
+                    TDKLogger.LogDebug("WalletConnectModal initialized!");
+                    // disconnect any previous session, because:
+                    // - thirdweb sdk does this internally anyways as soon as WalletConnectWallet is created (due to instability)
+                    // - unexpected errors and freezes happen when chain is switched in metamask and the session was recovered
+                    if (WalletConnect.Instance.IsConnected)
+                    {
+                        TDKLogger.LogDebug("Disconnecting previous WalletConnect session...");
+                        await WalletConnect.Instance.DisconnectAsync();
+                        TDKLogger.LogDebug("WalletConnect disconnected!");
+                    }
+                });
+            }
+        }
+
+        public async Task<bool> WaitForWalletConnectReady(float maxWait)
+        {
+            float timeout = maxWait;
+            await new WaitUntil(() => {
+                timeout -= Time.deltaTime;
+                return timeout <= 0 || WalletConnectModal.IsReady;
+            });
+            return WalletConnectModal.IsReady;
         }
 
         public async Task<bool> IsWalletConnected()

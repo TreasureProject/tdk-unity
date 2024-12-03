@@ -8183,6 +8183,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5769675580277394246, guid: 6393a0b7364627248830caa747134c99, type: 3}
+      propertyPath: <InitializeOnAwake>k__BackingField
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5852007486238492023, guid: 6393a0b7364627248830caa747134c99, type: 3}
       propertyPath: m_Name
       value: WalletConnectModal

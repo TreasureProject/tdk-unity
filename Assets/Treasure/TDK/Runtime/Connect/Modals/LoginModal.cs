@@ -48,8 +48,8 @@ namespace Treasure
         {
             if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
             {
-                errorText.text = "Please make sure you have active Internet connection.";
-                errorText.gameObject.SetActive(true);
+                socialsErrorText.text = "Please make sure you have active Internet connection.";
+                socialsErrorText.gameObject.SetActive(true);
                 return;
             }
 
@@ -126,10 +126,13 @@ namespace Treasure
         {
             if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
             {
-                errorText.text = "Please make sure you have active Internet connection.";
-                errorText.gameObject.SetActive(true);
+                socialsErrorText.text = "Please make sure you have active Internet connection.";
+                socialsErrorText.gameObject.SetActive(true);
                 return;
             }
+
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            thirdwebService.EnsureWalletConnectInitialized();
 
             var ensureChainModalTaskSource = new TaskCompletionSource<object>();
             var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal(
@@ -138,10 +141,18 @@ namespace Treasure
                 buttonText: "Continue",
                 buttonAction: () => {
                     ensureChainModalTaskSource.SetResult(null);
-                    TDKConnectUIManager.Instance.ShowLoginModal();
                 }
             );
             await ensureChainModalTaskSource.Task;
+            var isWalletConnectReady = await thirdwebService.WaitForWalletConnectReady(maxWait: 10);
+            TDKConnectUIManager.Instance.ShowLoginModal();
+            if (!isWalletConnectReady)
+            {
+                // show error on login modal and stop if WalletConnectModal is not ready after 10 seconds
+                socialsErrorText.text = "Wallet Connect timed out";
+                socialsErrorText.gameObject.SetActive(true);
+                return;
+            }
             try
             {
                 await TDK.Connect.Disconnect(); // clean up any previous connection attempts

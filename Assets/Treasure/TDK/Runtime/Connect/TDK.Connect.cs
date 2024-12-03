@@ -168,7 +168,6 @@ namespace Treasure
             await ConnectWallet(ecosystemWalletOptions);
         }
 
-        // TODO implement silent reconnect
         // TODO stop requiring WalletConnectModal to be in the scene
         public async Task ConnectExternalWallet()
         {
