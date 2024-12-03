@@ -167,8 +167,7 @@ namespace Treasure
         public async Task ConnectExternalWallet(int chainId)
         {
             _connectionCancelationTokenSource?.Cancel();
-            // TODO where to get supported chains list?
-            var supportedChains = new BigInteger[] { chainId, 1 };
+            var supportedChains = new BigInteger[] { chainId };
             WalletConnectWallet wallet = await WalletConnectWallet.Create(
                 client: Client,
                 initialChainId: chainId,
