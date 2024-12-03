@@ -91,16 +91,21 @@ namespace Treasure
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.ConnectWallet(ecosystemWalletOptions, ChainIdNumber, isSilentReconnect);
 
-            _address = await thirdwebService.ActiveWallet.GetAddress();
-            OnConnected?.Invoke(_address);
-
-            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
+            await OnConnectSuccess();
             TDKLogger.LogDebug($"[TDK.Connect:ConnectWallet] Connection success!");
         }
 
         private async Task Reconnect(EcosystemWalletOptions ecosystemWalletOptions)
         {
             await ConnectWallet(ecosystemWalletOptions, isSilentReconnect: true);
+        }
+
+        private async Task OnConnectSuccess()
+        {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            _address = await thirdwebService.ActiveWallet.GetAddress();
+            OnConnected?.Invoke(_address);
+            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
         }
         #endregion
 
@@ -180,11 +185,7 @@ namespace Treasure
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.ConnectExternalWallet(ChainIdNumber);
 
-            // TODO dry from ConnectWallet?
-            _address = await thirdwebService.ActiveWallet.GetAddress();
-            OnConnected?.Invoke(_address);
-
-            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
+            await OnConnectSuccess();
             TDKLogger.LogDebug($"[TDK.Connect:ConnectExternalWallet] Connection success!");
         }
 

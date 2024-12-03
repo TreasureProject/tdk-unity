@@ -81,6 +81,7 @@ namespace Treasure
                     email: ecosystemWalletOptions.Email,
                     phoneNumber: ecosystemWalletOptions.PhoneNumber,
                     authProvider: ecosystemWalletOptions.AuthProvider,
+                    siweSigner: ecosystemWalletOptions.SiweSigner,
                     storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
                 );
                 cancellationToken.ThrowIfCancellationRequested();
@@ -95,6 +96,8 @@ namespace Treasure
 
                     TDKLogger.LogDebug("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
 
+                    var isSocialsLogin = Enum.IsDefined(typeof(SocialAuthProvider), (int) ecosystemWalletOptions.AuthProvider);
+
                     if (ecosystemWalletOptions.AuthProvider == AuthProvider.Default)
                     {
                         await ecosystemWallet.SendOTP();
@@ -102,7 +105,7 @@ namespace Treasure
                         var otpModal = TDKConnectUIManager.Instance.ShowOtpModal(ecosystemWalletOptions.Email);
                         _ = await otpModal.LoginWithOtp(ecosystemWallet);
                     }
-                    else
+                    else if (isSocialsLogin)
                     {
                         _ = await ecosystemWallet.LoginWithOauth(
                             isMobile: Application.isMobilePlatform,
@@ -111,6 +114,14 @@ namespace Treasure
                             browser: new CrossPlatformUnityBrowser(),
                             cancellationToken: cancellationToken
                         );
+                    }
+                    else if (ecosystemWalletOptions.AuthProvider == AuthProvider.Siwe)
+                    {
+                        _ = await ecosystemWallet.LoginWithSiwe(TDK.Connect.ChainIdNumber);
+                    }
+                    else
+                    {
+                        throw new Exception("Unexpected AuthProvider value");
                     }
                 }
                 cancellationToken.ThrowIfCancellationRequested();
@@ -140,44 +151,16 @@ namespace Treasure
 
         public async Task ConnectExternalWallet(int chainId)
         {
-            // Allow only one attempt to connect at a time, a new one will cancel any previous
             _connectionCancelationTokenSource?.Cancel();
-            _connectionCancelationTokenSource = new CancellationTokenSource();
-            var cancellationToken = _connectionCancelationTokenSource.Token;
-            try
-            {
-                // TODO where to get supported chains list?
-                // TODO fix issue while trying to connect to arb-sepolia while metamask is on a different chain
-                var supportedChains = new BigInteger[] { chainId, 1 };
-                WalletConnectWallet wallet = await WalletConnectWallet.Create(
-                    client: Client,
-                    initialChainId: chainId,
-                    supportedChains: supportedChains
-                );
-                cancellationToken.ThrowIfCancellationRequested();
-                // TODO show transition modal while upgrading to smart wallet
-                SmartWallet smartWallet = await SmartWallet.Create(
-                    personalWallet: wallet,
-                    chainId: chainId,
-                    factoryAddress: TDK.Common.GetContractAddress(Contract.ManagedAccountFactory, (ChainId)chainId),
-                    gasless: true
-                );
-                cancellationToken.ThrowIfCancellationRequested();
-
-                TDKLogger.LogDebug("[TDKThirdwebService:ConnectExternalWallet] Smart wallet successfully connected!");
-
-                ActiveWallet = smartWallet;
-            }
-            catch (Exception ex)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    TDKLogger.LogInfo("[TDKThirdwebService:ConnectExternalWallet] New connection attempt has been made, ignoring previous connection...");
-                    TDKLogger.LogException("Wallet connection cancelled", ex);
-                    throw new Exception("New connection attempt has been made");
-                }
-                throw;
-            }
+            // TODO where to get supported chains list?
+            var supportedChains = new BigInteger[] { chainId, 1 };
+            WalletConnectWallet wallet = await WalletConnectWallet.Create(
+                client: Client,
+                initialChainId: chainId,
+                supportedChains: supportedChains
+            );
+            var options = new EcosystemWalletOptions(authprovider: AuthProvider.Siwe, siweSigner: wallet);
+            await ConnectWallet(options, TDK.Connect.ChainIdNumber, isSilentReconnect: false);
         }
 
         // TODO fix heavy cpu load related to unhandled errors appearing when switching chains in metamask after WalletConnect is initialized
