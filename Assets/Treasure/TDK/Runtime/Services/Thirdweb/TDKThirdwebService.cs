@@ -85,6 +85,11 @@ namespace Treasure
                     storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
                 );
                 cancellationToken.ThrowIfCancellationRequested();
+                
+                var isEmailLogin = ecosystemWalletOptions.AuthProvider == AuthProvider.Default;
+                var isSocialsLogin = Enum.IsDefined(typeof(SocialAuthProvider), (int) ecosystemWalletOptions.AuthProvider);
+                var isWalletLogin = ecosystemWalletOptions.AuthProvider == AuthProvider.Siwe;
+
                 var isConnected = await ecosystemWallet.IsConnected();
                 if (!isConnected)
                 {
@@ -96,9 +101,8 @@ namespace Treasure
 
                     TDKLogger.LogDebug("Session does not exist or is expired, proceeding with EcosystemWallet authentication.");
 
-                    var isSocialsLogin = Enum.IsDefined(typeof(SocialAuthProvider), (int) ecosystemWalletOptions.AuthProvider);
-
-                    if (ecosystemWalletOptions.AuthProvider == AuthProvider.Default)
+                    
+                    if (isEmailLogin)
                     {
                         await ecosystemWallet.SendOTP();
                         cancellationToken.ThrowIfCancellationRequested();
@@ -115,8 +119,12 @@ namespace Treasure
                             cancellationToken: cancellationToken
                         );
                     }
-                    else if (ecosystemWalletOptions.AuthProvider == AuthProvider.Siwe)
+                    else if (isWalletLogin)
                     {
+                        TDKConnectUIManager.Instance.GetTransitionModal().SetInfoLabels(
+                            "Connecting...",
+                            "Sign transaction in your external wallet"
+                        );
                         _ = await ecosystemWallet.LoginWithSiwe(TDK.Connect.ChainIdNumber);
                     }
                     else
@@ -125,6 +133,13 @@ namespace Treasure
                     }
                 }
                 cancellationToken.ThrowIfCancellationRequested();
+                if (isWalletLogin)
+                {
+                    TDKConnectUIManager.Instance.GetTransitionModal().SetInfoLabels(
+                        "Almost there...",
+                        "Upgrading to smart wallet"
+                    );
+                }
                 smartWallet = await SmartWallet.Create(
                     personalWallet: ecosystemWallet,
                     chainId: chainId,

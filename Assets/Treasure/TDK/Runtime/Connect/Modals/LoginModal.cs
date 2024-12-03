@@ -54,7 +54,7 @@ namespace Treasure
                 return;
             }
 
-            var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal(
+            TDKConnectUIManager.Instance.ShowTransitionModal(
                 "Authenticating...",
                 "Sign into your account in the pop-up",
                 buttonText: "Cancel",
@@ -70,7 +70,7 @@ namespace Treasure
                 if (ex.Message != "New connection attempt has been made")
                 {
                     TDKLogger.LogException($"[LoginModal:ConnectSocial] Error connecting", ex);
-                    if (transitionModal.gameObject.activeInHierarchy) // if transition modal is still open
+                    if (TDKConnectUIManager.Instance.GetTransitionModal().gameObject.activeInHierarchy) // if transition modal is still open
                     {
                         // close TransitionModal, go back to login modal and show cause of error
                         TDKConnectUIManager.Instance.ShowLoginModal();
@@ -136,7 +136,7 @@ namespace Treasure
             thirdwebService.EnsureWalletConnectInitialized();
 
             var ensureChainModalTaskSource = new TaskCompletionSource<object>();
-            var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal(
+            TDKConnectUIManager.Instance.ShowTransitionModal(
                 "Confirm selected network",
                 $"For better results, make sure the active network ({TDK.Connect.ChainId}) is selected in your external wallet app before connecting",
                 buttonText: "Continue",
@@ -145,11 +145,19 @@ namespace Treasure
                 }
             );
             await ensureChainModalTaskSource.Task;
+            TDKConnectUIManager.Instance.ShowTransitionModal(
+                "Processing...",
+                "This could take a few seconds",
+                buttonText: "Restart",
+                buttonAction: () => {
+                    TDKConnectUIManager.Instance.ShowLoginModal();
+                }
+            );
             var isWalletConnectReady = await thirdwebService.WaitForWalletConnectReady(maxWait: 10);
-            TDKConnectUIManager.Instance.ShowLoginModal();
             if (!isWalletConnectReady)
             {
                 // show error on login modal and stop if WalletConnectModal is not ready after 10 seconds
+                TDKConnectUIManager.Instance.ShowLoginModal();
                 socialsErrorText.text = "Wallet Connect timed out";
                 socialsErrorText.gameObject.SetActive(true);
                 return;
@@ -163,8 +171,14 @@ namespace Treasure
             {
                 if (ex.Message != "New connection attempt has been made")
                 {
-                    // TODO error handling
-                    throw ex;
+                    TDKLogger.LogException($"[LoginModal:ConnectExternalWallet] Error connecting", ex);
+                    if (TDKConnectUIManager.Instance.GetTransitionModal().gameObject.activeInHierarchy) // if transition modal is still open
+                    {
+                        // close TransitionModal, go back to login modal and show cause of error
+                        TDKConnectUIManager.Instance.ShowLoginModal();
+                        socialsErrorText.text = ex.Message;
+                        socialsErrorText.gameObject.SetActive(true);
+                    }
                 }
             }
         }

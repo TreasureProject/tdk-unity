@@ -107,7 +107,7 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
         }
 
-        public TransitionModal ShowTransitionModal(
+        public void ShowTransitionModal(
             string headerText,
             string infoText,
             string buttonText,
@@ -122,7 +122,10 @@ namespace Treasure
 
             transitionModal.SetInfoLabels(headerText, infoText);
             transitionModal.SetButtonAction(buttonText, buttonAction);
+        }
 
+        public TransitionModal GetTransitionModal()
+        {
             return transitionModal;
         }
 
