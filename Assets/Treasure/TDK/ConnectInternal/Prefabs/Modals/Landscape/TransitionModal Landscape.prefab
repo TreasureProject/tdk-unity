@@ -708,7 +708,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modalRect: {fileID: 3592920012158661337}
   animeTime: 0.3
-  cancelButton: {fileID: 8776000515462901094}
+  headerText: {fileID: 4349593239358704252}
+  infoText: {fileID: 671656708675693775}
+  actionButton: {fileID: 8776000515462901094}
+  actionButtonText: {fileID: 7281632432667554857}
 --- !u!1001 &5482886320779121978
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -975,7 +978,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8225361491217918181, guid: e23b01b46f7753141acbbae60bfdf8e1, type: 3}
       propertyPath: m_Name
-      value: Button(Cancel)
+      value: Button1
       objectReference: {fileID: 0}
     - target: {fileID: 8554024243294804342, guid: e23b01b46f7753141acbbae60bfdf8e1, type: 3}
       propertyPath: m_ChildAlignment
@@ -1072,6 +1075,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8579742489671749475, guid: e23b01b46f7753141acbbae60bfdf8e1, type: 3}
   m_PrefabInstance: {fileID: 5783156203473305579}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7281632432667554857 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3840563273972026306, guid: e23b01b46f7753141acbbae60bfdf8e1, type: 3}
+  m_PrefabInstance: {fileID: 5783156203473305579}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8776000515462901094 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2993618411261579917, guid: e23b01b46f7753141acbbae60bfdf8e1, type: 3}

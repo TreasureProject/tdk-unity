@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -52,10 +53,14 @@ namespace Treasure
                 return;
             }
 
-            var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal();
+            var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal(
+                "Authenticating...",
+                "Sign into your account in the pop-up",
+                buttonText: "Cancel",
+                buttonAction: () => TDKConnectUIManager.Instance.ShowLoginModal()
+            );
             try
             {
-                transitionModal.SetCancelAction(() => TDKConnectUIManager.Instance.ShowLoginModal());
                 await TDK.Connect.Disconnect(); // clean up any previous connection attempts
                 await TDK.Connect.ConnectSocial(provider);
             }
@@ -126,6 +131,17 @@ namespace Treasure
                 return;
             }
 
+            var ensureChainModalTaskSource = new TaskCompletionSource<object>();
+            var transitionModal = TDKConnectUIManager.Instance.ShowTransitionModal(
+                "Confirm selected network",
+                $"For better results, make sure the active network ({TDK.Connect.ChainId}) is selected in your external wallet app before connecting",
+                buttonText: "Continue",
+                buttonAction: () => {
+                    ensureChainModalTaskSource.SetResult(null);
+                    TDKConnectUIManager.Instance.ShowLoginModal();
+                }
+            );
+            await ensureChainModalTaskSource.Task;
             try
             {
                 await TDK.Connect.Disconnect(); // clean up any previous connection attempts

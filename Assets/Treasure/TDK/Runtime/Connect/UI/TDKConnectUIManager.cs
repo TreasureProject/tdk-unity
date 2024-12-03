@@ -107,13 +107,21 @@ namespace Treasure
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_UI_ACCOUNT);
         }
 
-        public TransitionModal ShowTransitionModal()
+        public TransitionModal ShowTransitionModal(
+            string headerText,
+            string infoText,
+            string buttonText,
+            Action buttonAction
+        )
         {
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
 
             transitionModal.Show();
             currentModalOpended = transitionModal;
+
+            transitionModal.SetInfoLabels(headerText, infoText);
+            transitionModal.SetButtonAction(buttonText, buttonAction);
 
             return transitionModal;
         }

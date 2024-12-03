@@ -8,15 +8,25 @@ namespace Treasure
     public class TransitionModal : ModalBase
     {
         [Space]
-        [SerializeField] private Button cancelButton;
+        [SerializeField] private TMP_Text headerText;
+        [SerializeField] private TMP_Text infoText;
+        [SerializeField] private Button actionButton;
+        [SerializeField] private TMP_Text actionButtonText;
 
-        public void SetCancelAction(Action onCancel)
+        public void SetInfoLabels(string header, string info)
         {
-            cancelButton.onClick.RemoveAllListeners();
-            cancelButton.onClick.AddListener(() =>
+            headerText.text = header;
+            infoText.text = info;
+        }
+
+        public void SetButtonAction(string text, Action buttonAction)
+        {
+            actionButtonText.text = text;
+            actionButton.onClick.RemoveAllListeners();
+            actionButton.onClick.AddListener(() =>
             {
-                cancelButton.onClick.RemoveAllListeners();
-                onCancel();
+                actionButton.onClick.RemoveAllListeners();
+                buttonAction();
             });
         }
     }
