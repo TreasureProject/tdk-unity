@@ -3,6 +3,6 @@
         public static class TDKVersion
         {
                 public static string name = "tdk-unity";
-                public static string version = "2.3.1";
+                public static string version = "2.4.0";
         }
 }
