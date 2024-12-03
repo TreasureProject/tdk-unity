@@ -145,14 +145,9 @@ namespace Treasure
                 }
             );
             await ensureChainModalTaskSource.Task;
-            TDKConnectUIManager.Instance.ShowTransitionModal(
-                "Processing...",
-                "This could take a few seconds",
-                buttonText: "Restart",
-                buttonAction: () => {
-                    TDKConnectUIManager.Instance.ShowLoginModal();
-                }
-            );
+            var transitionModal = TDKConnectUIManager.Instance.GetTransitionModal();
+            transitionModal.SetInfoLabels("Processing...", "This could take a few seconds");
+            transitionModal.SetButtonAction("Restart", () => TDKConnectUIManager.Instance.ShowLoginModal());
             var isWalletConnectReady = await thirdwebService.WaitForWalletConnectReady(maxWait: 10);
             if (!isWalletConnectReady)
             {
