@@ -42,6 +42,7 @@ namespace Treasure
 
         #region public vars
         public UnityEvent<string> OnConnected = new UnityEvent<string>();
+        public UnityEvent<string> OnAddressChanged = new UnityEvent<string>(); // for cross-chain switching
         public UnityEvent OnDisconnected = new UnityEvent();
         #endregion
 
@@ -91,7 +92,7 @@ namespace Treasure
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.ConnectWallet(ecosystemWalletOptions, ChainIdNumber, isSilentReconnect);
 
-            await OnConnectSuccess();
+            await UpdateConnectInfo(ChainId);
             TDKLogger.LogDebug($"[TDK.Connect:ConnectWallet] Connection success!");
         }
 
@@ -100,12 +101,20 @@ namespace Treasure
             await ConnectWallet(ecosystemWalletOptions, isSilentReconnect: true);
         }
 
-        private async Task OnConnectSuccess()
+        private async Task UpdateConnectInfo(ChainId chainId, bool newConnection = true)
         {
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            var oldAddress = _address;
             _address = await thirdwebService.ActiveWallet.GetAddress();
-            OnConnected?.Invoke(_address);
-            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
+            if (newConnection)
+            {
+                OnConnected?.Invoke(_address);
+            }
+            if (oldAddress != _address)
+            {
+                OnAddressChanged?.Invoke(_address);
+            }
+            TDK.Analytics.SetTreasureConnectInfo(_address, (int) chainId, newConnection);
         }
         #endregion
 
@@ -129,14 +138,17 @@ namespace Treasure
                 return;
             }
 
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            await thirdwebService.SwitchNetwork((int) chainId);
+
+            if (await thirdwebService.IsWalletConnected())
+            {
+                await UpdateConnectInfo(chainId, newConnection: false);
+            }
+
             _chainId = chainId;
 
-            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            await thirdwebService.SwitchNetwork(ChainIdNumber);
-
             TDKLogger.Log($"Switched chain to {chainId}");
-
-            TDK.Analytics.SetTreasureConnectInfo(_address, ChainIdNumber);
 
             if (startUserSession)
             {
@@ -185,7 +197,7 @@ namespace Treasure
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.ConnectExternalWallet(ChainIdNumber);
 
-            await OnConnectSuccess();
+            await UpdateConnectInfo(ChainId);
             TDKLogger.LogDebug($"[TDK.Connect:ConnectExternalWallet] Connection success!");
         }
 
