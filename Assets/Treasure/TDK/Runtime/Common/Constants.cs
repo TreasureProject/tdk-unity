@@ -9,6 +9,7 @@ namespace Treasure
         Sepolia = 11155111,
         Arbitrum = 42161,
         ArbitrumSepolia = 421614,
+        Treasure = 61166,
         TreasureRuby = 978657,
         TreasureTopaz = 978658
     }
@@ -57,13 +58,18 @@ namespace Treasure
                 }
             },
             {
+                ChainId.Treasure, new Dictionary<Contract, string> {
+                    { Contract.ManagedAccountFactory, null }, // not present in zksync
+                }
+            },
+            {
                 ChainId.TreasureRuby, new Dictionary<Contract, string> {
                     { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" },
                 }
             },
             {
                 ChainId.TreasureTopaz, new Dictionary<Contract, string> {
-                    { Contract.ManagedAccountFactory, null }, // not present in topaz
+                    { Contract.ManagedAccountFactory, null }, // not present in zksync
                     { Contract.MagicswapV2Router, "0xad781ed13b5966e7c620b896b6340abb4dd2ca86" },
                 }
             }
@@ -76,6 +82,7 @@ namespace Treasure
             { ChainId.Sepolia, "sepolia" },
             { ChainId.Arbitrum, "arbitrum" },
             { ChainId.ArbitrumSepolia, "arbitrum-sepolia" },
+            { ChainId.Treasure, "treasure" },
             { ChainId.TreasureRuby, "treasure-ruby" },
             { ChainId.TreasureTopaz, "treasure-topaz" }
         };
@@ -87,6 +94,7 @@ namespace Treasure
             { "sepolia", ChainId.Sepolia },
             { "arbitrum", ChainId.Arbitrum },
             { "arbitrum-sepolia", ChainId.ArbitrumSepolia },
+            { "treasure", ChainId.Treasure },
             { "treasure-ruby", ChainId.TreasureRuby },
             { "treasure-topaz", ChainId.TreasureTopaz }
         };

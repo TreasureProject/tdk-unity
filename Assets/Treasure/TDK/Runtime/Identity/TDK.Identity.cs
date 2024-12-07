@@ -39,7 +39,7 @@ namespace Treasure
             {
                 if (string.IsNullOrEmpty(_address))
                 {
-                    _address = TDK.Connect.Address;
+                    return TDK.Connect.Address;
                 }
 
                 return _address;

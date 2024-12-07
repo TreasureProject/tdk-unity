@@ -25,7 +25,7 @@ namespace Treasure
             // no-op, but for tracking foreground/background
         }
 
-        internal void SetTreasureConnectInfo(string smartWalletAddress, int chainId)
+        internal void SetTreasureConnectInfo(string smartWalletAddress, int chainId, bool newConnection = true)
         {
 #if !DISABLE_TREASURE_ANALTYICS
             try
@@ -37,7 +37,10 @@ namespace Treasure
                 TDKLogger.LogException("Error setting connect info for TDKAnalyticsService", ex);
             }
 #endif
-            TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_CONNECTED);
+            if (newConnection)
+            {
+                TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_CONNECTED);
+            }
         }
 
         public void TrackCustomEvent(string eventName, Dictionary<string, object> eventProps = null, bool highPriority = false)
