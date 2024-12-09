@@ -59,7 +59,7 @@ namespace Treasure
             },
             {
                 ChainId.Treasure, new Dictionary<Contract, string> {
-                    { Contract.ManagedAccountFactory, null }, // not present in zksync
+                    { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" }, // used for chain switching
                 }
             },
             {
@@ -69,7 +69,7 @@ namespace Treasure
             },
             {
                 ChainId.TreasureTopaz, new Dictionary<Contract, string> {
-                    { Contract.ManagedAccountFactory, null }, // not present in zksync
+                    { Contract.ManagedAccountFactory, "0x463effb51873c7720c810ac7fb2e145ec2f8cc60" }, // used for chain switching
                     { Contract.MagicswapV2Router, "0xad781ed13b5966e7c620b896b6340abb4dd2ca86" },
                 }
             }
