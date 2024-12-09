@@ -143,7 +143,7 @@ namespace Treasure
                 smartWallet = await SmartWallet.Create(
                     personalWallet: ecosystemWallet,
                     chainId: chainId,
-                    factoryAddress: TDK.Common.GetContractAddress(Contract.ManagedAccountFactory, (ChainId)chainId),
+                    factoryAddress: Constants.MANAGED_ACCOUNT_FACTORY_ADDRESS,
                     gasless: true
                 );
                 cancellationToken.ThrowIfCancellationRequested();

@@ -11,6 +11,7 @@ public class ConnectUI : MonoBehaviour
         "arbitrum-sepolia",
         "ethereum",
         "sepolia",
+        "treasure",
         "treasure-ruby",
         "treasure-topaz"
     };
@@ -19,6 +20,7 @@ public class ConnectUI : MonoBehaviour
         ChainId.ArbitrumSepolia,
         ChainId.Mainnet,
         ChainId.Sepolia,
+        ChainId.Treasure,
         ChainId.TreasureRuby,
         ChainId.TreasureTopaz
     };
