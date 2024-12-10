@@ -109,6 +109,7 @@ namespace Treasure
             if (newConnection)
             {
                 OnConnected?.Invoke(_address);
+                thirdwebService.TrackThirdwebAnalytics("connectWallet", "connect", "smartWallet", _address);
             }
             if (oldAddress != _address)
             {
