@@ -332,5 +332,36 @@ namespace Treasure
                 errorMessage = null,
             };
         }
+
+        public async void TrackThirdwebAnalytics(string source, string action, string walletType, string walletAddress)
+        {
+            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(action) || string.IsNullOrEmpty(walletType) || string.IsNullOrEmpty(walletAddress))
+            {
+                TDKLogger.LogWarning("[TDKThirdwebService.TrackUsage] Invalid usage analytics parameters");
+                return;
+            }
+
+            try
+            {
+                var content = new System.Net.Http.StringContent(
+                    Newtonsoft.Json.JsonConvert.SerializeObject(
+                        new
+                        {
+                            source,
+                            action,
+                            walletAddress,
+                            walletType,
+                        }
+                    ),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                );
+                _ = await Client.HttpClient.PostAsync("https://c.thirdweb.com/event", content);
+            }
+            catch
+            {
+                TDKLogger.LogWarning($"[TDKThirdwebService.TrackUsage] Failed to report usage analytics");
+            }
+        }
     }
 }
