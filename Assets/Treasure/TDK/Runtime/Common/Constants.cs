@@ -55,6 +55,7 @@ namespace Treasure
             },
             {
                 ChainId.Treasure, new Dictionary<Contract, string> {
+                    { Contract.MagicswapV2Router, "0x95afF54273275F2D9623f12A7E689dFAA5EbA311" },
                 }
             },
             {
