@@ -35,7 +35,7 @@ namespace Thirdweb.Unity
             _client = client;
         }
 
-        public async static Task<WalletConnectWallet> Create(ThirdwebClient client, BigInteger initialChainId, BigInteger[] supportedChains)
+        public async static Task<WalletConnectWallet> Create(ThirdwebClient client, BigInteger initialChainId, BigInteger[] supportedChains, string[] includedWalletIds)
         {
             var eip155ChainsSupported = new string[] { };
             if (supportedChains != null)
@@ -44,6 +44,7 @@ namespace Thirdweb.Unity
             _exception = null;
             _isConnected = false;
             _supportedChains = eip155ChainsSupported;
+            _includedWalletIds = includedWalletIds;
 
             if (WalletConnect.Instance != null && WalletConnect.Instance.IsConnected)
             {
@@ -126,7 +127,7 @@ namespace Thirdweb.Unity
             await WalletConnect.Instance.SignClient.AddressProvider.SetDefaultChainIdAsync($"eip155:{chainId}");
         }
 
-        [Obsolete("Use SwitchNetwork instead.")]
+        [Obsolete("Use IThirdwebWallet.SwitchNetwork instead.")]
         public Task EnsureCorrectNetwork(BigInteger chainId)
         {
             return SwitchNetwork(chainId);
@@ -279,6 +280,16 @@ namespace Thirdweb.Unity
         public Task<List<LinkedAccount>> GetLinkedAccounts()
         {
             throw new InvalidOperationException("GetLinkedAccounts is not supported by external wallets.");
+        }
+
+        public Task<List<LinkedAccount>> UnlinkAccount(LinkedAccount accountToUnlink)
+        {
+            throw new InvalidOperationException("UnlinkAccount is not supported by external wallets.");
+        }
+
+        public Task<EIP7702Authorization> SignAuthorization(BigInteger chainId, string contractAddress, bool willSelfExecute)
+        {
+            throw new InvalidOperationException("SignAuthorization is not supported by external wallets.");
         }
 
         #endregion
