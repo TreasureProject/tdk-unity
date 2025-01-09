@@ -845,9 +845,11 @@ PlayerSettings:
     iPhone: RH_SerializedDictionary
   additionalCompilerArguments: {}
   platformArchitecture: {}
-  scriptingBackend: {}
+  scriptingBackend:
+    Standalone: 1
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration:
+    Standalone: 1
     WebGL: 1
   managedStrippingLevel:
     EmbeddedLinux: 1
