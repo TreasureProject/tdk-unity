@@ -171,7 +171,8 @@ namespace Treasure
             WalletConnectWallet wallet = await WalletConnectWallet.Create(
                 client: Client,
                 initialChainId: chainId,
-                supportedChains: supportedChains
+                supportedChains: supportedChains,
+                includedWalletIds: null
             );
             var options = new EcosystemWalletOptions(authprovider: AuthProvider.Siwe, siweSigner: wallet);
             await ConnectWallet(options, TDK.Connect.ChainIdNumber, isSilentReconnect: false);
