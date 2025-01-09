@@ -45,11 +45,19 @@ public class IdentityUI : MonoBehaviour
 
     public async void OnGetMagicBalanceBtn()
     {
-        var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
         var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-        var contract = await ThirdwebContract.Create(thirdwebService.Client, contractAddress, TDK.Connect.ChainIdNumber);
-        var balance = await contract.ERC20_BalanceOf(TDK.Identity.Address);
-        TDKLogger.LogInfo($"Magic balance: {Utils.ToEth(balance.ToString())}");
+        var usingZkSyncChain = await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber);
+        if (usingZkSyncChain)
+        {
+            var balance = await TDK.Common.GetFormattedNativeBalance();
+            TDKLogger.LogInfo($"Magic balance: {balance}");
+        }
+        else
+        {
+            var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
+            var balance = await TDK.Common.GetFormattedERC20Balance(contractAddress, TDK.Identity.Address);
+            TDKLogger.LogInfo($"Magic balance: {balance}");
+        }
     }
 
     public async void OnMintMagicBtn()
