@@ -13,8 +13,11 @@ namespace Thirdweb.Editor
         private SerializedProperty initializeOnAwakeProp;
         private SerializedProperty showDebugLogsProp;
         private SerializedProperty optOutUsageAnalyticsProp;
+        private SerializedProperty autoConnectLastWallet;
         private SerializedProperty supportedChainsProp;
+        private SerializedProperty includedWalletIdsProp;
         private SerializedProperty redirectPageHtmlOverrideProp;
+        private SerializedProperty rpcOverridesProp;
 
         private int selectedTab = 0;
         private readonly string[] tabTitles = { "Client", "Preferences", "Misc", "Debug" };
@@ -31,8 +34,11 @@ namespace Thirdweb.Editor
             initializeOnAwakeProp = FindProperty("InitializeOnAwake");
             showDebugLogsProp = FindProperty("ShowDebugLogs");
             optOutUsageAnalyticsProp = FindProperty("OptOutUsageAnalytics");
+            autoConnectLastWallet = FindProperty("AutoConnectLastWallet");
             supportedChainsProp = FindProperty("SupportedChains");
+            includedWalletIdsProp = FindProperty("IncludedWalletIds");
             redirectPageHtmlOverrideProp = FindProperty("RedirectPageHtmlOverride");
+            rpcOverridesProp = FindProperty("RpcOverrides");
 
             bannerImage = Resources.Load<Texture2D>("EditorBanner");
         }
@@ -137,8 +143,8 @@ namespace Thirdweb.Editor
         private void DrawClientTab()
         {
             EditorGUILayout.HelpBox("Configure your client settings here.", MessageType.Info);
-            DrawProperty(clientIdProp, "Client ID");
-            DrawProperty(bundleIdProp, "Bundle ID");
+            DrawProperty(clientIdProp, "Client ID", "Your Thirdweb Client ID. You can find this in the Thirdweb Dashboard by creating a project.");
+            DrawProperty(bundleIdProp, "Bundle ID", "You may allowlist a bundle ID in the Thirdweb Dashboard to allow native apps to access our services, eg com.mycompany.myapp");
             DrawButton(
                 "Create API Key",
                 () =>
@@ -151,25 +157,46 @@ namespace Thirdweb.Editor
         private void DrawPreferencesTab()
         {
             EditorGUILayout.HelpBox("Set your preferences and initialization options here.", MessageType.Info);
-            DrawProperty(initializeOnAwakeProp, "Initialize On Awake");
-            DrawProperty(showDebugLogsProp, "Show Debug Logs");
-            DrawProperty(optOutUsageAnalyticsProp, "Opt-Out of Usage Analytics");
+            DrawProperty(initializeOnAwakeProp, "Initialize On Awake", "If enabled, Thirdweb will initialize on Awake. If disabled, you must call ThirdwebManager.Instance.Initialize() manually.");
+            DrawProperty(showDebugLogsProp, "Show Debug Logs", "If enabled, Thirdweb will log debug messages to the console.");
+            DrawProperty(optOutUsageAnalyticsProp, "Opt-Out of Usage Analytics", "If enabled, you may see inconsistent stats in your Thirdweb Dashboard.");
+            DrawProperty(
+                autoConnectLastWallet,
+                "Auto-Connect Last Wallet",
+                "If enabled, Thirdweb will automatically connect to the last connected wallet on initialization (this behavior does not apply to the WalletConnectWallet provider option)."
+            );
         }
 
         private void DrawMiscTab()
         {
             EditorGUILayout.HelpBox("Configure other settings here.", MessageType.Info);
 
-            // Wallet Connect Settings
-            GUILayout.Label("Wallet Connect Settings", EditorStyles.boldLabel);
-            DrawProperty(supportedChainsProp, "Supported Chains");
+            // RPC Overrides
+            DrawProperty(rpcOverridesProp, "RPC Overrides", "We recommend using our default RPC, but if you encounter issues you may override them by chain id here.");
 
             GUILayout.Space(10);
 
             // Desktop OAuth Settings
-            GUILayout.Label("Desktop OAuth Settings", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Redirect Page HTML Override", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(
+                new GUIContent("OAuth Redirect Page HTML Override", "The HTML displayed after Social Login on Desktop, you may override it to match your branding."),
+                EditorStyles.boldLabel
+            );
             redirectPageHtmlOverrideProp.stringValue = EditorGUILayout.TextArea(redirectPageHtmlOverrideProp.stringValue, GUILayout.MinHeight(75));
+
+            GUILayout.Space(10);
+
+            // Wallet Connect Settings
+            DrawProperty(
+                supportedChainsProp,
+                "WalletConnect Supported Chains",
+                "You technically connect to multiple chains at once with WC, so try to include all chain ids your app wants to support."
+            );
+
+            DrawProperty(
+                includedWalletIdsProp,
+                "WalletConnect Included Wallet IDs",
+                "If displaying less than 3 wallets look for ConnectView script in your hierarchy and edit WC Modal wallet count and other settings there."
+            );
         }
 
         private void DrawDebugTab()
@@ -208,11 +235,11 @@ namespace Thirdweb.Editor
             );
         }
 
-        private void DrawProperty(SerializedProperty property, string label)
+        private void DrawProperty(SerializedProperty property, string label, string tooltip = null)
         {
             if (property != null)
             {
-                EditorGUILayout.PropertyField(property, new GUIContent(label));
+                EditorGUILayout.PropertyField(property, new GUIContent(label, tooltip));
             }
             else
             {
