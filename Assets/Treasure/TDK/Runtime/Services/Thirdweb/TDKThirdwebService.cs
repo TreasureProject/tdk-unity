@@ -44,7 +44,7 @@ namespace Treasure
 
             var clientId = TDK.AppConfig.ClientId;
 
-            bundleId ??= Application.identifier ?? $"com.{Application.companyName}.{Application.productName}";
+            bundleId = !string.IsNullOrEmpty(Application.identifier) ? Application.identifier : $"com.{Application.companyName}.{Application.productName}";
 
             Client = ThirdwebClient.Create(
                 clientId: clientId,
