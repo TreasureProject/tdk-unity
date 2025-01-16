@@ -55,7 +55,7 @@ namespace Treasure
                 sdkName: Application.platform == RuntimePlatform.WebGLPlayer ? "UnitySDK_WebGL" : "UnitySDK",
                 sdkOs: Application.platform.ToString(),
                 sdkPlatform: "unity",
-                sdkVersion: ThirdwebManager.THIRDWEB_UNITY_SDK_VERSION
+                sdkVersion: ThirdwebManagerBase.THIRDWEB_UNITY_SDK_VERSION
             );
 
             TDKLogger.LogInfo("TDKThirdwebService initialized.");
