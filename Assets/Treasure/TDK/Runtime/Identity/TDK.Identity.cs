@@ -83,7 +83,7 @@ namespace Treasure
             return await TDKServiceLocator.GetService<TDKThirdwebService>().ActiveWallet.PersonalSign(payloadToSign);
         }
 
-        private async Task CreateSessionKey(string backendWallet, List<string> callTargets, BigInteger nativeTokenLimitPerTransaction)
+        public async Task CreateSessionKey(string backendWallet, List<string> callTargets, BigInteger nativeTokenLimitPerTransaction)
         {
             var permissionStartTimestamp = (decimal)Utils.GetUnixTimeStampNow() - 60 * 60;
             var permissionEndTimestamp = (decimal)(Utils.GetUnixTimeStampNow() + TDK.AppConfig.SessionDurationSec);
@@ -98,7 +98,7 @@ namespace Treasure
             );
         }
 
-        private async Task<List<User.Session>> GetUserSessions()
+        public async Task<List<User.Session>> GetUserSessions()
         {
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             var activeSignersTask = thirdwebService.ActiveWallet.GetAllActiveSigners();
@@ -117,7 +117,7 @@ namespace Treasure
             }).ToList();
         }
 
-        private bool ValidateSession(string backendWallet, List<string> callTargets, BigInteger nativeTokenLimitPerTransaction, User.Session session)
+        public bool ValidateSession(string backendWallet, List<string> callTargets, BigInteger nativeTokenLimitPerTransaction, User.Session session)
         {
             var requestedCallTargets = callTargets.Select(callTarget => callTarget.ToLowerInvariant());
             var signerApprovedTargets = session.approvedTargets.Select(approvedTarget => approvedTarget.ToLowerInvariant());
