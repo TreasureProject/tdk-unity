@@ -100,7 +100,7 @@ namespace Treasure
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             if (!await thirdwebService.IsWalletConnected())
             {
-                throw new Exception("[TDKThirdwebService.WriteTransaction] No active wallet connected");
+                throw new Exception("[TDK.API.EstimateTransactionGas] No active wallet connected");
             }
             var transaction = await thirdwebService.PrepareTransactionFromBody(body);
             return await ThirdwebTransaction.EstimateGasCosts(transaction);
@@ -121,7 +121,7 @@ namespace Treasure
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             if (!await thirdwebService.IsWalletConnected())
             {
-                throw new Exception("[TDKThirdwebService.WriteTransaction] No active wallet connected");
+                throw new Exception("[TDK.API.EstimateTransactionGas] No active wallet connected");
             }
             var transaction = await thirdwebService.PrepareTransactionFromBody(body);
             return await ThirdwebTransaction.EstimateGasCosts(transaction);
