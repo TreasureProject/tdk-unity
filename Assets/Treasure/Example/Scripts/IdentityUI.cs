@@ -66,6 +66,8 @@ public class IdentityUI : MonoBehaviour
         var contractAddress = TDK.Common.GetContractAddress(Contract.Magic);
         try
         {
+            var estimate = await TDK.API.EstimateTransactionGas(contractAddress, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
+            TDKLogger.LogInfo($"Estimated gas cost: {estimate.Ether}");
             var transaction = await TDK.API.WriteTransaction(contractAddress, "mint", new object[] { TDK.Identity.Address, Utils.ToWei("1000") });
             TDKLogger.LogInfo($"Mint successful: {transaction.transactionHash}");
         }
