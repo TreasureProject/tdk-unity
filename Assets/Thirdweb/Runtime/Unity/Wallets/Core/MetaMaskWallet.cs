@@ -16,6 +16,7 @@ namespace Thirdweb.Unity
     public class MetaMaskWallet : IThirdwebWallet
     {
         public ThirdwebClient Client => _client;
+        public string WalletId => "metamask";
         public ThirdwebAccountType AccountType => ThirdwebAccountType.ExternalAccount;
 
         private static ThirdwebClient _client;
@@ -191,10 +192,18 @@ namespace Thirdweb.Unity
             throw new NotImplementedException();
         }
 
-        public Task Disconnect()
+        public async Task Disconnect()
         {
-            ThirdwebDebug.Log("Disconnecting has no effect on this wallet.");
-            return Task.CompletedTask;
+            try
+            {
+                _ = await WebGLMetaMask.Instance.RequestAsync<string>(
+                    new RpcRequest { Method = "wallet_revokePermissions", Params = new object[] { new Dictionary<string, object> { { "eth_accounts", new object() } } } }
+                );
+            }
+            catch
+            {
+                // no-op
+            }
         }
 
         public Task<List<LinkedAccount>> LinkAccount(
@@ -206,7 +215,9 @@ namespace Thirdweb.Unity
             IThirdwebBrowser browser = null,
             BigInteger? chainId = null,
             string jwt = null,
-            string payload = null
+            string payload = null,
+            string defaultSessionIdOverride = null,
+            List<string> forceWalletIds = null
         )
         {
             throw new InvalidOperationException("LinkAccount is not supported by external wallets.");
