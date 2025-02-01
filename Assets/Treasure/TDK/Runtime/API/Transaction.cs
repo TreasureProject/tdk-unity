@@ -94,5 +94,37 @@ namespace Treasure
             var transaction = JsonConvert.DeserializeObject<Transaction>(response);
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
+
+        public async Task<TotalCosts> EstimateTransactionGas(WriteTransactionBody body)
+        {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            if (!await thirdwebService.IsWalletConnected())
+            {
+                throw new Exception("[TDK.API.EstimateTransactionGas] No active wallet connected");
+            }
+            var transaction = await thirdwebService.PrepareTransactionFromBody(body);
+            return await ThirdwebTransaction.EstimateGasCosts(transaction);
+        }
+
+        public async Task<TotalCosts> EstimateTransactionGas(string address, string functionName, object[] args)
+        {
+            return await EstimateTransactionGas(new WriteTransactionBody()
+            {
+                address = address,
+                functionName = functionName,
+                args = args,
+            });
+        }
+
+        public async Task<TotalCosts> EstimateRawTransactionGas(SendRawTransactionBody body)
+        {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            if (!await thirdwebService.IsWalletConnected())
+            {
+                throw new Exception("[TDK.API.EstimateTransactionGas] No active wallet connected");
+            }
+            var transaction = await thirdwebService.PrepareTransactionFromBody(body);
+            return await ThirdwebTransaction.EstimateGasCosts(transaction);
+        }
     }
 }

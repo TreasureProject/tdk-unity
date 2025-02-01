@@ -254,14 +254,7 @@ namespace Treasure
             {
                 throw new UnityException("[TDKThirdwebService.WriteTransaction] No active wallet connected");
             }
-            var contract = await ThirdwebContract.Create(Client, body.address, TDK.Connect.ChainIdNumber, body.abi);
-            var transaction = await ThirdwebContract.Prepare(ActiveWallet, contract, body.functionName, 0, parameters: body.args);
-            SetTxOverrides(transaction,
-                value: body.txOverrides.value,
-                gas: body.txOverrides.gas,
-                maxFeePerGas: body.txOverrides.maxFeePerGas,
-                maxPriorityFeePerGas: body.txOverrides.maxPriorityFeePerGas
-            );
+            var transaction = await PrepareTransactionFromBody(body);
             var receipt = await ThirdwebTransaction.SendAndWaitForTransactionReceipt(transaction);
             return ParseThirdwebTransactionReceipt(receipt);
         }
@@ -272,6 +265,26 @@ namespace Treasure
             {
                 throw new UnityException("[TDKThirdwebService.WriteTransactionRaw] No active wallet connected");
             }
+            var transaction = await PrepareTransactionFromBody(body);
+            var receipt = await ThirdwebTransaction.SendAndWaitForTransactionReceipt(transaction);
+            return ParseThirdwebTransactionReceipt(receipt);
+        }
+
+        public async Task<ThirdwebTransaction> PrepareTransactionFromBody(WriteTransactionBody body)
+        {
+            var contract = await ThirdwebContract.Create(Client, body.address, TDK.Connect.ChainIdNumber, body.abi);
+            var transaction = await ThirdwebContract.Prepare(ActiveWallet, contract, body.functionName, 0, parameters: body.args);
+            SetTxOverrides(transaction,
+                value: body.txOverrides.value,
+                gas: body.txOverrides.gas,
+                maxFeePerGas: body.txOverrides.maxFeePerGas,
+                maxPriorityFeePerGas: body.txOverrides.maxPriorityFeePerGas
+            );
+            return transaction;
+        }
+
+        public async Task<ThirdwebTransaction> PrepareTransactionFromBody(SendRawTransactionBody body)
+        {
             var transactionInput = new ThirdwebTransactionInput(
                 chainId: TDK.Connect.ChainIdNumber,
                 to: body.to,
@@ -284,8 +297,7 @@ namespace Treasure
                 maxFeePerGas: body.txOverrides.maxFeePerGas,
                 maxPriorityFeePerGas: body.txOverrides.maxPriorityFeePerGas
             );
-            var receipt = await ThirdwebTransaction.SendAndWaitForTransactionReceipt(transaction);
-            return ParseThirdwebTransactionReceipt(receipt);
+            return transaction;
         }
 
         private void SetTxOverrides(
