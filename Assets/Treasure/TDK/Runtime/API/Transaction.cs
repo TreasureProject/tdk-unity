@@ -59,7 +59,7 @@ namespace Treasure
             return JsonConvert.DeserializeObject<Transaction>(response);
         }
 
-        public async Task<Transaction> WriteTransaction(WriteTransactionBody body)
+        public async Task<Transaction> WriteTransaction(WriteTransactionBody body, bool skipWaitForCompletion = false)
         {
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             if (await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber))
@@ -69,20 +69,24 @@ namespace Treasure
             body.backendWallet ??= TDK.AppConfig.GetBackendWallet();
             var response = await Post("/transactions", JsonConvert.SerializeObject(body));
             var transaction = JsonConvert.DeserializeObject<Transaction>(response);
+            if (skipWaitForCompletion)
+            {
+                return transaction;
+            }
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
-        public async Task<Transaction> WriteTransaction(string address, string functionName, object[] args)
+        public async Task<Transaction> WriteTransaction(string address, string functionName, object[] args, bool skipWaitForCompletion = false)
         {
             return await WriteTransaction(new WriteTransactionBody()
             {
                 address = address,
                 functionName = functionName,
                 args = args,
-            });
+            }, skipWaitForCompletion);
         }
 
-        public async Task<Transaction> SendRawTransaction(SendRawTransactionBody body)
+        public async Task<Transaction> SendRawTransaction(SendRawTransactionBody body, bool skipWaitForCompletion = false)
         {
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             if (await thirdwebService.IsZkSyncChain(TDK.Connect.ChainIdNumber))
@@ -92,6 +96,10 @@ namespace Treasure
             body.backendWallet ??= TDK.AppConfig.GetBackendWallet();
             var response = await Post("/transactions/raw", JsonConvert.SerializeObject(body));
             var transaction = JsonConvert.DeserializeObject<Transaction>(response);
+            if (skipWaitForCompletion)
+            {
+                return transaction;
+            }
             return await TDK.Common.WaitForTransaction(transaction.queueId);
         }
 
