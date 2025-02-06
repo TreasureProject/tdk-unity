@@ -8,6 +8,7 @@ using System;
 using System.Numerics;
 using WalletConnectUnity.Modal;
 using WalletConnectUnity.Core;
+using Cysharp.Threading.Tasks;
 
 namespace Treasure
 {
@@ -230,7 +231,7 @@ namespace Treasure
                     await ActiveWallet.Disconnect();
                     TDKLogger.LogInfo("[TDKThirdwebService:DisconnectWallet] Active wallet disconnected");
                 }
-                await new WaitForEndOfFrame();
+                await UniTask.WaitForEndOfFrame(this);
                 ActiveWallet = null;
             }
         }
