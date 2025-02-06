@@ -178,7 +178,6 @@ namespace Treasure
             await ConnectWallet(options, TDK.Connect.ChainIdNumber, isSilentReconnect: false);
         }
 
-        // TODO fix heavy cpu load related to unhandled errors appearing when switching chains in metamask after WalletConnect is initialized
         public void EnsureWalletConnectInitialized()
         {
             if (_didInitWalletConnect == false)
