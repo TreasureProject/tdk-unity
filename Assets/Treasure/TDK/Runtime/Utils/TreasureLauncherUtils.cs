@@ -18,7 +18,6 @@ namespace Treasure
 
         public static string GetWalletAddressFromJwt()
         {
-            // TODO check token expiration date?
             var content = GetLauncherAuthToken().Split('.')[1];
             var jsonPayload = Decode(content);
             return JsonConvert.DeserializeObject<JToken>(jsonPayload)["ctx"]["address"].ToString();

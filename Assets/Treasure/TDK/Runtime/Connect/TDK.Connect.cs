@@ -186,7 +186,6 @@ namespace Treasure
             await ConnectWallet(ecosystemWalletOptions);
         }
 
-        // TODO stop requiring WalletConnectModal to be in the scene
         public async Task ConnectExternalWallet()
         {
             if (TDK.Identity.IsUsingTreasureLauncher)
