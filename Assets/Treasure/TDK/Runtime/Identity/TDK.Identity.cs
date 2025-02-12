@@ -155,7 +155,8 @@ namespace Treasure
                 sessionMinDurationLeftSec = TDK.AppConfig.SessionMinDurationLeftSec,
             });
 
-            using UnityWebRequest www = UnityWebRequest.Post("http://localhost:16001/tdk-start-session", body, "application/json");
+            var launcherServerUrl = TreasureLauncherUtils.GetLauncherServerUrl();
+            using UnityWebRequest www = UnityWebRequest.Post($"{launcherServerUrl}/tdk-start-session", body, "application/json");
             await www.SendWebRequest();
             var rawResponse = www.downloadHandler.text;
             if (www.result != UnityWebRequest.Result.Success)
