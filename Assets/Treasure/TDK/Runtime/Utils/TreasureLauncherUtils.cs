@@ -30,18 +30,24 @@ namespace Treasure
                 return;
             }
             var args = Environment.GetCommandLineArgs();
+            tdkAuthToken = TryParseArg(args, "--tdk-auth-token", defaultValue: null);
+            hasParsedCommandLineArgs = true;
+        }
+
+        private static string TryParseArg(string[] args, string argFlag, string defaultValue)
+        {
             foreach (var arg in args)
             {
-                if (arg.StartsWith("--tdk-auth-token"))
+                if (arg.StartsWith(argFlag))
                 {
                     var splitArg = arg.Split("=");
                     if (splitArg.Length == 2)
                     {
-                        tdkAuthToken = splitArg[1];
+                        return splitArg[1];
                     }
                 }
             }
-            hasParsedCommandLineArgs = true;
+            return defaultValue;
         }
 
         private static string Decode(string input)
