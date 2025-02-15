@@ -370,30 +370,13 @@ namespace Treasure
         {
             try
             {
-                var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-                
                 var launcherAuthCookie = TreasureLauncherUtils.GetLauncherAuthCookie();
                 var launcherAuthProvider = TreasureLauncherUtils.GetLauncherAuthProvider();
                 if (launcherAuthCookie == null || !launcherAuthProvider.HasValue)
                 {
                     return;
                 }
-                var ecosystemWalletOptions = new Thirdweb.Unity.EcosystemWalletOptions(
-                    authprovider: launcherAuthProvider.Value
-                );
-                await thirdwebService.ConnectWallet(
-                    ecosystemWalletOptions,
-                    TDK.Connect.ChainIdNumber,
-                    isSilentReconnect: true,
-                    launcherAuthCookie
-                );
-                TDKLogger.LogDebug("Successfully connected from launcher auth cookie");
-                
-                _address = await thirdwebService.ActiveWallet.GetAddress();
-                TDKLogger.LogDebug("Address set");
-                
-                TDK.Connect.OnConnected?.Invoke(_address);
-                TDK.Analytics.SetTreasureConnectInfo(_address, TDK.Connect.ChainIdNumber);
+                await TDK.Connect.ConnectViaLauncherCookie(launcherAuthCookie, launcherAuthProvider.Value);
             }
             catch (Exception ex)
             {
