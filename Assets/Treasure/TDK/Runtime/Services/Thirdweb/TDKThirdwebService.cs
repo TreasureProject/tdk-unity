@@ -64,7 +64,7 @@ namespace Treasure
             Initialized = true;
         }
 
-        public async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, int chainId, bool isSilentReconnect)
+        public async Task ConnectWallet(EcosystemWalletOptions ecosystemWalletOptions, int chainId, bool isSilentReconnect, string twAuthTokenOverride = null)
         {
             // Allow only one attempt to connect at a time, a new one will cancel any previous
             _connectionCancelationTokenSource?.Cancel();
@@ -83,7 +83,8 @@ namespace Treasure
                     phoneNumber: ecosystemWalletOptions.PhoneNumber,
                     authProvider: ecosystemWalletOptions.AuthProvider,
                     siweSigner: ecosystemWalletOptions.SiweSigner,
-                    storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath
+                    storageDirectoryPath: ecosystemWalletOptions.StorageDirectoryPath,
+                    twAuthTokenOverride: twAuthTokenOverride
                 );
                 cancellationToken.ThrowIfCancellationRequested();
                 

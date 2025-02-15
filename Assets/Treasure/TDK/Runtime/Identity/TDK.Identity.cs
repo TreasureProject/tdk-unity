@@ -59,7 +59,7 @@ namespace Treasure
 
         public bool IsUsingTreasureLauncher
         {
-            get { return TreasureLauncherUtils.GetLauncherAuthToken() != null; }
+            get { return TreasureLauncherUtils.GetLauncherAuthCookie() != null; }
         }
         #endregion
 
@@ -370,24 +370,30 @@ namespace Treasure
         {
             try
             {
-                var authToken = TreasureLauncherUtils.GetLauncherAuthToken();
-                if (authToken == null)
+                var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+                
+                var launcherAuthCookie = TreasureLauncherUtils.GetLauncherAuthCookie();
+                var launcherAuthProvider = TreasureLauncherUtils.GetLauncherAuthProvider();
+                if (launcherAuthCookie == null || !launcherAuthProvider.HasValue)
                 {
                     return;
                 }
-
-                _address = TreasureLauncherUtils.GetWalletAddressFromJwt();
-                TDKLogger.LogDebug("Successfully connected from launcher!");
+                var ecosystemWalletOptions = new Thirdweb.Unity.EcosystemWalletOptions(
+                    authprovider: launcherAuthProvider.Value
+                );
+                await thirdwebService.ConnectWallet(
+                    ecosystemWalletOptions,
+                    TDK.Connect.ChainIdNumber,
+                    isSilentReconnect: true,
+                    launcherAuthCookie
+                );
+                TDKLogger.LogDebug("Successfully connected from launcher auth cookie");
+                
+                _address = await thirdwebService.ActiveWallet.GetAddress();
+                TDKLogger.LogDebug("Address set");
+                
                 TDK.Connect.OnConnected?.Invoke(_address);
                 TDK.Analytics.SetTreasureConnectInfo(_address, TDK.Connect.ChainIdNumber);
-
-                TDKLogger.LogDebug("Checking for launcher token session...");
-                await TDK.Identity.ValidateUserSession(TDK.Connect.ChainId, authToken);
-
-                if (!IsAuthenticated)
-                {
-                    TDKLogger.LogDebug("No session found. Call StartUserSessionViaLauncher to start one");
-                }
             }
             catch (Exception ex)
             {
