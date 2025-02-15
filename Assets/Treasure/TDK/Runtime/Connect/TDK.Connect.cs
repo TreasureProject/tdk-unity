@@ -171,7 +171,10 @@ namespace Treasure
 
         public void HideConnectModal()
         {
-            TDKConnectUIManager.Instance.Hide();
+            if (TDKConnectUIManager.Instance != null)
+            {
+                TDKConnectUIManager.Instance.Hide();
+            }
         }
 
         public async Task ConnectEmail(string email)
