@@ -9,11 +9,18 @@ namespace Treasure
         private static bool hasParsedCommandLineArgs = false;
 
         private static string tdkAuthToken = null;
+        private static string serverPort = null;
 
         public static string GetLauncherAuthToken()
         {
             ParseArgs();
             return tdkAuthToken;
+        }
+
+        public static string GetLauncherServerUrl()
+        {
+            ParseArgs();
+            return $"http://localhost:{serverPort}";
         }
 
         public static string GetWalletAddressFromJwt()
@@ -30,18 +37,25 @@ namespace Treasure
                 return;
             }
             var args = Environment.GetCommandLineArgs();
+            tdkAuthToken = TryParseArg(args, "--tdk-auth-token", defaultValue: null);
+            serverPort = TryParseArg(args, "--server-port", defaultValue: "16001");
+            hasParsedCommandLineArgs = true;
+        }
+
+        private static string TryParseArg(string[] args, string argName, string defaultValue)
+        {
             foreach (var arg in args)
             {
-                if (arg.StartsWith("--tdk-auth-token"))
+                if (arg.StartsWith(argName))
                 {
                     var splitArg = arg.Split("=");
                     if (splitArg.Length == 2)
                     {
-                        tdkAuthToken = splitArg[1];
+                        return splitArg[1];
                     }
                 }
             }
-            hasParsedCommandLineArgs = true;
+            return defaultValue;
         }
 
         private static string Decode(string input)
