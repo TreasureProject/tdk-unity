@@ -366,7 +366,7 @@ namespace Treasure
             }
         }
 
-        public async Task AttemptConnectionViaLauncherAuthToken()
+        public async Task AttemptConnectionViaLauncherAuth()
         {
             try
             {
@@ -376,7 +376,20 @@ namespace Treasure
                 {
                     return;
                 }
-                await TDK.Connect.ConnectViaLauncherCookie(launcherAuthCookie, launcherAuthProvider.Value);
+                TDKLogger.LogDebug($"Connecting via auth cookie (provider: {launcherAuthProvider.Value})");
+                var didConnect = await TDK.Connect.ConnectViaLauncherCookie(
+                    launcherAuthCookie,
+                    launcherAuthProvider.Value,
+                    email: launcherAuthProvider == AuthProvider.Default ? TreasureLauncherUtils.GetEmailAddressFromAuthCookie() : null
+                );
+                if (didConnect)
+                {
+                    TDKLogger.LogDebug($"Connected via auth cookie.");
+                }
+                else
+                {
+                    TDKLogger.LogDebug($"Unable to connect via auth cookie, check internet connection.");
+                }
             }
             catch (Exception ex)
             {

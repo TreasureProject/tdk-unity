@@ -204,10 +204,10 @@ namespace Treasure
             TDKLogger.LogDebug($"[TDK.Connect:ConnectExternalWallet] Connection success!");
         }
 
-        public async Task ConnectViaLauncherCookie(string launcherAuthCookie, AuthProvider launcherAuthProvider)
+        public async Task<bool> ConnectViaLauncherCookie(string launcherAuthCookie, AuthProvider launcherAuthProvider, string email = null)
         {
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
-            var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: launcherAuthProvider);
+            var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: launcherAuthProvider, email: email);
 
             await thirdwebService.ConnectWallet(
                 ecosystemWalletOptions,
@@ -215,8 +215,13 @@ namespace Treasure
                 isSilentReconnect: true,
                 launcherAuthCookie
             );
-            await UpdateConnectInfo(ChainId);
-            TDKLogger.LogDebug($"[TDK.Connect:ConnectViaLauncherCookie] Connection success!");
+            if (await thirdwebService.IsWalletConnected())
+            {
+                await UpdateConnectInfo(ChainId);
+                TDKLogger.LogDebug($"[TDK.Connect:ConnectViaLauncherCookie] Connection success!");
+                return true;
+            }
+            return false;
         }
 
         public async Task Reconnect(string email)

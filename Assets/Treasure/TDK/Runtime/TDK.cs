@@ -102,7 +102,7 @@ namespace Treasure
             // set as initialized
             Initialized = true;
 
-            _ = Identity.AttemptConnectionViaLauncherAuthToken();
+            _ = Identity.AttemptConnectionViaLauncherAuth();
         }
 
         private void InitializeProperties(

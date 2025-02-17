@@ -38,6 +38,13 @@ namespace Treasure
             return tdkAuthCookie;
         }
 
+        public static string GetEmailAddressFromAuthCookie()
+        {
+            var content = GetLauncherAuthCookie().Split('.')[1];
+            var jsonPayload = Decode(content);
+            return JsonConvert.DeserializeObject<JToken>(jsonPayload)["storedToken"]["authDetails"]["email"].ToString();
+        }
+
         internal static Thirdweb.AuthProvider? GetLauncherAuthProvider()
         {
             ParseArgs();
