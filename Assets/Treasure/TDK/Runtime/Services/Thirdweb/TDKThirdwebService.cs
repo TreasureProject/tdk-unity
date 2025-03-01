@@ -22,6 +22,7 @@ namespace Treasure
         private CancellationTokenSource _connectionCancelationTokenSource;
 
         private bool _didInitWalletConnect = false;
+        private string _authCookie = null;
 
         public override void Awake()
         {
@@ -142,6 +143,7 @@ namespace Treasure
                         "Upgrading to smart wallet"
                     );
                 }
+                _authCookie = ExtractAuthCookie(ecosystemWallet);
                 smartWallet = await SmartWallet.Create(
                     personalWallet: ecosystemWallet,
                     chainId: chainId,
@@ -164,6 +166,25 @@ namespace Treasure
                 }
                 throw;
             }
+        }
+
+        private string ExtractAuthCookie(EcosystemWallet ecosystemWallet)
+        {
+            try
+            {
+                var link = ecosystemWallet.GenerateExternalLoginLink("localhost:3456");
+                return link.Split("authCookie=")[1];
+            }
+            catch (Exception ex)
+            {
+                TDKLogger.LogException("error parsing auth cookie", ex);
+                return "";
+            }
+        }
+
+        public string GetStoredAuthCookie()
+        {
+            return _authCookie;
         }
 
         public async Task ConnectExternalWallet(int chainId)
