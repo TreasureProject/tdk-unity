@@ -48,14 +48,20 @@ namespace Treasure
         internal static Thirdweb.AuthProvider? GetLauncherAuthProvider()
         {
             ParseArgs();
-            return tdkAuthProvider switch
+            return ParseAuthProviderString(tdkAuthProvider);
+        }
+
+        public static Thirdweb.AuthProvider? ParseAuthProviderString(string authProvider)
+        {
+            return authProvider?.ToLower() switch
             {
-                "Google_v2" => Thirdweb.AuthProvider.Google,
-                "Discord" => Thirdweb.AuthProvider.Discord,
-                "X" => Thirdweb.AuthProvider.X,
-                "Apple" => Thirdweb.AuthProvider.Apple,
-                "Siwe" => Thirdweb.AuthProvider.Siwe,
-                "Email" => Thirdweb.AuthProvider.Default,
+                "google" => Thirdweb.AuthProvider.Google,
+                "google_v2" => Thirdweb.AuthProvider.Google,
+                "discord" => Thirdweb.AuthProvider.Discord,
+                "x" => Thirdweb.AuthProvider.X,
+                "apple" => Thirdweb.AuthProvider.Apple,
+                "siwe" => Thirdweb.AuthProvider.Siwe,
+                "email" => Thirdweb.AuthProvider.Default,
                 _ => null,
             };
         }
