@@ -377,7 +377,7 @@ namespace Treasure
                     return;
                 }
                 TDKLogger.LogDebug($"Connecting via auth cookie (provider: {launcherAuthProvider.Value})");
-                var didConnect = await TDK.Connect.ConnectViaLauncherCookie(
+                var didConnect = await TDK.Connect.ConnectViaCookie(
                     launcherAuthCookie,
                     launcherAuthProvider.Value,
                     email: launcherAuthProvider == AuthProvider.Default ? TreasureLauncherUtils.GetEmailAddressFromAuthCookie() : null
