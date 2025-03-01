@@ -62,7 +62,7 @@ namespace Treasure
                 "apple" => Thirdweb.AuthProvider.Apple,
                 "siwe" => Thirdweb.AuthProvider.Siwe,
                 "email" => Thirdweb.AuthProvider.Default,
-                _ => null,
+                _ => Thirdweb.AuthProvider.Siwe,
             };
         }
 

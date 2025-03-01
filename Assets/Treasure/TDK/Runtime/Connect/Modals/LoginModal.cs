@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TMPro;
@@ -122,6 +123,9 @@ namespace Treasure
                 errorText.gameObject.SetActive(true);
             }
         }
+
+        [DllImport("__Internal")]
+        private static extern void OpenConnectModal();
 
         private async void ConnectExternalWallet()
         {

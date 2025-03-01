@@ -126,5 +126,14 @@ namespace Treasure
             InitConnect();
             InitMagicswap();
         }
+
+        // to be called extenrally via webgl build. passing params together since SendMessage only accepts 1 arg
+        public void ConnectViaCookie(string authMethodAndCookie)
+        {
+            var splitResult = authMethodAndCookie.Split("@");
+            var authMethod = TreasureLauncherUtils.ParseAuthProviderString(splitResult[0]);
+            var authCookie = splitResult[1];
+            _ = Connect.ConnectViaCookie(authCookie, authMethod.Value);
+        }
     }
 }

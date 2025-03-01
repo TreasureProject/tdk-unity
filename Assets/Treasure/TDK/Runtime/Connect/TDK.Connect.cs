@@ -206,6 +206,8 @@ namespace Treasure
 
         public async Task<bool> ConnectViaCookie(string authCookie, AuthProvider authProvider, string email = null)
         {
+            TDKLogger.LogDebug($"[TDK.Connect:ConnectViaLauncherCookie] Connecting via auth cookie (provider: {authProvider})");
+            
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: authProvider, email: email);
 
@@ -221,6 +223,7 @@ namespace Treasure
                 TDKLogger.LogDebug($"[TDK.Connect:ConnectViaLauncherCookie] Connection success!");
                 return true;
             }
+            TDKLogger.LogDebug($"[TDK.Connect:ConnectViaLauncherCookie] Connection failed");
             return false;
         }
 
