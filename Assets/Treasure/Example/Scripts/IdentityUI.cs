@@ -31,6 +31,18 @@ public class IdentityUI : MonoBehaviour
             .Show("Validate User Session", "Enter an auth token below to validate:", OnAuthTokenSubmit);
     }
 
+    public async void OnStartUserSessionLauncherBtn()
+    {
+        try
+        {
+            await TDK.Identity.StartUserSessionViaLauncher();
+        }
+        catch (Exception ex)
+        {
+            TDKLogger.LogException($"Error starting user session", ex);
+        }
+    }
+
     public async void OnAuthTokenSubmit(string value)
     {
         try

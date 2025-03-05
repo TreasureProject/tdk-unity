@@ -59,7 +59,7 @@ namespace Treasure
 
         public bool IsUsingTreasureLauncher
         {
-            get { return TreasureLauncherUtils.GetLauncherAuthToken() != null; }
+            get { return TreasureLauncherUtils.GetLauncherAuthCookie() != null; }
         }
         #endregion
 
@@ -366,27 +366,29 @@ namespace Treasure
             }
         }
 
-        public async Task AttemptConnectionViaLauncherAuthToken()
+        public async Task AttemptConnectionViaLauncherAuth()
         {
             try
             {
-                var authToken = TreasureLauncherUtils.GetLauncherAuthToken();
-                if (authToken == null)
+                var launcherAuthCookie = TreasureLauncherUtils.GetLauncherAuthCookie();
+                var launcherAuthProvider = TreasureLauncherUtils.GetLauncherAuthProvider();
+                if (launcherAuthCookie == null || !launcherAuthProvider.HasValue)
                 {
                     return;
                 }
-
-                _address = TreasureLauncherUtils.GetWalletAddressFromJwt();
-                TDKLogger.LogDebug("Successfully connected from launcher!");
-                TDK.Connect.OnConnected?.Invoke(_address);
-                TDK.Analytics.SetTreasureConnectInfo(_address, TDK.Connect.ChainIdNumber);
-
-                TDKLogger.LogDebug("Checking for launcher token session...");
-                await TDK.Identity.ValidateUserSession(TDK.Connect.ChainId, authToken);
-
-                if (!IsAuthenticated)
+                TDKLogger.LogDebug($"Connecting via auth cookie (provider: {launcherAuthProvider.Value})");
+                var didConnect = await TDK.Connect.ConnectViaCookie(
+                    launcherAuthCookie,
+                    launcherAuthProvider.Value,
+                    email: launcherAuthProvider == AuthProvider.Default ? TreasureLauncherUtils.GetEmailAddressFromAuthCookie() : null
+                );
+                if (didConnect)
                 {
-                    TDKLogger.LogDebug("No session found. Call StartUserSessionViaLauncher to start one");
+                    TDKLogger.LogDebug($"Connected via auth cookie.");
+                }
+                else
+                {
+                    TDKLogger.LogDebug($"Unable to connect via auth cookie, check internet connection.");
                 }
             }
             catch (Exception ex)

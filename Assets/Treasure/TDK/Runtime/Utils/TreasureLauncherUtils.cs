@@ -10,6 +10,8 @@ namespace Treasure
 
         private static string tdkAuthToken = null;
         private static string serverPort = null;
+        private static string tdkAuthCookie = null;
+        private static string tdkAuthProvider = null;
 
         public static string GetLauncherAuthToken()
         {
@@ -30,6 +32,40 @@ namespace Treasure
             return JsonConvert.DeserializeObject<JToken>(jsonPayload)["ctx"]["address"].ToString();
         }
 
+        internal static string GetLauncherAuthCookie()
+        {
+            ParseArgs();
+            return tdkAuthCookie;
+        }
+
+        public static string GetEmailAddressFromAuthCookie()
+        {
+            var content = GetLauncherAuthCookie().Split('.')[1];
+            var jsonPayload = Decode(content);
+            return JsonConvert.DeserializeObject<JToken>(jsonPayload)["storedToken"]["authDetails"]["email"].ToString();
+        }
+
+        internal static Thirdweb.AuthProvider? GetLauncherAuthProvider()
+        {
+            ParseArgs();
+            return ParseAuthProviderString(tdkAuthProvider);
+        }
+
+        public static Thirdweb.AuthProvider? ParseAuthProviderString(string authProvider)
+        {
+            return authProvider?.ToLower() switch
+            {
+                "google" => Thirdweb.AuthProvider.Google,
+                "google_v2" => Thirdweb.AuthProvider.Google,
+                "discord" => Thirdweb.AuthProvider.Discord,
+                "x" => Thirdweb.AuthProvider.X,
+                "apple" => Thirdweb.AuthProvider.Apple,
+                "siwe" => Thirdweb.AuthProvider.Siwe,
+                "email" => Thirdweb.AuthProvider.Default,
+                _ => null,
+            };
+        }
+
         private static void ParseArgs()
         {
             if (hasParsedCommandLineArgs)
@@ -39,6 +75,8 @@ namespace Treasure
             var args = Environment.GetCommandLineArgs();
             tdkAuthToken = TryParseArg(args, "--tdk-auth-token", defaultValue: null);
             serverPort = TryParseArg(args, "--server-port", defaultValue: "16001");
+            tdkAuthCookie = TryParseArg(args, "--tdk-auth-cookie", defaultValue: null);
+            tdkAuthProvider = TryParseArg(args, "--tdk-auth-provider", defaultValue: null);
             hasParsedCommandLineArgs = true;
         }
 
