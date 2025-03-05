@@ -250,6 +250,10 @@ namespace Treasure
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             await thirdwebService.DisconnectWallet();
             OnDisconnected?.Invoke();
+            if (TDKWebConnectInterface.IsActive())
+            {
+                TDKWebConnectInterface.LogOut();
+            }
             _address = null;
             TDK.Analytics.TrackCustomEvent(AnalyticsConstants.EVT_TREASURECONNECT_DISCONNECTED);
         }

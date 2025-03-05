@@ -22,7 +22,7 @@ namespace Treasure
         private CancellationTokenSource _connectionCancelationTokenSource;
 
         private bool _didInitWalletConnect = false;
-        private string _authCookie = null;
+        private string _authCookie = "";
 
         public override void Awake()
         {

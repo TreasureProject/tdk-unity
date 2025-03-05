@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TMPro;
@@ -124,15 +123,17 @@ namespace Treasure
             }
         }
 
-        [DllImport("__Internal")]
-        private static extern void OpenConnectModal();
-
         private async void ConnectExternalWallet()
         {
             if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
             {
                 socialsErrorText.text = "Please make sure you have active Internet connection.";
                 socialsErrorText.gameObject.SetActive(true);
+                return;
+            }
+            if (TDKWebConnectInterface.IsActive() && TDK.AppConfig.ConnectModalMode == TDKConfig.ConnectUIModalMode.WebGLExternalForWalletLoginOnly)
+            {
+                TDKWebConnectInterface.OpenConnectModal();
                 return;
             }
 

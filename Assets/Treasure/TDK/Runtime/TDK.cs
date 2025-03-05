@@ -53,6 +53,7 @@ namespace Treasure
                 }
 
                 TDKMainThreadDispatcher.StartProcessing();
+                TDKWebConnectInterface.Initialize();
 
                 return _instance;
             }
@@ -103,6 +104,15 @@ namespace Treasure
             Initialized = true;
 
             _ = Identity.AttemptConnectionViaLauncherAuth();
+
+            // TODO this code would be added by consumers of TDK
+            TDKWebConnectInterface.BrowserWalletConnectedAction += (isReusingConnection) =>
+            {
+                if (isReusingConnection)
+                {
+                    TDKWebConnectInterface.AttemptReconnect();
+                }
+            };
         }
 
         private void InitializeProperties(
@@ -125,15 +135,6 @@ namespace Treasure
             InitIdentity();
             InitConnect();
             InitMagicswap();
-        }
-
-        // to be called extenrally via webgl build. passing params together since SendMessage only accepts 1 arg
-        public void ConnectViaCookie(string authMethodAndCookie)
-        {
-            var splitResult = authMethodAndCookie.Split("@");
-            var authMethod = TreasureLauncherUtils.ParseAuthProviderString(splitResult[0]);
-            var authCookie = splitResult[1];
-            _ = Connect.ConnectViaCookie(authCookie, authMethod.Value);
         }
     }
 }
