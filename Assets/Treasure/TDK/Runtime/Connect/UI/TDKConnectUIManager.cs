@@ -68,6 +68,11 @@ namespace Treasure
         public void ShowLoginModal()
         {
             Activate();
+            if (TDKWebConnectInterface.IsActive() && TDK.AppConfig.ConnectModalMode == TDKConfig.ConnectUIModalMode.WebGLExternal)
+            {
+                TDKWebConnectInterface.OpenConnectModal();
+                return;
+            }
             if (currentModalOpended != null)
                 currentModalOpended.Hide();
 
@@ -145,7 +150,11 @@ namespace Treasure
         public void LogOut()
         {
             accountModal.Hide();
-
+            if (TDKWebConnectInterface.IsActive() && TDK.AppConfig.ConnectModalMode == TDKConfig.ConnectUIModalMode.WebGLExternal)
+            {
+                currentModalOpended = null;
+                return;
+            }
             loginModal.Show();
             currentModalOpended = loginModal;
         }

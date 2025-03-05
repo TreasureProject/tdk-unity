@@ -131,6 +131,11 @@ namespace Treasure
                 socialsErrorText.gameObject.SetActive(true);
                 return;
             }
+            if (TDKWebConnectInterface.IsActive() && TDK.AppConfig.ConnectModalMode == TDKConfig.ConnectUIModalMode.WebGLExternalForWalletLoginOnly)
+            {
+                TDKWebConnectInterface.OpenConnectModal();
+                return;
+            }
 
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             thirdwebService.EnsureWalletConnectInitialized();

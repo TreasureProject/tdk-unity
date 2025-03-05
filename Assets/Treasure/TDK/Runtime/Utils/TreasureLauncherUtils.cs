@@ -61,8 +61,9 @@ namespace Treasure
                 "x" => Thirdweb.AuthProvider.X,
                 "apple" => Thirdweb.AuthProvider.Apple,
                 "siwe" => Thirdweb.AuthProvider.Siwe,
+                "wallet" => Thirdweb.AuthProvider.Siwe,
                 "email" => Thirdweb.AuthProvider.Default,
-                _ => null,
+                _ => Thirdweb.AuthProvider.Siwe,
             };
         }
 

@@ -73,10 +73,12 @@ namespace Treasure
         [SerializeField] private ScriptableObjectDictionary moduleConfigurations = null;
 
         public enum ConnectUIHideBehavior { HideOnOutsideClick, DoNotHideOnOtpScreen, NeverHide }
+        public enum ConnectUIModalMode { InGame, WebGLExternal, WebGLExternalForWalletLoginOnly }
 
         [Header("Misc")]
         [SerializeField] private ConnectUIHideBehavior _connectHideBehavior = ConnectUIHideBehavior.DoNotHideOnOtpScreen;
         [SerializeField] private bool _enableWalletLogin = false;
+        [SerializeField] private ConnectUIModalMode _connectModalMode = ConnectUIModalMode.InGame;
         [SerializeField] private LoggerLevelValue _devLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private LoggerLevelValue _prodLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private bool _autoInitialize = true;
@@ -120,6 +122,7 @@ namespace Treasure
             set { _connectHideBehavior = value; }
         }
         public bool EnableWalletLogin => _enableWalletLogin;
+        public ConnectUIModalMode ConnectModalMode => _connectModalMode;
         public string ApiKey => Environment == Env.DEV ? _general._devApiKey : _general._prodApiKey;
 
         public bool AutoInitialize => _autoInitialize;

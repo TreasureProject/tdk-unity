@@ -53,6 +53,7 @@ namespace Treasure
                 }
 
                 TDKMainThreadDispatcher.StartProcessing();
+                TDKWebConnectInterface.Initialize();
 
                 return _instance;
             }
@@ -103,6 +104,15 @@ namespace Treasure
             Initialized = true;
 
             _ = Identity.AttemptConnectionViaLauncherAuth();
+
+            // TODO this code would be added by consumers of TDK
+            TDKWebConnectInterface.BrowserWalletConnectedAction += (isReusingConnection) =>
+            {
+                if (isReusingConnection)
+                {
+                    TDKWebConnectInterface.AttemptReconnect();
+                }
+            };
         }
 
         private void InitializeProperties(
