@@ -1,1 +1,1 @@
-thirdweb: 5.17.2
+thirdweb: 5.18.5
