@@ -226,6 +226,12 @@ namespace Treasure
             return false;
         }
 
+        public string GetStoredAuthCookie()
+        {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            return thirdwebService.GetStoredAuthCookie();
+        }
+
         public async Task Reconnect(string email)
         {
             TDKLogger.LogDebug($"[TDK.Connect:Reconnect] Reconnecting email ({email})...");
