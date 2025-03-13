@@ -230,6 +230,17 @@ namespace Treasure
                 _devApiUrl = config.analytics.devApiUrl,
                 _prodApiUrl = config.analytics.prodApiUrl,
             };
+            
+            // Misc
+            if (previousConfig != null)
+            {
+                _enableWalletLogin = previousConfig._enableWalletLogin;
+                _connectModalMode = previousConfig._connectModalMode;
+                _connectHideBehavior = previousConfig._connectHideBehavior;
+                _devLoggerLevel = previousConfig._devLoggerLevel;
+                _prodLoggerLevel = previousConfig._prodLoggerLevel;
+                _autoInitialize = previousConfig._autoInitialize;
+            }
         }
     }
 

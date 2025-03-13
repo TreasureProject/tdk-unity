@@ -8,6 +8,10 @@ mergeInto(LibraryManager.library, {
     window.dispatchEvent(new CustomEvent("tdkOpenConnectModal"))
   },
 
+  WebGLOpenWalletConnectModal: function () {
+    window.dispatchEvent(new CustomEvent("tdkOpenWalletConnectModal"))
+  },
+
   WebGLLogOut: function () {
     window.dispatchEvent(new CustomEvent("tdkLogOut"))
   },

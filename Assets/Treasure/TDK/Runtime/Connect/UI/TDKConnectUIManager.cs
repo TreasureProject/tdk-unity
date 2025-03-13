@@ -152,7 +152,7 @@ namespace Treasure
             accountModal.Hide();
             if (TDKWebConnectInterface.IsActive() && TDK.AppConfig.ConnectModalMode == TDKConfig.ConnectUIModalMode.WebGLExternal)
             {
-                currentModalOpended = null;
+                Hide();
                 return;
             }
             loginModal.Show();

@@ -105,14 +105,12 @@ namespace Treasure
 
             _ = Identity.AttemptConnectionViaLauncherAuth();
 
-            // TODO this code would be added by consumers of TDK
-            TDKWebConnectInterface.BrowserWalletConnectedAction += (isReusingConnection) =>
-            {
-                if (isReusingConnection)
-                {
-                    TDKWebConnectInterface.AttemptReconnect();
-                }
-            };
+            // TODO figure out why email hangs up if email is not provided
+            // _ = TDK.Connect.ConnectViaCookie("", Thirdweb.AuthProvider.Default);
+            // NOTE: google log out works properly, gives an error next time
+            // _ = TDK.Connect.ConnectViaCookie("", Thirdweb.AuthProvider.Google);
+            // TODO figure out why this still connects even after logging out
+            // _ = TDK.Connect.ConnectViaCookie("", Thirdweb.AuthProvider.Siwe);
         }
 
         private void InitializeProperties(
