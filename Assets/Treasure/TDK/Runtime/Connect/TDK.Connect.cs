@@ -204,8 +204,18 @@ namespace Treasure
             TDKLogger.LogDebug($"[TDK.Connect:ConnectExternalWallet] Connection success!");
         }
 
+        public async Task ConnectWithMetamask()
+        {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            await thirdwebService.ConnectWithMetamask(ChainIdNumber);
+
+            await UpdateConnectInfo(ChainId);
+            TDKLogger.LogDebug($"[TDK.Connect:ConnectWithMetamask] Connection success!");
+        }
+
         public async Task<bool> ConnectViaCookie(string authCookie, AuthProvider authProvider, string email = null)
         {
+            TDKLogger.LogDebug($"[TDK.Connect:ConnectViaCookie] Connecting via auth cookie (provider: {authProvider})");
             var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
             var ecosystemWalletOptions = new EcosystemWalletOptions(authprovider: authProvider, email: email);
 
@@ -218,10 +228,17 @@ namespace Treasure
             if (await thirdwebService.IsWalletConnected())
             {
                 await UpdateConnectInfo(ChainId);
-                TDKLogger.LogDebug($"[TDK.Connect:ConnectViaLauncherCookie] Connection success!");
+                TDKLogger.LogDebug($"[TDK.Connect:ConnectViaCookie] Connection success!");
                 return true;
             }
+            TDKLogger.LogDebug($"[TDK.Connect:ConnectViaCookie] Connection failed");
             return false;
+        }
+
+        public string GetStoredAuthCookie()
+        {
+            var thirdwebService = TDKServiceLocator.GetService<TDKThirdwebService>();
+            return thirdwebService.GetStoredAuthCookie();
         }
 
         public async Task Reconnect(string email)
