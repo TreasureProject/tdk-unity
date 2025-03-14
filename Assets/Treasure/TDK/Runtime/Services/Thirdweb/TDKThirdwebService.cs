@@ -47,10 +47,11 @@ namespace Treasure
             var clientId = TDK.AppConfig.ClientId;
 
             bundleId = !string.IsNullOrEmpty(Application.identifier) ? Application.identifier : $"com.{Application.companyName}.{Application.productName}";
-
+            bundleId = bundleId.ToLower();
+            
             Client = ThirdwebClient.Create(
                 clientId: clientId,
-                bundleId: bundleId.ToLower(),
+                bundleId: bundleId,
                 httpClient: Application.platform == RuntimePlatform.WebGLPlayer
                     ? new UnityThirdwebHttpClient()
                     : new ThirdwebHttpClient(),
@@ -197,6 +198,14 @@ namespace Treasure
                 supportedChains: supportedChains,
                 includedWalletIds: null
             );
+            var options = new EcosystemWalletOptions(authprovider: AuthProvider.Siwe, siweSigner: wallet);
+            await ConnectWallet(options, TDK.Connect.ChainIdNumber, isSilentReconnect: false);
+        }
+
+        public async Task ConnectWithMetamask(int chainId)
+        {
+            _connectionCancelationTokenSource?.Cancel();
+            MetaMaskWallet wallet = await MetaMaskWallet.Create(client: Client, activeChainId: chainId);
             var options = new EcosystemWalletOptions(authprovider: AuthProvider.Siwe, siweSigner: wallet);
             await ConnectWallet(options, TDK.Connect.ChainIdNumber, isSilentReconnect: false);
         }

@@ -77,6 +77,7 @@ namespace Treasure
         [Header("Misc")]
         [SerializeField] private ConnectUIHideBehavior _connectHideBehavior = ConnectUIHideBehavior.DoNotHideOnOtpScreen;
         [SerializeField] private bool _enableWalletLogin = false;
+        [SerializeField] private bool _enableMetamaskWebglLogin = false;
         [SerializeField] private LoggerLevelValue _devLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private LoggerLevelValue _prodLoggerLevel = LoggerLevelValue.INFO;
         [SerializeField] private bool _autoInitialize = true;
@@ -120,6 +121,7 @@ namespace Treasure
             set { _connectHideBehavior = value; }
         }
         public bool EnableWalletLogin => _enableWalletLogin;
+        public bool EnableMetamaskWebglLogin => Application.platform == RuntimePlatform.WebGLPlayer && _enableMetamaskWebglLogin;
         public string ApiKey => Environment == Env.DEV ? _general._devApiKey : _general._prodApiKey;
 
         public bool AutoInitialize => _autoInitialize;
@@ -232,6 +234,7 @@ namespace Treasure
             if (previousConfig != null)
             {
                 _enableWalletLogin = previousConfig._enableWalletLogin;
+                _enableMetamaskWebglLogin = previousConfig._enableMetamaskWebglLogin;
                 _connectHideBehavior = previousConfig._connectHideBehavior;
                 _devLoggerLevel = previousConfig._devLoggerLevel;
                 _prodLoggerLevel = previousConfig._prodLoggerLevel;

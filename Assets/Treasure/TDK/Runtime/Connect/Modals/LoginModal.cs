@@ -15,6 +15,7 @@ namespace Treasure
         [SerializeField] private Button loginDiscordButton;
         [SerializeField] private Button loginXButton;
         [SerializeField] private Button loginWalletButton;
+        [SerializeField] private Button loginMetamaskButton;
         [SerializeField] private TMP_Text socialsErrorText;
         [Space]
         [SerializeField] private TMP_InputField emailInputField;
@@ -38,6 +39,9 @@ namespace Treasure
 
             loginWalletButton.gameObject.SetActive(TDK.AppConfig.EnableWalletLogin);
             loginWalletButton.onClick.AddListener(() => { ConnectExternalWallet(); });
+
+            loginMetamaskButton.gameObject.SetActive(TDK.AppConfig.EnableMetamaskWebglLogin);
+            loginMetamaskButton.onClick.AddListener(() => { ConnectWithMetamask(); });
         }
 
         private void OnEnable()
@@ -174,6 +178,31 @@ namespace Treasure
                         socialsErrorText.text = ex.Message;
                         socialsErrorText.gameObject.SetActive(true);
                     }
+                }
+            }
+        }
+
+        private async void ConnectWithMetamask()
+        {
+            if (!TDK.Instance.AbstractedEngineApi.HasInternetConnection())
+            {
+                socialsErrorText.text = "Please make sure you have active Internet connection.";
+                socialsErrorText.gameObject.SetActive(true);
+                return;
+            }
+
+            try
+            {
+                await TDK.Connect.Disconnect(); // clean up any previous connection attempts
+                await TDK.Connect.ConnectWithMetamask();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message != "New connection attempt has been made")
+                {
+                    TDKLogger.LogException($"[LoginModal:ConnectWithMetamask] Error connecting", ex);
+                    socialsErrorText.text = ex.Message;
+                    socialsErrorText.gameObject.SetActive(true);
                 }
             }
         }
